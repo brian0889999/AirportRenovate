@@ -11,10 +11,10 @@ public class LoginController : ControllerBase
     public IActionResult Login([FromBody] LoginViewModel loginData)
     {  /* var isAuthenticated = */
 
-        if ()
+        if (1==1)
         {
             
-            return Ok(); // 回傳成功的訊息及用戶相關資訊
+            return Ok("ok"); // 回傳成功的訊息及用戶相關資訊
         }
         else
         {

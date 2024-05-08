@@ -1,7 +1,7 @@
 <template>
     <div>
         <h2>登入</h2>
-        <form @submit.prevent="login">
+        <form  @submit.prevent="login">
             <div>
                 <label for="account">帳號：</label>
                 <input type="text" name="account" id="account" v-model="loginData.account" placeholder="請輸入帳號" />
@@ -29,7 +29,9 @@ const loginData = ref<LoginViewModel>({
 })
 const login = async () => {
     try {
-        const response = await axios.post('/login', loginData);
+        console.log("1")
+        const response = await axios.post('/api/login', loginData);
+        debugger;
         console.log(response.data); // 登入成功後的回傳資料
     } catch (error) {
         console.error('登入失敗:', error); // 處理登入失敗的情況
