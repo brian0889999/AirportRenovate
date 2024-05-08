@@ -1,0 +1,6 @@
+@AirportRenovate.Server_HostAddress = http://localhost:5082
+
+GET {{AirportRenovate.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

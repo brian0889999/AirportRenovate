@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34728.123
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AirportRenovate.Server", "AirportRenovate.Server\AirportRenovate.Server.csproj", "{64A557C3-D9F7-4917-AFD1-B4973300018D}"
+EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "airportrenovate.client", "airportrenovate.client\airportrenovate.client.esproj", "{954BF167-A401-4EB4-97BB-7EFEDF9FD691}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{64A557C3-D9F7-4917-AFD1-B4973300018D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64A557C3-D9F7-4917-AFD1-B4973300018D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64A557C3-D9F7-4917-AFD1-B4973300018D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64A557C3-D9F7-4917-AFD1-B4973300018D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{954BF167-A401-4EB4-97BB-7EFEDF9FD691}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{954BF167-A401-4EB4-97BB-7EFEDF9FD691}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{954BF167-A401-4EB4-97BB-7EFEDF9FD691}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{954BF167-A401-4EB4-97BB-7EFEDF9FD691}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{954BF167-A401-4EB4-97BB-7EFEDF9FD691}.Release|Any CPU.Build.0 = Release|Any CPU
+		{954BF167-A401-4EB4-97BB-7EFEDF9FD691}.Release|Any CPU.Deploy.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0CB0FB15-1A87-438B-8F3F-2ECE06229EC8}
+	EndGlobalSection
+EndGlobal
