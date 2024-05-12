@@ -2,7 +2,7 @@
 {
     public class LoginViewModel
     {
-        public string account = string.Empty;
-        public string password = string.Empty;
+        public string Account { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
     }
 }
