@@ -15,10 +15,18 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import(/*webpackChunkName: "login" */ '@/views/Login.vue')
     },
     {
-        path: '/HelloWorld',
-        name: 'HelloWorld',
-        component: () => import(/*webpackChunkName */ '@/components/HelloWorld.vue')
-    }
+        path: '/main',
+        name: 'main',
+        component: () => import(/*webpackChunkName: "MainLayout" */ '@/layouts/MainLayout.vue'),   
+        redirect: { name: 'EngineeringSearch' },
+        children: [
+            {
+                path: 'EngineeringSearch',
+                name: 'EngineeringSearch',
+                component: () => import(/*webpackChunkName "EngineeringSearch" */ '@/views/main/EngineeringSearch.vue')
+            }]
+    },
+   
 ];
 
 const router = createRouter({

@@ -22,6 +22,9 @@
 import axios from 'axios';
 import { ref } from 'vue';
 import type { LoginViewModel } from '@/types/apiInterface';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const loginData = ref<LoginViewModel>({
     Account: '',
@@ -32,7 +35,7 @@ const loginData = ref<LoginViewModel>({
         const data = loginData.value;
     try {
         const response = await axios.post(url, data);
-
+        router.push('/main')
         console.log(response.data); // 登入成功後的回傳資料
     } catch (error) {
         console.error('登入失敗:', error); // 處理登入失敗的情況
