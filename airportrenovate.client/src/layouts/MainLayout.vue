@@ -1,7 +1,7 @@
 <template>
     <div style="display: contents">
-        <AppDrawer />
         <AppBar />
+        <AppDrawer />
         <AppView />
     </div>
 </template>
