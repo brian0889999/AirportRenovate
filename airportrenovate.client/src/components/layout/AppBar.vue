@@ -3,25 +3,30 @@
                prominent
                elevation="0">
         <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
+        <v-spacer />
+        <v-spacer />
+        <v-spacer />
+        <v-spacer />
+        <v-spacer />
+        <v-spacer />
+        <v-toolbar-title>ç¶“è²»ç®¡ç†/æ­¡è¿</v-toolbar-title>
 
-        <v-toolbar-title>My files</v-toolbar-title>
 
-        <v-spacer></v-spacer>
 
-        <v-btn>­º­¶</v-btn>
-        <v-btn @click="logout">µn¥X</v-btn>
+        <v-btn>é¦–é </v-btn>
+        <v-btn @click="logout">ç™»å‡º</v-btn>
 
     </v-app-bar>
 </template>
 
 <script setup lang="ts">
-    import { computed, onMounded } from 'vue';
+    import { computed, onMounted } from 'vue';
     import { useStore } from '@/store/index';
     import { useRouter } from 'vue-router';
     const router = useRouter();
     const logout = () => {
 
-        if (confirm("½T©w­nµn¥X¶Ü?")) {
+        if (confirm("ç¢ºå®šè¦ç™»å‡ºå—?")) {
             router.push('/login');
         } else {
             return false;

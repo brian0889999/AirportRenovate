@@ -1,0 +1,12 @@
+工務組:Public Works Group
+業務組:Business Groups
+人事室:Personnel Office
+中控室:Central Control Room
+北竿站:Peikan Station
+企劃組:Planning Group
+南竿站:Nankan Station
+政風室:Political Affairs Office
+航務組:Aviation Section
+總務組:General Affairs Section
+企劃行政組:Planning Administration Group
+營運安全組:Operational Safety Group
