@@ -18,12 +18,16 @@ const routes: Array<RouteRecordRaw> = [
         path: '/main',
         name: 'main',
         component: () => import(/*webpackChunkName: "MainLayout" */ '@/layouts/MainLayout.vue'),   
-        redirect: { name: 'EngineeringSearch' },
+        redirect: { name: 'PrivilegeManagement' },
         children: [
             {
-                path: 'EngineeringSearch',
-                name: 'EngineeringSearch',
-                component: () => import(/*webpackChunkName "EngineeringSearch" */ '@/views/main/EngineeringSearch.vue')
+                path: 'PrivilegeManagement',
+                name: 'PrivilegeManagement',
+                component: () => import(/*webpackChunkName "PrivilegeManagement" */ '@/views/main/PrivilegeManagement.vue')
+            }, {
+                path: 'Test',
+                name: 'Test',
+                component: () => import(/*webpackChunkName "Test" */ '@/views/main/Test.vue')
             }]
     },
    

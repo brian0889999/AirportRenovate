@@ -2,7 +2,7 @@
     <v-app-bar color="primary"
                prominent
                elevation="0">
-        <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
+        <v-app-bar-nav-icon variant="text" @click.stop="toggleDrawer(!drawer)"></v-app-bar-nav-icon>
         <v-spacer />
         <v-spacer />
         <v-spacer />
@@ -42,6 +42,13 @@
     const rail = computed(() => {
         return store.rail;
     })
+    const toggleDrawer = (value?: boolean) => {
+        store.setDrawer(value != undefined ? value : !store.drawer);
+    }
+
+    const toggleRail = (value?: boolean) => {
+        store.setRail(value != undefined ? value : !store.rail);
+    }
 </script>
 
 <style scoped>

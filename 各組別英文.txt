@@ -10,3 +10,6 @@
 總務組:General Affairs Section
 企劃行政組:Planning Administration Group
 營運安全組:Operational Safety Group
+
+
+權限管理:Privilege Management

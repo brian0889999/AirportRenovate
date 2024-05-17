@@ -6,13 +6,6 @@
                           expand-on-hover>
         <v-list :items="items"></v-list>
     </v-navigation-drawer>
-
-    <!--<v-main style="height: 500px;">
-        <v-card-text>
-            The navigation drawer will appear from the bottom on smaller size screens.
-        </v-card-text>
-    </v-main>-->
-
 </template>
 <script setup lang="ts">
     import { ref, computed, watch } from 'vue';

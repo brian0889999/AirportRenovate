@@ -1,6 +1,6 @@
 <template>
     <v-main>
-        <v-container>
+        <v-container fill-height>
             <router-view v-slot="{ Component }">
                 <component :is="Component" />
             </router-view>

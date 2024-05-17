@@ -59,7 +59,7 @@ const loginData = ref<LoginViewModel>({
     try {
         const response = await axios.post(url, data);
         router.push('/main')
-        console.log(response.data); // 登入成功後的回傳資料
+        console.log(response.data ? response.data :'沒有資料'); // 登入成功後的回傳資料
     } catch (error) {
         console.error('登入失敗:', error); // 處理登入失敗的情況
     }
