@@ -45,9 +45,13 @@
 import axios from 'axios';
 import { ref } from 'vue';
 import type { LoginViewModel } from '@/types/apiInterface';
+import type { LoginUserModel } from '@/types/vueInterface';
 import { useRouter } from 'vue-router';
+import { useCookies } from 'vue3-cookies';
 
 const router = useRouter();
+
+const { cookies } = useCookies(); // 初始化 vue3-cookies
 
 const loginData = ref<LoginViewModel>({
     Account: '',
@@ -56,16 +60,41 @@ const loginData = ref<LoginViewModel>({
     const login = async () => {
         const url = '/api/Login';
         const data = loginData.value;
+
     try {
         const response = await axios.post(url, data);
+        if (response) {
+            const userData: LoginUserModel = response.data;
+            for (let key in userData) {
+                if (key === 'status1' || key === 'status2' || key === 'status3') {
+                    userData[key] = userData[key].trim(); // 清除資料多餘空格
+                }
+            }
+            setUserData(userData);
+            console.log(userData ? userData : '沒有資料'); // 登入成功後的回傳資料
+        }
         router.push('/main')
-        console.log(response.data ? response.data :'沒有資料'); // 登入成功後的回傳資料
+       
     } catch (error) {
         console.error('登入失敗:', error); // 處理登入失敗的情況
     }
 }
 
+    // 設定使用者資料的函數
+    const setUserData = (userData: LoginUserModel) => {
+        // 將使用者資料存入 Cookie，設置為一天後過期
+        cookies.set('userData', JSON.stringify(userData), { expires: '1d' });
+    };
 
+    // 獲取使用者資料的函數
+    const getUserData = () => {
+        const userData = cookies.get('userData');
+        if (userData) {
+            console.log(JSON.parse(userData)); // 輸出從 Cookie 中讀取的使用者資料
+        } else {
+            console.log('No user data found');
+        }
+    };
 </script>
 
 <style scoped>

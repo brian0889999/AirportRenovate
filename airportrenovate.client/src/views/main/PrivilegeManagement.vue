@@ -21,9 +21,9 @@
 import { ref } from 'vue';
 
     const headers = [
-        { title: '權限', align: 'start', sortable: false, value: '6級(科目)' },
-        { title: '功能', value: '功能' },
-        { title: '備註', value: '備註' },
+        { title: '權限', align: 'start', sortable: false, key: '權限' },
+        { title: '功能', key: '功能' },
+        { title: '備註', key: '備註' },
     ];
     
     const items = ref([
