@@ -25,6 +25,10 @@ const routes: Array<RouteRecordRaw> = [
                 name: 'PrivilegeManagement',
                 component: () => import(/*webpackChunkName "PrivilegeManagement" */ '@/views/main/PrivilegeManagement.vue')
             }, {
+                path: 'PublicWorksGroup',
+                name: 'PublicWorksGroup',
+                component: () => import(/*webpackChunkName "PublicWorksGroup" */ '@/views/main/PublicWorksGroup.vue')
+            }, {
                 path: 'Test',
                 name: 'Test',
                 component: () => import(/*webpackChunkName "Test" */ '@/views/main/Test.vue')

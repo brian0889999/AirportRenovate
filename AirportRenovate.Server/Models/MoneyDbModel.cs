@@ -28,7 +28,7 @@ namespace AirportRenovate.Server.Models
 
         public int? UseBudget { get; set; }
 
-        [Column("[In]")]
+        [Column("In")]
         public int? In { get; set; }
 
         public int? InActual { get; set; }
@@ -77,7 +77,8 @@ namespace AirportRenovate.Server.Models
 
         public string? Group1 { get; set; }
 
-        [Column("[All]")]
+        //[Column("[All]")]
+        [Column("All")]
         public string? All { get; set; }
 
         public string? True { get; set; }

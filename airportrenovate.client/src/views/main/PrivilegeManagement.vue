@@ -1,4 +1,5 @@
 <template>
+    
     <v-container style="width:100%; display:flex;" class=".custom-container">
         <!--<v-data-table style="width:100%" :headers="headers"
                       :items="lists"
@@ -17,9 +18,9 @@
 
 
 <script setup lang="ts">
-//import axios from 'axios';
+import axios from 'axios';
 import { ref } from 'vue';
-
+ 
     const headers = [
         { title: '權限', align: 'start', sortable: false, key: '權限' },
         { title: '功能', key: '功能' },
@@ -38,6 +39,8 @@ import { ref } from 'vue';
         { title: '系統', value: 'status3'},
     ]
     const lists = ref([{}]);
+
+   
 </script>
 
 <style scoped>
