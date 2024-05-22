@@ -71,7 +71,7 @@ const loginData = ref<LoginViewModel>({
                 }
             }
             setUserData(userData);
-            console.log(userData ? userData : '沒有資料'); // 登入成功後的回傳資料
+         /*   console.log(userData ? userData : '沒有資料'); // 登入成功後的回傳資料*/
         }
         router.push('/main')
        

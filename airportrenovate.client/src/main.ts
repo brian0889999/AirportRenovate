@@ -6,6 +6,7 @@ import App from './App.vue';
 import router from './router';
 /*import axios from 'axios';*/
 import vuetify from './plugins/vuetify';
+import '@mdi/font/css/materialdesignicons.css'; // 引入 字體圖標
 /*import VueCookies from 'vue3-cookies';*/
 
 const app = createApp(App)

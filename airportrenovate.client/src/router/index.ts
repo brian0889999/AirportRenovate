@@ -18,21 +18,18 @@ const routes: Array<RouteRecordRaw> = [
         path: '/main',
         name: 'main',
         component: () => import(/*webpackChunkName: "MainLayout" */ '@/layouts/MainLayout.vue'),   
-        redirect: { name: 'PrivilegeManagement' },
+        redirect: { name: 'PublicWorksGroup' },
         children: [
+            {
+                path: 'PublicWorksGroup',
+                name: 'PublicWorksGroup',
+                component: () => import(/*webpackChunkName "PublicWorksGroup" */ '@/views/main/PublicWorksGroup.vue')
+            }, 
             {
                 path: 'PrivilegeManagement',
                 name: 'PrivilegeManagement',
                 component: () => import(/*webpackChunkName "PrivilegeManagement" */ '@/views/main/PrivilegeManagement.vue')
-            }, {
-                path: 'PublicWorksGroup',
-                name: 'PublicWorksGroup',
-                component: () => import(/*webpackChunkName "PublicWorksGroup" */ '@/views/main/PublicWorksGroup.vue')
-            }, {
-                path: 'Test',
-                name: 'Test',
-                component: () => import(/*webpackChunkName "Test" */ '@/views/main/Test.vue')
-            }, {
+            },  {
                 path: 'Test2',
                 name: 'Test2',
                 component: () => import(/*webpackChunkName "Test2" */ '@/views/main/Test2.vue')
