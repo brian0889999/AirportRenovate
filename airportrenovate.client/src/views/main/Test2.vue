@@ -442,7 +442,7 @@
     //    }
     //}
 </script>
-<style>
+<style scoped>
     .v-data-table__tr:hover {
         background-color: #232F34;
     }

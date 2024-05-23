@@ -34,7 +34,7 @@ export interface BudgetDataModel {
     subjectActual?: number | null;
 }
 
-export interface UsersDataModel {
+export interface UserDataModel {
     No?: number;
     Name?: string;
     Account?: string;
@@ -42,4 +42,23 @@ export interface UsersDataModel {
     Status1?: string;
     Status2?: string;
     Status3?: string;
+}
+
+export interface Crumb {
+    title: string;
+    icon?: string;
+    href: string;
+    childs?: Crumb[];
+}
+
+export interface Breadcrumb {
+    title?: string;
+    disabled: boolean;
+    href: string;
+}
+
+export interface RouteItemMeta {
+    title?: string;
+    icon?: string;
+    disabled?: string;
 }

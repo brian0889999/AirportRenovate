@@ -12,27 +12,32 @@ const routes: Array<RouteRecordRaw> = [
     {
         path: '/login',
         name: 'login',
-        component: () => import(/*webpackChunkName: "login" */ '@/views/Login.vue')
+        component: () => import(/*webpackChunkName: "login" */ '@/views/Login.vue'),
+        meta: { title: '登入' },
     },
     {
         path: '/main',
         name: 'main',
-        component: () => import(/*webpackChunkName: "MainLayout" */ '@/layouts/MainLayout.vue'),   
         redirect: { name: 'PublicWorksGroup' },
+        component: () => import(/*webpackChunkName: "MainLayout" */ '@/layouts/MainLayout.vue'),   
+        meta: { title: '首頁' },
         children: [
             {
                 path: 'PublicWorksGroup',
                 name: 'PublicWorksGroup',
-                component: () => import(/*webpackChunkName "PublicWorksGroup" */ '@/views/main/PublicWorksGroup.vue')
+                component: () => import(/*webpackChunkName "PublicWorksGroup" */ '@/views/main/PublicWorksGroup.vue'),
+                meta: { title: '工務組' },
             }, 
             {
                 path: 'PrivilegeManagement',
                 name: 'PrivilegeManagement',
-                component: () => import(/*webpackChunkName "PrivilegeManagement" */ '@/views/main/PrivilegeManagement.vue')
+                component: () => import(/*webpackChunkName "PrivilegeManagement" */ '@/views/main/PrivilegeManagement.vue'),
+                meta: { title: '權限管理' },
             },  {
                 path: 'Test2',
                 name: 'Test2',
-                component: () => import(/*webpackChunkName "Test2" */ '@/views/main/Test2.vue')
+                component: () => import(/*webpackChunkName "Test2" */ '@/views/main/Test2.vue'),
+                meta: { title: 'Test2' },
             },
         ]
     },
