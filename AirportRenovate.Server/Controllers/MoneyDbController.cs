@@ -16,7 +16,7 @@ public class MoneyDbController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> GetData([FromBody] QueryDto queryDto)
+    public async Task<IActionResult> GetData([FromBody] QueryDto queryDto) // 前端傳Year值,後端回傳符合Year值的工務組資料
     {
         try
         {
@@ -60,9 +60,6 @@ public class MoneyDbController : ControllerBase
         }
     }
 }
-    public class QueryDto
-{
-    public int Year { get; set; }
-}
+   
 
 

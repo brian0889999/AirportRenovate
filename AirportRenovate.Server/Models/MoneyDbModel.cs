@@ -3,6 +3,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AirportRenovate.Server.Models
 {
+    public class QueryDto
+    {
+        public int Year { get; set; }
+    }
     public class MoneyDbModel
     {
         [Key]

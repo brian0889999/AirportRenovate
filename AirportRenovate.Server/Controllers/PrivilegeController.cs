@@ -19,18 +19,18 @@ public class PrivilegeController : ControllerBase
 
 
     [HttpGet]    
-    public ActionResult<IEnumerable<UsersModelDb>> FetchUsers()
+    public ActionResult<IEnumerable<UserModelDb>> FetchUsers()
     {
         var usersData = _context.user_data1;
-        var users = new List<UsersModelDb>();
+        var users = new List<UserModelDb>();
         foreach (var userData in usersData)
         {
-            var user = new UsersModelDb
+            var user = new UserModelDb
             {
                 No = userData.No,
                 Name = userData.Name?.Trim(),
                 Account = userData.Account?.Trim(),
-                Password = userData.Password?.Trim(),
+                Password = DESEncryptionUtility.DecryptDES(userData.Password?.Trim()),
                 Status1 = userData.Status1?.Trim(),
                 Status2 = userData.Status2?.Trim(),
                 Status3 = userData.Status3?.Trim()
@@ -38,5 +38,33 @@ public class PrivilegeController : ControllerBase
             users.Add(user);
         }
         return Ok(users);
+    }
+
+
+    [HttpPut]
+
+    public IActionResult UpdateUser([FromBody] UserModelDb currentItem)
+    {
+        if (currentItem == null)
+        {
+            return BadRequest("沒有user資料");
+        }
+
+        // 根據No欄位去找資料
+        var existingUser = _context.user_data1.FirstOrDefault(user => user.No == currentItem.No);
+        if (existingUser == null)
+        {
+            return NotFound("沒有找到user");
+        }
+
+        existingUser.Name = currentItem.Name;
+        existingUser.Account = currentItem.Account;
+        existingUser.Password = DESEncryptionUtility.EncryptDES(currentItem?.Password);
+        existingUser.Status1 = currentItem.Status1?.Trim();
+        existingUser.Status2 = currentItem.Status2?.Trim();
+        existingUser.Status3 = currentItem. Status3?.Trim();
+        _context.SaveChanges();
+
+        return Ok(existingUser);
     }
 }

@@ -24,7 +24,7 @@ namespace AirportRenovate.Server.Models
     }
 
 
-    public class UsersModelDb
+    public class UserModelDb
     {
         [Key]
         public int No { get; set; }

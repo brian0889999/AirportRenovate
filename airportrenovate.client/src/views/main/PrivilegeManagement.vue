@@ -1,34 +1,42 @@
 <template>
     
     <v-container style="width:100%; display:flex;">
-        <v-data-table v-if="!isEditing"
-                      :headers="authheaders"
-                      :items="processedLists"
-                      item-key="name"
-                      items-per-page="-1"
-                      hide-default-footer
-                      style="width: 100%;">
-            <template v-slot:[`item.edit`]="{ item }">
-                <v-btn @click="editItem(item)" icon class="small-btn">
-                    <v-icon>mdi-pencil</v-icon>
-                </v-btn>
-            </template>
-        </v-data-table>
-
-        <v-data-table v-if="!isEditing"
-                      style="width:100%" 
-                      :headers="headers"
-                      :items="items"
-                      :items-per-page="5"
-                      class="elevation-1"
-                      :hide-default-footer="true">
-        </v-data-table>
-
+        <v-row>
+            <v-col cols="12" sm="8" md="6">
+                <v-data-table v-if="!isEditing"
+                              :headers="authheaders"
+                              :items="processedLists"
+                              item-key="name"
+                              items-per-page="12"
+                              
+                              class="elevation-1"
+                              style="width: 100%;">
+                    <template v-slot:[`item.edit`]="{ item }">
+                        <v-btn @click="editItem(item)" icon class="small-btn">
+                            <v-icon>mdi-pencil</v-icon>
+                        </v-btn>
+                    </template>
+                </v-data-table>
+            </v-col>
+            <v-col cols="12" sm="8" md="6">
+                <!--寫死的Table-->
+                <v-data-table v-if="!isEditing"
+                              style="width:100%"
+                              :headers="headers"
+                              :items="items"
+                              :items-per-page="-1"
+                              class="elevation-1"
+                              :hide-default-footer="true">
+                </v-data-table>
+            </v-col>
+        </v-row>
     <div v-if="isEditing" style="width: 100%;">
         <v-form>
             <v-text-field v-model="currentItem.name" label="姓名"></v-text-field>
-            <v-select v-model="currentItem.status1" :items="Object.keys(statusMapping)" label="權限"></v-select>
-            <v-select v-model="currentItem.status3" :items="Object.keys(statusMapping)" label="系統"></v-select>
+            <v-select v-model="currentItem.status1"
+                      :items="['A', 'B', 'C', 'D']"
+                      label="權限"></v-select>
+            <v-select v-model="currentItem.status3" :items="Object.keys(reverseStatusMapping)" label="系統"></v-select>
             <v-text-field v-model="currentItem.account" label="帳號"></v-text-field>
             <v-text-field v-model="currentItem.password" label="密碼"></v-text-field>
             <v-btn @click="saveItem" color="primary" class="mr-2" size="large">保存</v-btn>
@@ -41,7 +49,7 @@
 
 <script setup lang="ts">
 import axios from 'axios';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import type { UserDataModel } from '@/types/vueInterface';
 
   
@@ -81,13 +89,29 @@ import type { UserDataModel } from '@/types/vueInterface';
             console.error(error);
         }
     }
-    fetchUsers();
+
+    //const status1Options = ref([
+    //    { value: 'A', text: 'A' },
+    //    { value: 'B', text: 'B' },
+    //    { value: 'C', text: 'C' },
+    //    { value: 'D', text: 'D' },
+    //]);
+
+    // 對應狀態碼到中文
     const statusMapping: { [key: string]: string } = {
-        'A': '土木',
-        'B': '水電',
-        'C': '建築',
-        'D': '綜合',
-        'E': '機械'
+        "A": "土木",
+        "B": "水電",
+        "C": "建築",
+        "D": "綜合",
+        "E": "機械"
+    };
+
+    const reverseStatusMapping: { [key: string]: string } = {
+        "土木": "A",
+        "水電": "B",
+        "建築": "C",
+        "綜合": "D",
+        "機械": "E"
     };
 
     const processedLists = computed(() => {
@@ -104,8 +128,16 @@ import type { UserDataModel } from '@/types/vueInterface';
         currentItem.value = { ...item };
     };
 
-    const saveItem = () => {
+    const saveItem = async () => {
         // 保存邏輯
+        if (currentItem.value) {
+            currentItem.value.status3 = reverseStatusMapping[currentItem.value.status3 || ''] || currentItem.value.status3;
+            const url = '/api/Privilege'
+            const data: UserDataModel | null = currentItem.value;
+            const response = await axios.put(url, data);
+            console.log(response.data)
+        }
+        console.log(currentItem.value);
 
         fetchUsers();
         isEditing.value = false;
@@ -115,6 +147,7 @@ import type { UserDataModel } from '@/types/vueInterface';
         isEditing.value = false;
         currentItem.value = null;
     };
+    onMounted(fetchUsers);
 </script>
 
 <style scoped>

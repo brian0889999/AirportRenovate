@@ -35,13 +35,13 @@ export interface BudgetDataModel {
 }
 
 export interface UserDataModel {
-    No?: number;
-    Name?: string;
-    Account?: string;
-    Password?: string;
-    Status1?: string;
-    Status2?: string;
-    Status3?: string;
+    no?: number;
+    name?: string;
+    account?: string;
+    password?: string;
+    status1?: string;
+    status2?: string;
+    status3?: string;
 }
 
 export interface Crumb {
