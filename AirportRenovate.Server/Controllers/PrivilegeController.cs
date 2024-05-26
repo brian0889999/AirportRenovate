@@ -30,14 +30,50 @@ public class PrivilegeController : ControllerBase
                 No = userData.No,
                 Name = userData.Name?.Trim(),
                 Account = userData.Account?.Trim(),
-                Password = DESEncryptionUtility.DecryptDES(userData.Password?.Trim()),
-                Status1 = userData.Status1?.Trim(),
-                Status2 = userData.Status2?.Trim(),
-                Status3 = userData.Status3?.Trim()
+                Password = string.IsNullOrEmpty(userData?.Password) ? null : DESEncryptionUtility.DecryptDES(userData.Password.Trim()),
+                Auth = userData?.Auth?.Trim(),
+                Status1 = userData?.Status1?.Trim(),
+                Status2 = userData?.Status2?.Trim(),
+                Status3 = userData?.Status3?.Trim()
             };
             users.Add(user);
         }
         return Ok(users);
+    }
+
+    [HttpPost]
+    public IActionResult AddUser([FromBody] UserModelDb currentItem)
+    {
+        if(currentItem == null)
+        {
+            return BadRequest("沒有user資料");
+        }
+        else
+        {
+            // 創建新的 LoginViewModelDb 物件
+            var newUser = new LoginViewModelDb
+            {
+                //No = currentItem.No,
+                Name = currentItem.Name,
+                Account = currentItem.Account,
+                Password = string.IsNullOrEmpty(currentItem?.Password) ? null : DESEncryptionUtility.EncryptDES(currentItem.Password),
+                Auth = currentItem?.Auth,
+                Status1 = currentItem?.Status1,
+                Status2 = "O", // 預設值
+                Status3 = currentItem?.Status3,
+                Account_Open = "y", // 預設值
+                Time = new DateTime(1990, 1, 1, 0, 0, 0), // 預設值
+                Time1 = DateTime.Now, // 當下時間
+                Count = 0, // 預設值
+                Unit_No = "M" // 預設值
+            };
+
+            // 添加到資料庫
+            _context.user_data1.Add(newUser);
+            _context.SaveChanges();
+
+            return Ok(newUser);
+        }
     }
 
 
@@ -48,23 +84,28 @@ public class PrivilegeController : ControllerBase
         if (currentItem == null)
         {
             return BadRequest("沒有user資料");
-        }
-
-        // 根據No欄位去找資料
-        var existingUser = _context.user_data1.FirstOrDefault(user => user.No == currentItem.No);
-        if (existingUser == null)
+        } 
+        else
         {
-            return NotFound("沒有找到user");
+            // 根據No欄位去找資料
+            var existingUser = _context.user_data1.FirstOrDefault(user => user.No == currentItem.No);
+            if (existingUser == null)
+            {
+                return NotFound("沒有找到user");
+            }
+            existingUser.Name = currentItem.Name;
+            existingUser.Account = currentItem.Account;
+            existingUser.Password = string.IsNullOrEmpty(currentItem?.Password) ? null : DESEncryptionUtility.EncryptDES(currentItem.Password);
+            existingUser.Auth = currentItem?.Auth;
+            existingUser.Status1 = currentItem?.Status1?.Trim();
+            existingUser.Status2 = currentItem?.Status2?.Trim();
+            existingUser.Status3 = currentItem?.Status3?.Trim();
+            _context.SaveChanges();
+
+            return Ok(existingUser);
         }
+        
 
-        existingUser.Name = currentItem.Name;
-        existingUser.Account = currentItem.Account;
-        existingUser.Password = DESEncryptionUtility.EncryptDES(currentItem?.Password);
-        existingUser.Status1 = currentItem.Status1?.Trim();
-        existingUser.Status2 = currentItem.Status2?.Trim();
-        existingUser.Status3 = currentItem. Status3?.Trim();
-        _context.SaveChanges();
-
-        return Ok(existingUser);
+        
     }
 }

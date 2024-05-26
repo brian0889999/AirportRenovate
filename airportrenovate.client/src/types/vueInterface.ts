@@ -39,6 +39,7 @@ export interface UserDataModel {
     name?: string;
     account?: string;
     password?: string;
+    auth?: string;
     status1?: string;
     status2?: string;
     status3?: string;

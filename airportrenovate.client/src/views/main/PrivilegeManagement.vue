@@ -3,12 +3,12 @@
     <v-container style="width:100%; display:flex;">
         <v-row>
             <v-col cols="12" sm="8" md="6">
+                <v-btn v-if="!isEditing" @click="addItem" color="primary" class="mb-4">新增</v-btn>
                 <v-data-table v-if="!isEditing"
                               :headers="authheaders"
                               :items="processedLists"
                               item-key="name"
                               items-per-page="12"
-                              
                               class="elevation-1"
                               style="width: 100%;">
                     <template v-slot:[`item.edit`]="{ item }">
@@ -17,6 +17,7 @@
                         </v-btn>
                     </template>
                 </v-data-table>
+
             </v-col>
             <v-col cols="12" sm="8" md="6">
                 <!--寫死的Table-->
@@ -32,11 +33,16 @@
         </v-row>
     <div v-if="isEditing" style="width: 100%;">
         <v-form>
-            <v-text-field v-model="currentItem.name" label="姓名"></v-text-field>
+            <v-text-field v-model="currentItem.name" label="姓名" :readonly="isEditMode"></v-text-field>
             <v-select v-model="currentItem.status1"
                       :items="['A', 'B', 'C', 'D']"
                       label="權限"></v-select>
-            <v-select v-model="currentItem.status3" :items="Object.keys(reverseStatusMapping)" label="系統"></v-select>
+            <v-select v-model="currentItem.auth" 
+                      :items="Object.keys(ReverseAuthMapping)" 
+                      label="組室"></v-select>
+            <v-select v-model="currentItem.status3"
+                      :items="Object.keys(reverseStatusMapping)" 
+                      label="系統"></v-select>
             <v-text-field v-model="currentItem.account" label="帳號"></v-text-field>
             <v-text-field v-model="currentItem.password" label="密碼"></v-text-field>
             <v-btn @click="saveItem" color="primary" class="mr-2" size="large">保存</v-btn>
@@ -51,6 +57,7 @@
 import axios from 'axios';
 import { ref, computed, onMounted } from 'vue';
 import type { UserDataModel } from '@/types/vueInterface';
+import { AuthMapping, ReverseAuthMapping, statusMapping, reverseStatusMapping } from '@/utils/mappings'; // 對應狀態碼到中文
 
   
  
@@ -76,6 +83,7 @@ import type { UserDataModel } from '@/types/vueInterface';
 
     const lists = ref<UserDataModel[]>([]);
     const isEditing = ref(false);
+    const isEditMode = ref(true); // 用來區分新增或編輯資料
     const currentItem = ref<UserDataModel | null>(null);
 
     const fetchUsers = async () => {
@@ -83,40 +91,19 @@ import type { UserDataModel } from '@/types/vueInterface';
             const url = '/api/Privilege'
             const response = await axios.get<UserDataModel[]>(url);
       /*      console.log(response.data);*/
+            if (response) {
             lists.value = response.data;
+            }
         }
         catch (error) {
             console.error(error);
         }
     }
 
-    //const status1Options = ref([
-    //    { value: 'A', text: 'A' },
-    //    { value: 'B', text: 'B' },
-    //    { value: 'C', text: 'C' },
-    //    { value: 'D', text: 'D' },
-    //]);
-
-    // 對應狀態碼到中文
-    const statusMapping: { [key: string]: string } = {
-        "A": "土木",
-        "B": "水電",
-        "C": "建築",
-        "D": "綜合",
-        "E": "機械"
-    };
-
-    const reverseStatusMapping: { [key: string]: string } = {
-        "土木": "A",
-        "水電": "B",
-        "建築": "C",
-        "綜合": "D",
-        "機械": "E"
-    };
-
     const processedLists = computed(() => {
         return lists.value.map(list => ({
             ...list,
+            auth: AuthMapping[list.auth || ''] || list.auth,
             status3: statusMapping[list.status3 || ''] || list.status3
         }));
     });
@@ -124,20 +111,31 @@ import type { UserDataModel } from '@/types/vueInterface';
     const editItem = (item: UserDataModel) => {
         // 加入編輯邏輯
         console.log('Edit item:', item);
+        isEditMode.value = true;
         isEditing.value = true;
         currentItem.value = { ...item };
     };
 
+    const addItem = () => {
+        isEditMode.value = false;
+        isEditing.value = true;
+        currentItem.value = { name: '', account: '', password: '', auth: '', status1: '', status3: '' };
+    }
+
     const saveItem = async () => {
         // 保存邏輯
         if (currentItem.value) {
+            currentItem.value.auth = ReverseAuthMapping[currentItem.value.auth || ''] || currentItem.value.auth;
             currentItem.value.status3 = reverseStatusMapping[currentItem.value.status3 || ''] || currentItem.value.status3;
             const url = '/api/Privilege'
             const data: UserDataModel | null = currentItem.value;
-            const response = await axios.put(url, data);
-            console.log(response.data)
+            if (isEditMode.value) { // 如果是編輯用put,新增用post
+                const response = await axios.put(url, data);
+            } else {
+                const response = await axios.post(url, data);
+            }
         }
-        console.log(currentItem.value);
+        /*console.log(currentItem.value);*/
 
         fetchUsers();
         isEditing.value = false;
