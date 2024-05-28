@@ -21,7 +21,7 @@ public class PrivilegeController : ControllerBase
     [HttpGet]    
     public ActionResult<IEnumerable<UserModelDb>> FetchUsers()
     {
-        var usersData = _context.user_data1;
+        var usersData = _context.User_data1;
         var users = new List<UserModelDb>();
         foreach (var userData in usersData)
         {
@@ -50,17 +50,20 @@ public class PrivilegeController : ControllerBase
         }
         else
         {
-            // 創建新的 LoginViewModelDb 物件
-            var newUser = new LoginViewModelDb
+            // 創建新的 LoginModelDb 物件
+            var newUser = new LoginModelDb
             {
                 //No = currentItem.No,
                 Name = currentItem.Name,
                 Account = currentItem.Account,
                 Password = string.IsNullOrEmpty(currentItem?.Password) ? null : DESEncryptionUtility.EncryptDES(currentItem.Password),
+                Email = "",
                 Auth = currentItem?.Auth,
+                Reason = "",
                 Status1 = currentItem?.Status1,
                 Status2 = "O", // 預設值
-                Status3 = currentItem?.Status3,
+                Memo = "",
+                Status3 = currentItem?.Status3?.Trim(),
                 Account_Open = "y", // 預設值
                 Time = new DateTime(1990, 1, 1, 0, 0, 0), // 預設值
                 Time1 = DateTime.Now, // 當下時間
@@ -69,7 +72,7 @@ public class PrivilegeController : ControllerBase
             };
 
             // 添加到資料庫
-            _context.user_data1.Add(newUser);
+            _context.User_data1.Add(newUser);
             _context.SaveChanges();
 
             return Ok(newUser);
@@ -88,7 +91,7 @@ public class PrivilegeController : ControllerBase
         else
         {
             // 根據No欄位去找資料
-            var existingUser = _context.user_data1.FirstOrDefault(user => user.No == currentItem.No);
+            var existingUser = _context.User_data1.FirstOrDefault(user => user.No == currentItem.No);
             if (existingUser == null)
             {
                 return NotFound("沒有找到user");

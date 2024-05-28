@@ -48,6 +48,7 @@ import type { LoginViewModel } from '@/types/apiInterface';
 import type { LoginUserModel } from '@/types/vueInterface';
 import { useRouter } from 'vue-router';
 import { useCookies } from 'vue3-cookies';
+    import { post, type ApiResponse } from '../services/api';
 
 const router = useRouter();
 
@@ -60,9 +61,14 @@ const loginData = ref<LoginViewModel>({
     const login = async () => {
         const url = '/api/Login';
         const data = loginData.value;
-
+        const regex: RegExp = /^(?!.*[^\x21-\x7e])(?=.*[\W])(?=.*[a-zA-Z])(?=.*\d).{8,20}$/;
+        if (!regex.test(loginData.value.Password)) {
+            alert('請輸入 8 到 20 個字符的密碼，必須包含至少一個字母、一個數字和一個特殊字符。');
+            return;
+        }
     try {
         const response = await axios.post(url, data);
+        /*const response: ApiResponse<any> = await post<any>(url, data);*/
         if (response) {
             const userData: LoginUserModel = response.data;
             for (let key in userData) {

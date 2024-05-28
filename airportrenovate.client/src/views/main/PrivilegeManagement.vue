@@ -41,7 +41,7 @@
                       :items="Object.keys(ReverseAuthMapping)" 
                       label="組室"></v-select>
             <v-select v-model="currentItem.status3"
-                      :items="Object.keys(reverseStatusMapping)" 
+                      :items="Object.keys(ReverseStatusMapping)" 
                       label="系統"></v-select>
             <v-text-field v-model="currentItem.account" label="帳號"></v-text-field>
             <v-text-field v-model="currentItem.password" label="密碼"></v-text-field>
@@ -57,7 +57,7 @@
 import axios from 'axios';
 import { ref, computed, onMounted } from 'vue';
 import type { UserDataModel } from '@/types/vueInterface';
-import { AuthMapping, ReverseAuthMapping, statusMapping, reverseStatusMapping } from '@/utils/mappings'; // 對應狀態碼到中文
+import { AuthMapping, ReverseAuthMapping, StatusMapping, ReverseStatusMapping } from '@/utils/mappings'; // 對應狀態碼到中文
 
   
  
@@ -104,7 +104,7 @@ import { AuthMapping, ReverseAuthMapping, statusMapping, reverseStatusMapping } 
         return lists.value.map(list => ({
             ...list,
             auth: AuthMapping[list.auth || ''] || list.auth,
-            status3: statusMapping[list.status3 || ''] || list.status3
+            status3: StatusMapping[list.status3 || ''] || list.status3
         }));
     });
 
@@ -123,17 +123,38 @@ import { AuthMapping, ReverseAuthMapping, statusMapping, reverseStatusMapping } 
     }
 
     const saveItem = async () => {
+        const regex: RegExp = /^(?!.*[^\x21-\x7e])(?=.*[\W])(?=.*[a-zA-Z])(?=.*\d).{8,20}$/;
+        
         // 保存邏輯
         if (currentItem.value) {
+            if (!regex.test(currentItem.value.password ?? '')) {
+                alert('請輸入 8 到 20 個字符的密碼，必須包含至少一個字母、一個數字和一個特殊字符。');
+                return;
+            }
             currentItem.value.auth = ReverseAuthMapping[currentItem.value.auth || ''] || currentItem.value.auth;
-            currentItem.value.status3 = reverseStatusMapping[currentItem.value.status3 || ''] || currentItem.value.status3;
+            currentItem.value.status3 = ReverseStatusMapping[currentItem.value.status3 || ''] || currentItem.value.status3;
+           
+            if (currentItem.value.status3 === "無") {
+                currentItem.value.status3 = "";  // 將"無"轉換為空字串
+            };
+
             const url = '/api/Privilege'
             const data: UserDataModel | null = currentItem.value;
-            if (isEditMode.value) { // 如果是編輯用put,新增用post
-                const response = await axios.put(url, data);
-            } else {
-                const response = await axios.post(url, data);
+            try {
+                let response;
+                if (isEditMode.value) { // 如果是編輯用put,新增用post
+                     response = await axios.put(url, data);
+                } else {
+                     response = await axios.post(url, data);
+                }
+                // 這裡可以加入成功處理的邏輯
+                console.log("操作成功", response.data);
+            } catch (error) {
+                // 處理錯誤
+                console.error(error);
+                // 這裡可以加入錯誤處理的邏輯,例如提示用戶或記錄錯誤
             }
+            
         }
         /*console.log(currentItem.value);*/
 

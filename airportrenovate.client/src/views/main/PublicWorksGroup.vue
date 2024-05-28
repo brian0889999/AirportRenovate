@@ -63,11 +63,12 @@
     //console.log('searchYear.value=', searchYear.value);
     const searchMoneyDb = async () => {
 
-        const url = '/api/MoneyDb';
-        const data = { Year: searchYear.value };  // 抓年度的值
+        const url = '/api/MoneyDb/ByYear';
+        //const data = { Year: searchYear.value }; 
+        const data = { params: { Year: searchYear.value } };  // 抓年度的值
         try {
 
-            const response = await axios.post<BudgetDataModel[]>(url, data);
+            const response = await axios.get<BudgetDataModel[]>(url, data);
             if (response) {
                 console.log(response.data);
                 const dbData = response.data;

@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using AirportRenovate.Server.Models;
 using AirportRenovate.Server.Datas;
 using AirportRenovate.Server.Utilities;
+using AirportRenovate.Server.ViewModels;
+using AirportRenovate.Server.Models;
 
 namespace AirportRenovate.Server.Controllers;
 
@@ -34,7 +35,7 @@ public class LoginController : ControllerBase
 
     public IActionResult GetUsers()
     {
-        var users = _context.user_data1;
+        var users = _context.User_data1;
         foreach (var user in users)
         {
             if (user.Password != null)
@@ -67,7 +68,7 @@ public class LoginController : ControllerBase
         if (!string.IsNullOrEmpty(loginData.Account) && !string.IsNullOrEmpty(loginData.Password))
         {
             var password = DESEncryptionUtility.EncryptDES(loginData.Password);
-            var user = _context.user_data1.FirstOrDefault(x => x.Account == loginData.Account);
+            var user = _context.User_data1.FirstOrDefault(x => x.Account == loginData.Account);
             if (user != null && user.Password == password)
             {
                 return Ok(user);

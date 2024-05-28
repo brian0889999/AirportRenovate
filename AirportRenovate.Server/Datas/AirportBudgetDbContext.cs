@@ -10,7 +10,7 @@ namespace AirportRenovate.Server.Datas
         public AirportBudgetDbContext(DbContextOptions<AirportBudgetDbContext> options) : base(options)
         {
         }
-        public DbSet<LoginViewModelDb> user_data1 {  get; set; }
+        public DbSet<LoginModelDb> User_data1 {  get; set; }
         public DbSet<MoneyDbModel> Money { get; set; }
         public DbSet<Money2DbModel> Money2 { get; set; }
         public DbSet<Money3DbModel> Money3 { get; set; }

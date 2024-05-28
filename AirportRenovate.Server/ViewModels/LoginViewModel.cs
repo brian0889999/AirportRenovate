@@ -1,4 +1,4 @@
-﻿namespace AirportRenovate.Server.Models
+﻿namespace AirportRenovate.Server.ViewModels
 {
     public class LoginViewModel
     {

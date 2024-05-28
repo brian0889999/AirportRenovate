@@ -14,13 +14,16 @@ public class MoneyDbController : ControllerBase
     {
         _context = context;
     }
-
-    [HttpPost]
-    public async Task<IActionResult> GetData([FromBody] QueryDto queryDto) // 前端傳Year值,後端回傳符合Year值的工務組資料
+    //[HttpPost("ByYear")]
+    //public async Task<IActionResult> GetData([FromBody] QueryDto queryDto) // 前端傳Year值,後端回傳符合Year值的工務組資料
+    [HttpGet("ByYear")]
+    public async Task<IActionResult> GetData(int year) // 前端傳Year值,後端回傳符合Year值的工務組資料
     {
         try
         {
-            var yearParameter = queryDto.Year;
+            var A = _context.Money.Include(x=>x.Money3DbModels).ToList();
+            A[0].Money3DbModels[0];
+            var yearParameter = year;
 
             var results = await _context.Money
                 .Where(money => money.Group == "工務組" && money.Year == yearParameter)
@@ -29,9 +32,9 @@ public class MoneyDbController : ControllerBase
                     money3 => money3.Name,
                     (money, money3) => new { Money = money, Money3 = money3 })
                 .Where(joinResult => joinResult.Money3.Group1 == "工務組" &&
-                                     (joinResult.Money3.status == "O" || joinResult.Money3.status == "C") &&
-                                     joinResult.Money3.year == yearParameter)
-                .GroupBy(joinResult => new { joinResult.Money.Subject6, joinResult.Money.Subject7, joinResult.Money.Subject8, joinResult.Money.BudgetYear, joinResult.Money.Final, joinResult.Money.Budget, joinResult.Money.Group, joinResult.Money3.year })
+                                     (joinResult.Money3.Status == "O" || joinResult.Money3.Status == "C") &&
+                                     joinResult.Money3.Year == yearParameter)
+                .GroupBy(joinResult => new { joinResult.Money.Subject6, joinResult.Money.Subject7, joinResult.Money.Subject8, joinResult.Money.BudgetYear, joinResult.Money.Final, joinResult.Money.Budget, joinResult.Money.Group, joinResult.Money3.Year })
                 .Select(g => new
                 {
                     g.Key.Subject6,
@@ -41,7 +44,7 @@ public class MoneyDbController : ControllerBase
                     g.Key.Final,
                     g.Key.Budget,
                     g.Key.Group,
-                    Year = g.Key.year,
+                    Year = g.Key.Year,
                     General = g.Sum(x => x.Money3.Text == "一般" ? x.Money3.PurchaseMoney : 0),
                     Out = g.Sum(x => x.Money3.Text == "勻出" ? x.Money3.PurchaseMoney : 0),
                     UseBudget = g.Key.BudgetYear - g.Sum(x => x.Money3.Text == "勻出" ? x.Money3.PurchaseMoney : 0) - g.Sum(x => x.Money3.Text == "一般" ? x.Money3.PurchaseMoney : 0) + g.Key.Final,

@@ -1,6 +1,6 @@
 // 對應狀態碼到中文
-export const statusMapping: { [key: string]: string } = {
-    "NULL": "無",
+export const StatusMapping: { [key: string]: string } = {
+    "": "無",
     "A": "土木",
     "B": "水電",
     "C": "建築",
@@ -8,8 +8,8 @@ export const statusMapping: { [key: string]: string } = {
     "E": "機械"
 };
 
-export const reverseStatusMapping: { [key: string]: string } = {
-    "無": "NULL",
+export const ReverseStatusMapping: { [key: string]: string } = {
+    "無": "",
     "土木": "A",
     "水電": "B",
     "建築": "C",
