@@ -73,7 +73,7 @@ const loginData = ref<LoginViewModel>({
             const userData: LoginUserModel = response.data;
             for (let key in userData) {
                 if (key === 'status1' || key === 'status2' || key === 'status3') {
-                    userData[key] = userData[key].trim(); // 清除資料多餘空格
+                    userData[key] = userData[key]?.trim(); // 清除資料多餘空格
                 }
             }
             setUserData(userData);

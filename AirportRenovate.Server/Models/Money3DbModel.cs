@@ -54,6 +54,8 @@ namespace AirportRenovate.Server.Models
 
         public string? Year1 { get; set; }
 
+        [ForeignKey("Name")]
+        public MoneyDbModel? MoneyDbModel { get; set; }
         //[ForeignKey("Name")]
         //public MoneyDbModel? MoneyDbModel { get; set; }
     }

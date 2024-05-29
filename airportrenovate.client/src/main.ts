@@ -9,7 +9,7 @@ import vuetify from './plugins/vuetify';
 import '@mdi/font/css/materialdesignicons.css'; // 引入 字體圖標
 /*import VueCookies from 'vue3-cookies';*/
 
-const app = createApp(App)
+const app = createApp(App);
 const pinia = createPinia();
 
 

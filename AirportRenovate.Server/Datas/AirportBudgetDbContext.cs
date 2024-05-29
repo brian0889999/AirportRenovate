@@ -20,6 +20,12 @@ namespace AirportRenovate.Server.Datas
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<MoneyDbModel>()
+                .HasMany(m => m.Money3DbModels)
+                .WithOne(m3 => m3.MoneyDbModel)
+                .HasForeignKey(m3 => m3.Name)
+                .HasPrincipalKey(m => m.Budget);
+
             base.OnModelCreating(modelBuilder);
         }
     }

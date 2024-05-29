@@ -21,6 +21,10 @@
                       items-per-page-text="每頁筆數"
                       :loading="loading"
                       style="width: 100%;">
+            <template #item.budget="{ item }">
+                <v-btn variant="flat"
+                       @click="handleBudgetClick">{{ item.budget }}</v-btn>
+            </template>
         </v-data-table>
     </v-container>
 </template>
@@ -89,8 +93,9 @@
         }
     }
 
-
-
+    const handleBudgetClick = (budget: string) => {
+        console.log('Budget clicked:', budget);
+    }
 
 </script>
 
