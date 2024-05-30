@@ -23,7 +23,13 @@
                       style="width: 100%;">
             <template #item.budget="{ item }">
                 <v-btn variant="flat"
-                       @click="handleBudgetClick">{{ item.budget }}</v-btn>
+                       class="mb-2"
+                       @click="handleBudgetClick(item)">{{ item.budget }}</v-btn>
+                <br />
+                <v-btn @click="handleExcelClick(item.budget)"
+                       color="primary">
+                    EXCEL
+                </v-btn>
             </template>
         </v-data-table>
     </v-container>
@@ -46,12 +52,12 @@
         { title: '預算名稱', key: 'budget' },
         { title: '組室別', key: 'group' },
         { title: '科目(6級)', key: 'subject6' },
-        { title: '科目(7級', key: 'subject7' },
+        { title: '科目(7級)', key: 'subject7' },
         { title: '科目(8級)', key: 'subject8' },
         { title: '年度預算額度(1)', key: 'budgetYear' },
         { title: '併決算書(2)', key: 'final' },
         { title: '一般動支數(3)', key: 'general' },
-        { title: '勻出數(4))', key: 'out' },
+        { title: '勻出數(4)', key: 'out' },
         { title: '可用預算餘額(5)=(1)+(2)-(3)-(4)', key: 'useBudget' },
         { title: '勻入數(6)', key: 'in' },
         { title: '勻入實付數(7)', key: 'inActual' },
@@ -93,9 +99,33 @@
         }
     }
 
-    const handleBudgetClick = (budget: string) => {
-        console.log('Budget clicked:', budget);
-    }
+    const handleBudgetClick = async (budget: object) => {
+        const data = { ...budget };
+        console.log('Budget clicked:', data);
+        //try {
+        //    const url = '/api/MoneyDb/ByBudget'
+        //    const response = await axios.get(url, { params: { budget } })
+        //    console.log(response.data);
+        //} catch (error) {
+        //    console.error(error);
+        //}
+    };
+
+    //const handleExcelClick = async (budget: string) => {
+    //    try {
+    //        const response = await axios.get(`/api/MoneyDb/ExportToExcel?budget=${budget}`, {
+    //            responseType: 'blob'
+    //        });
+    //        const url = window.URL.createObjectURL(new Blob([response.data]));
+    //        const link = document.createElement('a');
+    //        link.href = url;
+    //        link.setAttribute('download', `${budget}.xlsx`);
+    //        document.body.appendChild(link);
+    //        link.click();
+    //    } catch (error) {
+    //        console.error(error);
+    //    }
+    //};
 
 </script>
 
@@ -103,4 +133,9 @@
     .no-margin {
         margin: 0;
     }
+    /*.link-style {
+        color: #007bff;
+        text-decoration: underline;
+        cursor: pointer;
+    }*/
 </style>
