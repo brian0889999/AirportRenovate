@@ -82,8 +82,8 @@ import { AuthMapping, ReverseAuthMapping, StatusMapping, ReverseStatusMapping } 
     ]);
 
     const lists = ref<UserDataModel[]>([]);
-    const isEditing = ref(false);
-    const isEditMode = ref(true); // 用來區分新增或編輯資料
+    const isEditing = ref<boolean>(false);
+    const isEditMode = ref<boolean>(true); // 用來區分新增或編輯資料
     const currentItem = ref<UserDataModel | null>(null);
 
     const fetchUsers = async () => {

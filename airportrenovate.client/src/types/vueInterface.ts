@@ -34,6 +34,21 @@ export interface BudgetDataModel {
     subjectActual?: number | null;
 }
 
+export interface SelectedBudgetDataModel {
+    subject6?: string | null;
+    subject7?: string | null;
+    subject8?: string | null;
+    budgetYear?: number | null;
+    final?: number | null;
+    general?: number | null;
+    out?: number | null;
+    useBudget?: number | null;
+    in?: number | null;
+    inActual?: number | null;
+    inBalance?: number | null;
+    subjectActual?: number | null;
+    End?: number | null;
+}
 export interface UserDataModel {
     no?: number;
     name?: string;

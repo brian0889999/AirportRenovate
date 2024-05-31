@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 using AirportRenovate.Server.DTOs;
 
-namespace MyGisMIS.Server.Filters;
+namespace AirportRenovate.Server.Filters;
 
 public class CustomExceptionFilterAttribute : ExceptionFilterAttribute
 {

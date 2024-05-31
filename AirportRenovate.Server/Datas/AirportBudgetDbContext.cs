@@ -1,6 +1,7 @@
 ﻿using AirportRenovate.Server.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Reflection.Emit;
 
 
 namespace AirportRenovate.Server.Datas
@@ -20,13 +21,26 @@ namespace AirportRenovate.Server.Datas
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<MoneyDbModel>()
                 .HasMany(m => m.Money3DbModels)
                 .WithOne(m3 => m3.MoneyDbModel)
                 .HasForeignKey(m3 => m3.Name)
                 .HasPrincipalKey(m => m.Budget);
 
-            base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<Money3DbModel>()
+                .HasOne(m3 => m3.MoneyDbModel)
+                .WithMany(m => m.Money3DbModels)
+                .HasForeignKey(m3 => m3.Name);
         }
     }
 }
+
+//modelBuilder.Entity<MoneyDbModel>()
+//    .HasMany(m => m.Money3DbModels)
+//    .WithOne(m3 => m3.MoneyDbModel)
+//    .HasForeignKey(m3 => m3.Name)
+//    .HasPrincipalKey(m => m.Budget);
+
+//base.OnModelCreating(modelBuilder);
