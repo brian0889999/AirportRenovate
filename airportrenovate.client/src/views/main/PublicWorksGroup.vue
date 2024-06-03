@@ -63,20 +63,20 @@
 
     const headers: ReadonlyHeaders = [
         /*{ title: '預算名稱', key: '', value: 'budget' },*/
-        { title: '預算名稱', key: 'budget' },
-        { title: '組室別', key: 'group' },
-        { title: '科目(6級)', key: 'subject6' },
-        { title: '科目(7級)', key: 'subject7' },
-        { title: '科目(8級)', key: 'subject8' },
-        { title: '年度預算額度(1)', key: 'budgetYear' },
-        { title: '併決算書(2)', key: 'final' },
-        { title: '一般動支數(3)', key: 'general' },
-        { title: '勻出數(4)', key: 'out' },
-        { title: '可用預算餘額(5)=(1)+(2)-(3)-(4)', key: 'useBudget' },
-        { title: '勻入數(6)', key: 'in' },
-        { title: '勻入實付數(7)', key: 'inActual' },
-        { title: '勻入數餘額(8)=(6)-(7)', key: 'inBalance' },
-        { title: '本科目實付數(9)', key: 'subjectActual' }
+        { title: '預算名稱', key: 'Budget' },
+        { title: '組室別', key: 'Group' },
+        { title: '科目(6級)', key: 'Subject6' },
+        { title: '科目(7級)', key: 'Subject7' },
+        { title: '科目(8級)', key: 'Subject8' },
+        { title: '年度預算額度(1)', key: 'BudgetYear' },
+        { title: '併決算書(2)', key: 'Final' },
+        { title: '一般動支數(3)', key: 'General' },
+        { title: '勻出數(4)', key: 'Out' },
+        { title: '可用預算餘額(5)=(1)+(2)-(3)-(4)', key: 'UseBudget' },
+        { title: '勻入數(6)', key: 'In' },
+        { title: '勻入實付數(7)', key: 'InActual' },
+        { title: '勻入數餘額(8)=(6)-(7)', key: 'InBalance' },
+        { title: '本科目實付數(9)', key: 'SubjectActual' }
     ]
 
 
@@ -133,13 +133,13 @@
             //if (response) {
             //    console.log(response.data);
             //    const dbData = response.data;
-            //    items.value = dbData
+            //    items.value = dbData;  
             //}
             const response: ApiResponse<any> = await get<any>(url, data);
-            if (response.statusCode === 200) {
-                console.log(response.data);
-                const dbData = response.data;
-                items.value = dbData
+            if (response.StatusCode === 200) {
+                console.log(response.Data);
+                const dbData = response.Data;
+                items.value = dbData;
             } else {
                 console.log(response.Data ?? response.Message)
             }

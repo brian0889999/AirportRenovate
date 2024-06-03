@@ -10,6 +10,10 @@ builder.Services.AddControllers(options =>
 {
     options.Filters.Add(new CustomExceptionFilterAttribute());
     options.Filters.Add(new CustomResultFilterAttribute());
+})
+.AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.PropertyNamingPolicy = null;
 });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
