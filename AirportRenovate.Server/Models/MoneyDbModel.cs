@@ -43,7 +43,7 @@ namespace AirportRenovate.Server.Models
 
         public int? Year { get; set; }
 
-        [ForeignKey("Budget")]
+        //[ForeignKey("Budget")]
         public List<Money3DbModel>? Money3DbModels { get; set; }
     }
 
