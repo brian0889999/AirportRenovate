@@ -56,7 +56,7 @@
     import { ref } from 'vue';
     import { get, post, type ApiResponse } from '@/services/api';
     import type { VDataTable } from 'vuetify/components';
-    import type { BudgetDataModel, SelectedBudgetDataModel } from '@/types/vueInterface';
+    import type { BudgetDataModel, SelectedBudgetDataModel } from '@/types/apiInterface';
 
 
     type ReadonlyHeaders = VDataTable['$props']['headers'];

@@ -7,11 +7,11 @@
                 <v-data-table v-if="!isEditing"
                               :headers="authheaders"
                               :items="processedLists"
-                              item-key="name"
+                              item-key="Name"
                               items-per-page="12"
                               class="elevation-1"
                               style="width: 100%;">
-                    <template v-slot:[`item.edit`]="{ item }">
+                    <template v-slot:[`item.Edit`]="{ item }">
                         <v-btn @click="editItem(item)" icon class="small-btn">
                             <v-icon>mdi-pencil</v-icon>
                         </v-btn>
@@ -33,18 +33,18 @@
         </v-row>
     <div v-if="isEditing" style="width: 100%;">
         <v-form>
-            <v-text-field v-model="currentItem.name" label="姓名" :readonly="isEditMode"></v-text-field>
-            <v-select v-model="currentItem.status1"
+            <v-text-field v-model="currentItem.Name" label="姓名" :readonly="isEditMode"></v-text-field>
+            <v-select v-model="currentItem.Status1"
                       :items="['A', 'B', 'C', 'D']"
                       label="權限"></v-select>
-            <v-select v-model="currentItem.auth" 
+            <v-select v-model="currentItem.Auth" 
                       :items="Object.keys(ReverseAuthMapping)" 
                       label="組室"></v-select>
-            <v-select v-model="currentItem.status3"
+            <v-select v-model="currentItem.Status3"
                       :items="Object.keys(ReverseStatusMapping)" 
                       label="系統"></v-select>
-            <v-text-field v-model="currentItem.account" label="帳號"></v-text-field>
-            <v-text-field v-model="currentItem.password" label="密碼"></v-text-field>
+            <v-text-field v-model="currentItem.Account" label="帳號"></v-text-field>
+            <v-text-field v-model="currentItem.Password" label="密碼"></v-text-field>
             <v-btn @click="saveItem" color="primary" class="mr-2" size="large">保存</v-btn>
             <v-btn @click="cancelEdit" color="primary" size="large">取消</v-btn>
         </v-form>
@@ -56,9 +56,9 @@
 <script setup lang="ts">
 import axios from 'axios';
 import { ref, computed, onMounted } from 'vue';
-import type { UserDataModel } from '@/types/vueInterface';
+import type { UserDataModel } from '@/types/apiInterface';
 import { AuthMapping, ReverseAuthMapping, StatusMapping, ReverseStatusMapping } from '@/utils/mappings'; // 對應狀態碼到中文
-
+import { get } from '@/services/api';
   
  
     const headers = ref([
@@ -75,10 +75,10 @@ import { AuthMapping, ReverseAuthMapping, StatusMapping, ReverseStatusMapping } 
     ]);
 
     const authheaders = ref([
-        { title: '姓名', align: 'start', sortable: false, key: 'name', value: 'name' },
-        { title: '權限', key: 'status1', value: 'status1' },
-        { title: '系統', key: 'status3', value: 'status3' },
-        { title: '編輯', key: 'edit', value: 'edit', sortable: false },
+        { title: '姓名', align: 'start', sortable: false, key: 'Name', value: 'Name' },
+        { title: '權限', key: 'Status1', value: 'Status1' },
+        { title: '系統', key: 'Status3', value: 'Status3' },
+        { title: '編輯', key: 'Edit', value: 'Edit', sortable: false },
     ]);
 
     const lists = ref<UserDataModel[]>([]);
@@ -88,12 +88,24 @@ import { AuthMapping, ReverseAuthMapping, StatusMapping, ReverseStatusMapping } 
 
     const fetchUsers = async () => {
         try {
+      //      const url = '/api/Privilege'
+      //      const response = await axios.get<UserDataModel[]>(url);
+      ///*      console.log(response.data);*/
+      //      if (response) {
+      //      lists.value = response.data;
+
+      //      console.log("lists.value", lists.value);;
+      //      }
+
             const url = '/api/Privilege'
-            const response = await axios.get<UserDataModel[]>(url);
-      /*      console.log(response.data);*/
-            if (response) {
-            lists.value = response.data;
-            }
+      const response = await get<UserDataModel[]>(url);
+/*      console.log(response.data);*/
+       if (response && response.Data && response.Data) {
+          lists.value = response.Data;
+          //console.log("lists.value", response.Data);
+        } else {
+          console.error("Response data is null or undefined");
+        }
         }
         catch (error) {
             console.error(error);
@@ -103,8 +115,8 @@ import { AuthMapping, ReverseAuthMapping, StatusMapping, ReverseStatusMapping } 
     const processedLists = computed(() => {
         return lists.value.map(list => ({
             ...list,
-            auth: AuthMapping[list.auth || ''] || list.auth,
-            status3: StatusMapping[list.status3 || ''] || list.status3
+            Auth: AuthMapping[list.Auth || ''] || list.Auth,
+            Status3: StatusMapping[list.Status3 || ''] || list.Status3
         }));
     });
 
@@ -119,7 +131,7 @@ import { AuthMapping, ReverseAuthMapping, StatusMapping, ReverseStatusMapping } 
     const addItem = () => {
         isEditMode.value = false;
         isEditing.value = true;
-        currentItem.value = { name: '', account: '', password: '', auth: '', status1: '', status3: '' };
+        currentItem.value = { Name: '', Account: '', Password: '', Auth: '', Status1: '', Status3: '' };
     }
 
     const saveItem = async () => {
@@ -127,15 +139,15 @@ import { AuthMapping, ReverseAuthMapping, StatusMapping, ReverseStatusMapping } 
         
         // 保存邏輯
         if (currentItem.value) {
-            if (!regex.test(currentItem.value.password ?? '')) {
+            if (!regex.test(currentItem.value.Password ?? '')) {
                 alert('請輸入 8 到 20 個字符的密碼，必須包含至少一個字母、一個數字和一個特殊字符。');
                 return;
             }
-            currentItem.value.auth = ReverseAuthMapping[currentItem.value.auth || ''] || currentItem.value.auth;
-            currentItem.value.status3 = ReverseStatusMapping[currentItem.value.status3 || ''] || currentItem.value.status3;
+            currentItem.value.Auth = ReverseAuthMapping[currentItem.value.Auth || ''] || currentItem.value.Auth;
+            currentItem.value.Status3 = ReverseStatusMapping[currentItem.value.Status3 || ''] || currentItem.value.Status3;
            
-            if (currentItem.value.status3 === "無") {
-                currentItem.value.status3 = "";  // 將"無"轉換為空字串
+            if (currentItem.value.Status3 === "無") {
+                currentItem.value.Status3 = "";  // 將"無"轉換為空字串
             };
 
             const url = '/api/Privilege'
