@@ -45,7 +45,7 @@
 import axios from 'axios';
 import { ref } from 'vue';
 import type { LoginViewModel } from '@/types/apiInterface';
-import type { LoginUserModel } from '@/types/vueInterface';
+import type { LoginUserModel } from '@/types/apiInterface';
 import { useRouter } from 'vue-router';
 import { useCookies } from 'vue3-cookies';
     import { post, type ApiResponse } from '../services/api';
@@ -72,7 +72,7 @@ const loginData = ref<LoginViewModel>({
         if (response) {
             const userData: LoginUserModel = response.data;
             for (let key in userData) {
-                if (key === 'status1' || key === 'status2' || key === 'status3') {
+                if (key === 'Status1' || key === 'Status2' || key === 'Status3') {
                     userData[key] = userData[key]?.trim(); // 清除資料多餘空格
                 }
             }

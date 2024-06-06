@@ -15,19 +15,19 @@
         </v-row>
         <v-data-table v-if="!isSelectedItem"
                       :headers="headers"
-                      :items="items"
+                      :items="computedItems"
                       item-key="name"
                       items-per-page="10"
                       loading-text="讀取中請稍後..."
                       items-per-page-text="每頁筆數"
                       :loading="loading"
                       style="width: 100%;">
-            <template #item.budget="{ item }">
+            <template #item.Budget="{ item }">
                 <v-btn variant="flat"
                        class="mb-2"
-                       @click="handleBudgetClick(item)">{{ item.budget }}</v-btn>
+                       @click="handleBudgetClick(item)">{{ item.Budget }}</v-btn>
                 <br />
-                <v-btn @click="handleExcelClick(item.budget)"
+                <v-btn @click="handleExcelClick(item.Budget)"
                        color="primary">
                     EXCEL
                 </v-btn>
@@ -53,10 +53,10 @@
 
 <script setup lang="ts">
     import axios from 'axios';
-    import { ref } from 'vue';
+    import { ref, computed } from 'vue';
     import { get, post, type ApiResponse } from '@/services/api';
     import type { VDataTable } from 'vuetify/components';
-    import type { BudgetDataModel, SelectedBudgetDataModel } from '@/types/apiInterface';
+    import type { BudgetDataModel, SelectedBudgetDataModel, MoneyItem, MoneyRawData } from '@/types/apiInterface';
 
 
     type ReadonlyHeaders = VDataTable['$props']['headers'];
@@ -80,7 +80,7 @@
     ]
 
 
-    const items = ref<BudgetDataModel[]>([]);
+    const items = ref<MoneyItem[]>([]);
 
     //isSelectedItem
     const isSelectedItem = ref<boolean>(false);
@@ -135,10 +135,22 @@
             //    const dbData = response.data;
             //    items.value = dbData;  
             //}
-            const response: ApiResponse<any> = await get<any>(url, data);
+            const response: ApiResponse<MoneyRawData[]> = await get<MoneyRawData[]>(url, data);
             if (response.StatusCode === 200) {
+                console.log(response.StatusCode);
                 console.log(response.Data);
-                const dbData = response.Data;
+                const dbData = response.Data?.map((item: MoneyRawData): MoneyItem => ({
+                    Budget: item.MoneyDbModel.Budget,
+                    Group: item.MoneyDbModel.Group,
+                    Subject6: item.MoneyDbModel.Subject6,
+                    Subject7: item.MoneyDbModel.Subject7,
+                    Subject8: item.MoneyDbModel.Subject8,
+                    BudgetYear: item.MoneyDbModel.BudgetYear,
+                    Final: parseFloat(item.MoneyDbModel.Final ?? "") || 0,
+                    Text: item.Text,
+                    PurchaseMoney: item.PurchaseMoney,
+                    PayMoney: item.PayMoney
+                })) ?? [];
                 items.value = dbData;
             } else {
                 console.log(response.Data ?? response.Message)
@@ -151,6 +163,52 @@
             console.log('end');
         }
     }
+
+
+    const sumByCondition = (items: MoneyItem[], condition: string, field: keyof MoneyItem) => {
+        return items
+            .filter(item => item.Text === condition)
+            .reduce((sum, item) => sum + (item[field] as number || 0), 0);
+    };
+
+    const groupBy = (array: MoneyItem[], keys: (keyof MoneyItem)[]) => {
+        return array.reduce((result, currentValue) => {
+            const key = keys.map(k => currentValue[k]).join('-');
+            if (!result[key]) {
+                result[key] = [];
+            }
+            result[key].push(currentValue);
+            return result;
+        }, {} as Record<string, MoneyItem[]>);
+    };
+
+    const computedItems = computed(() => {
+        const groupedItems = groupBy(items.value, ['Budget', 'Group', 'Subject6', 'Subject7', 'Subject8', 'BudgetYear', 'Final']);
+        return Object.values(groupedItems).map(group => {
+            const firstItem = group[0];
+            const general = sumByCondition(group, '一般', 'PurchaseMoney');
+            const out = sumByCondition(group, '勻出', 'PurchaseMoney');
+            const inValue = sumByCondition(group, '勻入', 'PurchaseMoney');
+            const inActual = sumByCondition(group, '勻入', 'PayMoney');
+            const subjectActual = inActual + sumByCondition(group, '一般', 'PayMoney');
+            const useBudget = (firstItem.BudgetYear || 0) + (firstItem.Final || 0) - general - out + inValue - inActual;
+            const end = (firstItem.BudgetYear || 0) + (firstItem.Final || 0) - general - out + inValue - inActual;
+            const inBalance = inValue - inActual;
+
+            return {
+                ...firstItem,
+                General: general,
+                Out: out,
+                In: inValue,
+                InActual: inActual,
+                UseBudget: useBudget,
+                End: end,
+                InBalance: inBalance,
+                SubjectActual: subjectActual
+            };
+        });
+    });
+
 
     const handleBudgetClick = async (budget: object) => {
         isSelectedItem.value = true;

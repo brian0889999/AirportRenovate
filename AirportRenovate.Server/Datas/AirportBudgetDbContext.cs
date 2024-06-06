@@ -23,24 +23,28 @@ namespace AirportRenovate.Server.Datas
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<MoneyDbModel>()
-                .HasMany(m => m.Money3DbModels)
-                .WithOne(m3 => m3.MoneyDbModel)
-                .HasForeignKey(m3 => m3.Name)
-                .HasPrincipalKey(m => m.Budget);
+            // 設定主鍵
+            modelBuilder.Entity<MoneyDbModel>().HasKey(m => m.ID);
+            modelBuilder.Entity<Money3DbModel>().HasKey(m3 => m3.ID);
+            // 設定關聯
+            //modelBuilder.Entity<MoneyDbModel>()
+            //    .HasMany(m => m.Money3DbModels)
+            //    .WithOne(m3 => m3.MoneyDbModel)
+            //    .HasForeignKey(m3 => m3.Name) // 注意這裡的外鍵應該對應到正確的屬性
+            //    .HasPrincipalKey(m => m.Budget);
 
             modelBuilder.Entity<Money3DbModel>()
                 .HasOne(m3 => m3.MoneyDbModel)
                 .WithMany(m => m.Money3DbModels)
-                .HasForeignKey(m3 => m3.Name);
+                .HasForeignKey(m3 => m3.Name) 
+                .HasPrincipalKey(m => m.Budget);
+
+
+            //modelBuilder.Entity<Money3DbModel>()
+            //    .HasOne(m3 => m3.MoneyDbModel)
+            //    .WithMany()
+            //    .HasForeignKey(m3 => m3.Name)
+            //    .HasPrincipalKey(m => m.Budget);
         }
     }
 }
-
-//modelBuilder.Entity<MoneyDbModel>()
-//    .HasMany(m => m.Money3DbModels)
-//    .WithOne(m3 => m3.MoneyDbModel)
-//    .HasForeignKey(m3 => m3.Name)
-//    .HasPrincipalKey(m => m.Budget);
-
-//base.OnModelCreating(modelBuilder);

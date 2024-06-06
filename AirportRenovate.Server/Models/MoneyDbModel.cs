@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace AirportRenovate.Server.Models
 {
@@ -44,7 +45,9 @@ namespace AirportRenovate.Server.Models
         public int? Year { get; set; }
 
         //[ForeignKey("Budget")]
-        public List<Money3DbModel>? Money3DbModels { get; set; }
+        [JsonIgnore]
+        public ICollection<Money3DbModel>? Money3DbModels { get; set; }
+        //public List<Money3DbModel>? Money3DbModels { get; set; }
     }
 
 }
