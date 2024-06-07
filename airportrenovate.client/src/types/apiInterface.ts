@@ -22,7 +22,7 @@ export interface LoginUserModel {
     Status3?: string;
 }
 
-export interface BudgetDataModel {
+export interface BudgetModel {
     budget?: string | null;
     group?: string | null;
     subject6?: string | null;
@@ -39,20 +39,25 @@ export interface BudgetDataModel {
     subjectActual?: number | null;
 }
 
-export interface SelectedBudgetDataModel {
-    subject6?: string | null;
-    subject7?: string | null;
-    subject8?: string | null;
-    budgetYear?: number | null;
-    final?: number | null;
-    general?: number | null;
-    out?: number | null;
-    useBudget?: number | null;
-    in?: number | null;
-    inActual?: number | null;
-    inBalance?: number | null;
-    subjectActual?: number | null;
+export interface SelectedBudgetModel {
+    Budget?: string;
+    Group?: string;
+    Subject6?: string | null;
+    Subject7?: string | null;
+    Subject8?: string | null;
+    BudgetYear?: number | null;
+    Final?: number | null;
+    General?: number | null;
+    Out?: number | null;
+    UseBudget?: number | null;
+    In?: number | null;
+    InActual?: number | null;
+    InBalance?: number | null;
+    SubjectActual?: number | null;
     End?: number | null;
+    Text?: string;
+    PurchaseMoney?: number;
+    PayMoney?: number;
 }
 export interface UserDataModel {
     No?: number;

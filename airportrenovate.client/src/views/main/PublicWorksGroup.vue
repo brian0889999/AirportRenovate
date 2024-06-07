@@ -39,14 +39,15 @@
                 <v-btn @click="previousPage"
                        color="primary"
                        class="mb-2">回上一頁</v-btn>
-
             </v-col>
         </v-row>
         <v-data-table v-if="isSelectedItem"
                       :headers="selectedHeaders"
+                      :items="selectedItem"
                       hide-default-footer></v-data-table>
         <v-data-table v-if="isSelectedItem"
-                      :headers="selectedDetailHeaders"></v-data-table>
+                      :headers="selectedDetailHeaders"
+                      :items="selectedDetailItem"></v-data-table>
     </v-container>
 </template>
 
@@ -56,7 +57,7 @@
     import { ref, computed } from 'vue';
     import { get, post, type ApiResponse } from '@/services/api';
     import type { VDataTable } from 'vuetify/components';
-    import type { BudgetDataModel, SelectedBudgetDataModel, MoneyItem, MoneyRawData } from '@/types/apiInterface';
+    import type { BudgetModel, SelectedBudgetModel, MoneyItem, MoneyRawData } from '@/types/apiInterface';
 
 
     type ReadonlyHeaders = VDataTable['$props']['headers'];
@@ -76,7 +77,7 @@
         { title: '勻入數(6)', key: 'In' },
         { title: '勻入實付數(7)', key: 'InActual' },
         { title: '勻入數餘額(8)=(6)-(7)', key: 'InBalance' },
-        { title: '本科目實付數(9)', key: 'SubjectActual' }
+        { title: '本科目實付數(9)', key: 'SubjectActual' },
     ]
 
 
@@ -86,39 +87,40 @@
     const isSelectedItem = ref<boolean>(false);
     const previousPage = () => isSelectedItem.value = false;
     const selectedHeaders: ReadonlyHeaders = [
-        { title: '6級(科目)', key: 'subject6' },
-        { title: '7級(子目)', key: 'subject7' },
-        { title: '8級(細目)', key: 'subject8' },
-        { title: '年度預算額度(1)', key: 'budgetYear' },
-        { title: '併決算數額(2)', key: 'final' },
-        { title: '一般動支數(3)', key: 'general' },
-        { title: '勻出數(4)', key: 'out' },
-        { title: '一般預算餘額(不含勻入)(5)=(1)+(2)-(3)-(4)', key: 'useBudget' },
-        { title: '勻入數額(6)累計(勻入)請購金額', key: 'in' },
-        { title: '勻入實付數額(7)累計(勻入)實付金額', key: 'inActual' },
-        { title: '勻入數餘額(8)=(6)-(7)', key: 'inBalance' },
-        { title: '本科目實付數(9)累計(一般)及(勻入)實付金額', key: 'subjectActual' },
+        { title: '6級(科目)', key: 'Subject6' },
+        { title: '7級(子目)', key: 'Subject7' },
+        { title: '8級(細目)', key: 'Subject8' },
+        { title: '年度預算額度(1)', key: 'BudgetYear' },
+        { title: '併決算數額(2)', key: 'Final' },
+        { title: '一般動支數(3)', key: 'General' },
+        { title: '勻出數(4)', key: 'Out' },
+        { title: '一般預算餘額(不含勻入)(5)=(1)+(2)-(3)-(4)', key: 'UseBudget' },
+        { title: '勻入數額(6)累計(勻入)請購金額', key: 'In' },
+        { title: '勻入實付數額(7)累計(勻入)實付金額', key: 'InActual' },
+        { title: '勻入數餘額(8)=(6)-(7)', key: 'InBalance' },
+        { title: '本科目實付數(9)累計(一般)及(勻入)實付金額', key: 'SubjectActual' },
         { title: '(含勻入)可用預算餘額(10)=(1)+(2)-(3)-(4)+(6)', key: 'End' }
-    ]
-    const selectedItems = ref<SelectedBudgetDataModel[]>([]);
+    ];
+    const selectedItem = ref<SelectedBudgetModel[]>([]);
 
     const selectedDetailHeaders: ReadonlyHeaders = [
-        { title: '請購日期', key: '' },
-        { title: '類別', key: '' },
-        { title: '摘要', key: '' },
-        { title: '請購金額', key: '' },
-        { title: '支付日期', key: '' },
-        { title: '實付金額', key: '' },
-        { title: '請購人', key: '' },
-        { title: '支付人', key: '' },
-        { title: '備註', key: '' },
-        { title: '未稅', key: '' },
-        { title: '已對帳', key: '' },
-    ]
+        { title: '請購日期', key: 'Purchasedate' },
+        { title: '類別', key: 'Text' },
+        { title: '摘要', key: 'Note' },
+        { title: '請購金額', key: 'PurchaseMoney' },
+        { title: '支付日期', key: 'PayDate' },
+        { title: '實付金額', key: 'PayMoney' },
+        { title: '請購人', key: 'People' },
+        { title: '支付人', key: 'People1' },
+        { title: '備註', key: 'Remarks' },
+        { title: '未稅', key: 'All' },
+        { title: '已對帳', key: 'True' },
+    ];
+    const selectedDetailItem = ref<MoneyRawData[]>([]);
 
 
-    const years = [111, 112, 113]
-    const searchYear = ref<number>(113)
+    const years = [111, 112, 113];
+    const searchYear = ref<number>(113);
     //console.log('searchYear=', searchYear);
     //console.log('searchYear.value=', searchYear.value);
     const searchMoneyDb = async () => {
@@ -126,10 +128,10 @@
         const url = '/api/MoneyDb/ByYear';
         //const data = { params: { Year: searchYear.value } }; 
         console.log(123);
-        const data = { Year: searchYear.value } ;  // 抓年度的值
+        const data = { Year: searchYear.value };  // 抓年度的值
         try {
 
-            /*const response = await axios.get<BudgetDataModel[]>(url, data);*/
+            /*const response = await axios.get<BudgetModel[]>(url, data);*/
             //if (response) {
             //    console.log(response.data);
             //    const dbData = response.data;
@@ -152,6 +154,8 @@
                     PayMoney: item.PayMoney
                 })) ?? [];
                 items.value = dbData;
+                selectedDetailItem.value = response.Data ?? [];
+                console.log('selectedDetailItem.value', selectedDetailItem.value);
             } else {
                 console.log(response.Data ?? response.Message)
             }
@@ -162,7 +166,7 @@
         finally {
             console.log('end');
         }
-    }
+    };
 
 
     const sumByCondition = (items: MoneyItem[], condition: string, field: keyof MoneyItem) => {
@@ -191,8 +195,8 @@
             const inValue = sumByCondition(group, '勻入', 'PurchaseMoney');
             const inActual = sumByCondition(group, '勻入', 'PayMoney');
             const subjectActual = inActual + sumByCondition(group, '一般', 'PayMoney');
-            const useBudget = (firstItem.BudgetYear || 0) + (firstItem.Final || 0) - general - out + inValue - inActual;
-            const end = (firstItem.BudgetYear || 0) + (firstItem.Final || 0) - general - out + inValue - inActual;
+            const useBudget = (firstItem.BudgetYear || 0) - out - general + (firstItem.Final || 0);
+            const end = (firstItem.BudgetYear || 0) + (firstItem.Final || 0) - general - out + inValue;
             const inBalance = inValue - inActual;
 
             return {
@@ -210,10 +214,33 @@
     });
 
 
-    const handleBudgetClick = async (budget: object) => {
+    const handleBudgetClick = async (budget: SelectedBudgetModel) => {
         isSelectedItem.value = true;
-        const data = { ...budget };
+        const data = [{ ...budget }];
         console.log('Budget clicked:', data);
+        selectedItem.value = data.map((v) => {
+            const newData: SelectedBudgetModel = {
+                Subject6: v.Subject6,
+                Subject7: v.Subject7,
+                Subject8: v.Subject8,
+                BudgetYear: v.BudgetYear,
+                Final: v.Final,
+                General: v.General,
+                Out: v.Out,
+                UseBudget: v.UseBudget,
+                In: v.In,
+                InActual: v.InActual,
+                InBalance: v.InBalance,
+                SubjectActual: v.SubjectActual,
+                End: v.End
+            };
+            return newData;
+        });
+
+        // 篩選 selectedDetailItem，選出 Budget 欄位與傳進來的 Budget 欄位值相同的資料
+        const budgetValue = budget.Budget;
+        selectedDetailItem.value = selectedDetailItem.value.filter(item => item.MoneyDbModel.Budget === budgetValue && item.Status !== 'C');
+        console.log('Filtered selectedDetailItem:', selectedDetailItem.value);
 
         //try {
         //    const url = '/api/MoneyDb/ByBudget'

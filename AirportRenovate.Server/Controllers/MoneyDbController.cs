@@ -95,37 +95,35 @@ public class MoneyDbController : ControllerBase
                .Include(money3 => money3.MoneyDbModel)
                .ToQueryString();
 
-            var results = _context.Money3
-                .Where(money3 => money3.Group1 == "工務組"
-                && money3.MoneyDbModel != null && money3.MoneyDbModel.Group == "工務組"
-                && money3.Year == Year && money3.MoneyDbModel.Year == Year
-                && (money3.Status == "O" || money3.Status == "C"))
-                .Include(money3 => money3.MoneyDbModel)
-                //.ProjectTo<Money3DbModelDto>(_mapper.ConfigurationProvider)
-                .ToList();
+            //var results = _context.Money3
+            //    .Where(money3 => money3.Group1 == "工務組"
+            //    && money3.MoneyDbModel != null && money3.MoneyDbModel.Group == "工務組"
+            //    && money3.Year == Year && money3.MoneyDbModel.Year == Year
+            //    && (money3.Status != null && money3.Status.Trim() == "O" || money3.Status != null && money3.Status.Trim() == "C"))
+            //    .Include(money3 => money3.MoneyDbModel)
+            //    //.ProjectTo<Money3DbModelDto>(_mapper.ConfigurationProvider)
+            //    .ToList();
 
-            //var results = await _context.Money3
-            //.Where(money3 => money3.Group1 == "工務組"
-            //                 && money3.MoneyDbModel != null
-            //                 && money3.MoneyDbModel.Group == "工務組"
-            //                 && money3.Year == Year
-            //                 && money3.MoneyDbModel.Year == Year
-            //                 && (money3.Status == "O" || money3.Status == "C"))
-            //.Include(money3 => money3.MoneyDbModel)
-            //.Select(money3 => new
-            //{
-            //    money3.MoneyDbModel.Subject6,
-            //    money3.MoneyDbModel.Subject7,
-            //    money3.MoneyDbModel.Subject8,
-            //    money3.MoneyDbModel.BudgetYear,
-            //    money3.MoneyDbModel.Final,
-            //    money3.MoneyDbModel.Budget,
-            //    money3.MoneyDbModel.Group,
-            //    money3.Text,
-            //    money3.PurchaseMoney,
-            //    money3.PayMoney
-            //})
-            //.ToListAsync();
+            var results = _context.Money3
+    .Where(money3 => money3.Group1 == "工務組"
+        && money3.MoneyDbModel != null && money3.MoneyDbModel.Group == "工務組"
+        && money3.Year == Year && money3.MoneyDbModel.Year == Year
+        && (money3.Status != null && (money3.Status.Trim() == "O" || money3.Status.Trim() == "C")))
+    .Include(money3 => money3.MoneyDbModel)
+    .Select(money3 => new {
+        money3,
+        money3.MoneyDbModel,
+        Group1 = money3.Group1 != null ? money3.Group1.Trim() : "",
+        Status = money3.Status != null ? money3.Status.Trim() : "" // 移除 Status 欄位的多餘空格
+    })
+    .AsEnumerable() // 轉為本地處理，避免 EF Core 的限制
+    .Select(x => {
+        x.money3.Group1 = x.Group1;
+        x.money3.Status = x.Status; // 更新 Status 欄位值
+        return x.money3;
+    })
+    .ToList();
+
 
             return Ok(results);
 

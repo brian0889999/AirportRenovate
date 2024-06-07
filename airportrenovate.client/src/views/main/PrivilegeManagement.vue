@@ -6,11 +6,23 @@
                 <v-btn v-if="!isEditing" @click="addItem" color="primary" class="mb-4">新增</v-btn>
                 <v-data-table v-if="!isEditing"
                               :headers="authheaders"
-                              :items="processedLists"
+                              :items="paginatedItems"
                               item-key="Name"
                               items-per-page="12"
                               class="elevation-1"
-                              style="width: 100%;">
+                              style="width: 100%;"
+                               :footer-props="{
+            itemsPerPageOptions: [12],
+            showFirstLastPage: true,
+            showCurrentPage: true
+          }"
+                              hide-default-footer>
+                    <template v-slot:top>
+                        <v-pagination v-model="page"
+                                      :length="pageCount"
+                                      @input="updatePage"
+                                      class="mb-4"></v-pagination>
+                    </template>
                     <template v-slot:[`item.Edit`]="{ item }">
                         <v-btn @click="editItem(item)" icon class="small-btn">
                             <v-icon>mdi-pencil</v-icon>
@@ -58,9 +70,9 @@ import axios from 'axios';
 import { ref, computed, onMounted } from 'vue';
 import type { UserDataModel } from '@/types/apiInterface';
 import { AuthMapping, ReverseAuthMapping, StatusMapping, ReverseStatusMapping } from '@/utils/mappings'; // 對應狀態碼到中文
-import { get } from '@/services/api';
+import { get, type ApiResponse } from '@/services/api';
   
- 
+ //寫死的Table
     const headers = ref([
         { title: '權限', align: 'start', sortable: false, key: '權限' },
         { title: '功能', key: '功能' },
@@ -86,6 +98,23 @@ import { get } from '@/services/api';
     const isEditMode = ref<boolean>(true); // 用來區分新增或編輯資料
     const currentItem = ref<UserDataModel | null>(null);
 
+    // pagination
+    const page = ref(1);
+    const itemsPerPage = ref(12);
+
+    const pageCount = computed(() => Math.ceil(processedLists.value.length / itemsPerPage.value));
+
+    const paginatedItems = computed(() => {
+        const start = (page.value - 1) * itemsPerPage.value;
+        const end = start + itemsPerPage.value;
+        return processedLists.value.slice(start, end);
+    });
+
+    const updatePage = (newPage: number) => {
+        page.value = newPage;
+    };
+
+    //取得其他使用者
     const fetchUsers = async () => {
         try {
       //      const url = '/api/Privilege'
@@ -98,7 +127,7 @@ import { get } from '@/services/api';
       //      }
 
             const url = '/api/Privilege'
-      const response = await get<UserDataModel[]>(url);
+            const response: ApiResponse<UserDataModel[]> = await get<UserDataModel[]>(url);
 /*      console.log(response.data);*/
        if (response && response.Data && response.Data) {
           lists.value = response.Data;
