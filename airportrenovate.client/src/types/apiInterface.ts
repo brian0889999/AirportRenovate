@@ -81,6 +81,7 @@ export interface MoneyItem {
     Text?: string;
     PurchaseMoney?: number;
     PayMoney?: number;
+    Purchasedate?: string;
 }
 
 export interface MoneyRawData {
