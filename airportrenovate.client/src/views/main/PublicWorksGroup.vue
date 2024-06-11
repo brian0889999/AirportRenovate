@@ -6,18 +6,20 @@
                 <v-select label="查詢年度"
                           :items="years"
                           v-model="searchYear"
-                          style="width: 100px;"></v-select>
+                          style="width: 100px;">
+                </v-select>
                 <v-btn @click="searchMoneyDb"
                        color="primary"
-                       class="mb-2">查詢</v-btn>
-
+                       class="mb-2">
+                    查詢
+                </v-btn>
             </v-col>
         </v-row>
         <v-data-table v-if="!isSelectedItem"
                       :headers="headers"
                       :items="computedItems"
                       item-key="name"
-                      items-per-page="10"
+                      items-per-page="12"
                       loading-text="讀取中請稍後..."
                       items-per-page-text="每頁筆數"
                       :loading="loading"
@@ -25,7 +27,9 @@
             <template #item.Budget="{ item }">
                 <v-btn variant="flat"
                        class="mb-2"
-                       @click="handleBudgetClick(item)">{{ item.Budget }}</v-btn>
+                       @click="handleBudgetClick(item)">
+                    {{ item.Budget }}
+                </v-btn>
                 <br />
                 <v-btn @click="handleExcelClick(item.Budget)"
                        color="primary">
@@ -38,16 +42,26 @@
             <v-col cols="12" sm="8" md="6">
                 <v-btn @click="previousPage"
                        color="primary"
-                       class="mb-2">回上一頁</v-btn>
+                       class="mb-2">
+                    回上一頁
+                </v-btn>
             </v-col>
         </v-row>
         <v-data-table v-if="isSelectedItem"
                       :headers="selectedHeaders"
                       :items="selectedItem"
-                      hide-default-footer></v-data-table>
+                      hide-default-footer>
+        </v-data-table>
         <v-data-table v-if="isSelectedItem"
                       :headers="selectedDetailHeaders"
-                      :items="selectedDetailItem"></v-data-table>
+                      :items="computedSelectedDetailItems">
+            <template #item.Purchasedate="{ item }">
+                {{ item.FormattedPurchasedate }}
+            </template>
+            <template #item.PayDate="{ item }">
+                {{ item.FormattedPayDate }}
+            </template>
+        </v-data-table>
     </v-container>
 </template>
 
@@ -58,8 +72,9 @@
     import { get, post, type ApiResponse } from '@/services/api';
     import type { VDataTable } from 'vuetify/components';
     import type { BudgetModel, SelectedBudgetModel, MoneyItem, MoneyRawData } from '@/types/apiInterface';
-
-
+    import { formatDate, sumByCondition, groupBy } from '@/utils/functions'
+    const group: string = "工務組";
+    const loading = ref<boolean>(false);
     type ReadonlyHeaders = VDataTable['$props']['headers'];
 
     const headers: ReadonlyHeaders = [
@@ -78,14 +93,16 @@
         { title: '勻入實付數(7)', key: 'InActual' },
         { title: '勻入數餘額(8)=(6)-(7)', key: 'InBalance' },
         { title: '本科目實付數(9)', key: 'SubjectActual' },
-    ]
+    ];
 
 
     const items = ref<MoneyItem[]>([]);
 
     //isSelectedItem
     const isSelectedItem = ref<boolean>(false);
+
     const previousPage = () => isSelectedItem.value = false;
+
     const selectedHeaders: ReadonlyHeaders = [
         { title: '6級(科目)', key: 'Subject6' },
         { title: '7級(子目)', key: 'Subject7' },
@@ -118,9 +135,8 @@
     ];
     const selectedDetailItem = ref<MoneyRawData[]>([]);
 
-
-    const years = [111, 112, 113];
-    const searchYear = ref<number>(113);
+    const years = [111, 112, 113]
+    const searchYear = ref<number>(113)
     //console.log('searchYear=', searchYear);
     //console.log('searchYear.value=', searchYear.value);
     const searchMoneyDb = async () => {
@@ -128,7 +144,8 @@
         const url = '/api/MoneyDb/ByYear';
         //const data = { params: { Year: searchYear.value } }; 
         console.log(123);
-        const data = { Year: searchYear.value };  // 抓年度的值
+        const data = { Year: searchYear.value, Group: group };  // 抓年度的值
+        loading.value = true;
         try {
 
             /*const response = await axios.get<BudgetModel[]>(url, data);*/
@@ -151,7 +168,8 @@
                     Final: parseFloat(item.MoneyDbModel.Final ?? "") || 0,
                     Text: item.Text,
                     PurchaseMoney: item.PurchaseMoney,
-                    PayMoney: item.PayMoney
+                    PayMoney: item.PayMoney,
+                    Purchasedate: item.Purchasedate || ""  // 確保不為 undefined
                 })) ?? [];
                 items.value = dbData;
                 selectedDetailItem.value = response.Data ?? [];
@@ -164,31 +182,16 @@
             console.error(error)
         }
         finally {
+            loading.value = false;
             console.log('end');
         }
     };
 
-
-    const sumByCondition = (items: MoneyItem[], condition: string, field: keyof MoneyItem) => {
-        return items
-            .filter(item => item.Text === condition)
-            .reduce((sum, item) => sum + (item[field] as number || 0), 0);
-    };
-
-    const groupBy = (array: MoneyItem[], keys: (keyof MoneyItem)[]) => {
-        return array.reduce((result, currentValue) => {
-            const key = keys.map(k => currentValue[k]).join('-');
-            if (!result[key]) {
-                result[key] = [];
-            }
-            result[key].push(currentValue);
-            return result;
-        }, {} as Record<string, MoneyItem[]>);
-    };
-
+    //// sumByCondition透過condition(篩選條件是item的Text欄位)找出那一欄位的field做總和
+    //// groupBy用於分組
     const computedItems = computed(() => {
         const groupedItems = groupBy(items.value, ['Budget', 'Group', 'Subject6', 'Subject7', 'Subject8', 'BudgetYear', 'Final']);
-        return Object.values(groupedItems).map(group => {
+        const sortedItems = Object.values(groupedItems).map(group => {
             const firstItem = group[0];
             const general = sumByCondition(group, '一般', 'PurchaseMoney');
             const out = sumByCondition(group, '勻出', 'PurchaseMoney');
@@ -211,8 +214,19 @@
                 SubjectActual: subjectActual
             };
         });
+        //按照日期排序
+        return sortedItems.sort((a, b) => new Date(b.Purchasedate || "").getTime() - new Date(a.Purchasedate || "").getTime());
     });
 
+    const computedSelectedDetailItems = computed(() => {
+        return selectedDetailItem.value
+            .map(item => ({
+                ...item,
+                FormattedPurchasedate: formatDate(item.Purchasedate || ""),
+                FormattedPayDate: formatDate(item.PayDate || "")
+            }))
+            .sort((a, b) => new Date(b.Purchasedate || "").getTime() - new Date(a.Purchasedate || "").getTime());
+    });
 
     const handleBudgetClick = async (budget: SelectedBudgetModel) => {
         isSelectedItem.value = true;
