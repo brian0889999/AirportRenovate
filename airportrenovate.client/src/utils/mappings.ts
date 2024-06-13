@@ -8,7 +8,7 @@ export const StatusMapping: { [key: string]: string } = {
     "E": "機械"
 };
 
-export const ReverseStatusMapping: { [key: string]: string } = {
+export const ReverseStatusMapping: { [key: string]: string } = { // 轉換資料後存進資料庫
     "無": "",
     "土木": "A",
     "水電": "B",
@@ -30,7 +30,7 @@ export const AuthMapping: { [key: string]: string } = {
     "J": "總務組"
 }
 
-export const ReverseAuthMapping: { [key: string]: string } = {
+export const ReverseAuthMapping: { [key: string]: string } = { // 轉換資料後存進資料庫
     "工務組": "A",
     "業務組": "B",
     "人事室": "C",

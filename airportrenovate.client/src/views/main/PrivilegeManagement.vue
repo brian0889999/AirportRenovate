@@ -3,7 +3,7 @@
     <v-container style="width:100%; display:flex;">
         <v-row>
             <v-col cols="12" sm="8" md="6">
-                <v-btn v-if="!isEditing" @click="addItem" color="primary" class="mb-4">新增</v-btn>
+                <v-btn v-if="!isEditing" @click="addItem" color="primary" class="mb-4">新增帳號</v-btn>
                 <v-data-table v-if="!isEditing"
                               :headers="authheaders"
                               :items="paginatedItems"
@@ -45,7 +45,8 @@
         </v-row>
     <div v-if="isEditing" style="width: 100%;">
         <v-form>
-            <v-text-field v-model="currentItem.Name" label="姓名" :readonly="isEditMode"></v-text-field>
+            <v-text-field v-model="currentItem.Name" label="姓名" :readonly="isEditMode"
+                          variant="solo"></v-text-field>
             <v-select v-model="currentItem.Status1"
                       :items="['A', 'B', 'C', 'D']"
                       label="權限"></v-select>
@@ -214,4 +215,12 @@ import { get, type ApiResponse } from '@/services/api';
  .small-btn {
      transform: scale(0.8);
  }
+
+    /*.custom-background .v-input__control {
+        background-color: #e0e0e0;*/ /* 灰色背景 */
+    /*}
+
+    .custom-background input {
+        pointer-events: none;*/ /* 禁止點擊 */
+    /*}*/
 </style>

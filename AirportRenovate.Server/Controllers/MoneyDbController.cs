@@ -11,6 +11,8 @@ using NPOI.SS.Formula.Functions;
 using AirportRenovate.Server.Mappings;
 using AutoMapper.QueryableExtensions;
 using AirportRenovate.Server.DTOs;
+using AirportRenovate.Server.ViewModels;
+using System.Text.RegularExpressions;
 
 
 
@@ -30,7 +32,7 @@ public class MoneyDbController : ControllerBase
     //[HttpPost("ByYear")]
     //public async Task<IActionResult> GetData([FromBody] QueryDto queryDto) // 前端傳Year值,後端回傳符合Year值的工務組資料
     [HttpGet("ByYear")]
-    public async Task<IActionResult> GetData(int Year) // 前端傳Year值,後端回傳符合Year值的工務組資料
+    public async Task<IActionResult> GetData(int Year, string Group) // 前端傳Year值,後端回傳符合Year值的工務組資料
     {
         try
         {
@@ -88,12 +90,12 @@ public class MoneyDbController : ControllerBase
             //var C = B.ToList();
 
             var A = _context.Money3
-               .Where(money3 => money3.Group1 == "工務組"
-               && money3.MoneyDbModel != null && money3.MoneyDbModel.Group == "工務組"
-               && money3.Year == Year && money3.MoneyDbModel.Year == Year
-               && (money3.Status == "O" || money3.Status == "C"))
-               .Include(money3 => money3.MoneyDbModel)
-               .ToQueryString();
+            .Where(money3 => money3.Group1 == Group
+            && money3.MoneyDbModel != null && money3.MoneyDbModel.Group == Group
+            && money3.Year == Year && money3.MoneyDbModel.Year == Year
+            && (money3.Status == "O" || money3.Status == "C"))
+            .Include(money3 => money3.MoneyDbModel)
+            .ToQueryString();
 
             //var results = _context.Money3
             //    .Where(money3 => money3.Group1 == "工務組"
@@ -105,24 +107,26 @@ public class MoneyDbController : ControllerBase
             //    .ToList();
 
             var results = _context.Money3
-    .Where(money3 => money3.Group1 == "工務組"
-        && money3.MoneyDbModel != null && money3.MoneyDbModel.Group == "工務組"
-        && money3.Year == Year && money3.MoneyDbModel.Year == Year
-        && (money3.Status != null && (money3.Status.Trim() == "O" || money3.Status.Trim() == "C")))
-    .Include(money3 => money3.MoneyDbModel)
-    .Select(money3 => new {
-        money3,
-        money3.MoneyDbModel,
-        Group1 = money3.Group1 != null ? money3.Group1.Trim() : "",
-        Status = money3.Status != null ? money3.Status.Trim() : "" // 移除 Status 欄位的多餘空格
-    })
-    .AsEnumerable() // 轉為本地處理，避免 EF Core 的限制
-    .Select(x => {
-        x.money3.Group1 = x.Group1;
-        x.money3.Status = x.Status; // 更新 Status 欄位值
-        return x.money3;
-    })
-    .ToList();
+           .Where(money3 => money3.Group1 == Group
+               && money3.MoneyDbModel != null && money3.MoneyDbModel.Group == Group
+               && money3.Year == Year && money3.MoneyDbModel.Year == Year
+               && (money3.Status != null && (money3.Status.Trim() == "O" || money3.Status.Trim() == "C")))
+           .Include(money3 => money3.MoneyDbModel)
+           .Select(money3 => new {
+               money3,
+               money3.MoneyDbModel,
+               Group1 = money3.Group1 != null ? money3.Group1.Trim() : "",
+               Status = money3.Status != null ? money3.Status.Trim() : "",// 移除 Status 欄位的多餘空格
+               All = money3.All != null ? money3.All.Trim() : "",
+               True = money3.True != null ? money3.True.Trim() : "",
+           })
+   .AsEnumerable() // 轉為本地處理，避免 EF Core 的限制
+   .Select(x => {
+       x.money3.Group1 = x.Group1;
+       x.money3.Status = x.Status; // 更新 Status 欄位值
+       return x.money3;
+   })
+   .ToList();
 
 
             return Ok(results);
@@ -198,7 +202,42 @@ public class MoneyDbController : ControllerBase
     //    }
     //}
 
+    [HttpPut("UpdateSelectedDetail")]
+    public IActionResult DoUpdate([FromBody] SoftDeleteViewModel request)
+    {
+        var money3 = _context.Money3.FirstOrDefault(m => m.ID1 == request.ID1);
+        if (money3 == null)
+        {
+            return NotFound("Record not found");
+        }
 
+        money3.Purchasedate = request.Purchasedate;
+        money3.PurchaseMoney = request.PurchaseMoney;
+        money3.PayDate = request.PayDate;
+        money3.PayMoney = request.PayMoney;
+        money3.People = request.People;
+        money3.People1 = request.People1;
+        money3.Note = request.Note;
+        money3.All = request.All;
+        money3.True = request.True;
+        money3.Year1 = request.Year1;
+
+        _context.SaveChanges();
+
+        return Ok("Record updated successfully");
+    }
+
+    [HttpPut("SoftDelete")]
+
+    public IActionResult DoSoftDelete([FromBody] SoftDeleteViewModel request)
+    {
+        var money3 = _context.Money3.FirstOrDefault(m => m.ID1 == request.ID1);
+        if (money3 == null)
+        {
+            return NotFound("not exist");
+        }
+        return Ok("ok");
+    }
 
 
 }

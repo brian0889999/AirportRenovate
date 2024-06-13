@@ -101,6 +101,8 @@ export interface MoneyRawData {
     Group1?: string;
     Year?: number;
     Year1?: string;
+    All?: string;
+    True?: string;
     MoneyDbModel: {
         ID: number;
         Budget?: string;

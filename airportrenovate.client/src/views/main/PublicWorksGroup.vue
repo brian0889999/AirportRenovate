@@ -38,7 +38,7 @@
             </template>
         </v-data-table>
         <!-- isSelectedItem -->
-        <v-row justify="start" v-if="isSelectedItem">
+        <v-row justify="start" v-if="isSelectedItem && !isEditingSelectedDetailForm">
             <v-col cols="12" sm="8" md="6">
                 <v-btn @click="previousPage"
                        color="primary"
@@ -47,12 +47,12 @@
                 </v-btn>
             </v-col>
         </v-row>
-        <v-data-table v-if="isSelectedItem"
+        <v-data-table v-if="isSelectedItem && !isEditingSelectedDetailForm"
                       :headers="selectedHeaders"
                       :items="selectedItem"
                       hide-default-footer>
         </v-data-table>
-        <v-data-table v-if="isSelectedItem"
+        <v-data-table v-if="isSelectedItem && !isEditingSelectedDetailForm"
                       :headers="selectedDetailHeaders"
                       :items="computedSelectedDetailItems">
             <template #item.Purchasedate="{ item }">
@@ -61,7 +61,19 @@
             <template #item.PayDate="{ item }">
                 {{ item.FormattedPayDate }}
             </template>
+            <template #item.actions="{ item }">
+                <v-btn icon size="small" class="mr-2" @click="editItem(item)">
+                    <v-icon>mdi-pencil</v-icon>
+                </v-btn>
+                <v-btn icon size="small" @click="deleteItem(item)">
+                    <v-icon>mdi-delete</v-icon>
+                </v-btn>
+            </template>
         </v-data-table>
+        <update-selected-detail-form v-if="isEditingSelectedDetailForm"
+                                     :item="editingItem"
+                                     @update="updateItem"
+                                     @cancel="cancelEdit" />
     </v-container>
 </template>
 
@@ -69,11 +81,13 @@
 <script setup lang="ts">
     import axios from 'axios';
     import { ref, computed } from 'vue';
-    import { get, post, type ApiResponse } from '@/services/api';
+    import { get, post, put, type ApiResponse } from '@/services/api';
     import type { VDataTable } from 'vuetify/components';
     import type { BudgetModel, SelectedBudgetModel, MoneyItem, MoneyRawData } from '@/types/apiInterface';
-    import { formatDate, sumByCondition, groupBy } from '@/utils/functions'
-    const group: string = "工務組";
+    import { formatDate, sumByCondition, groupBy } from '@/utils/functions';
+    import UpdateSelectedDetailForm from '@/components/modules/UpdateSelectedDetailForm.vue';
+
+    const searchGroup: string = "工務組";
     const loading = ref<boolean>(false);
     type ReadonlyHeaders = VDataTable['$props']['headers'];
 
@@ -101,7 +115,11 @@
     //isSelectedItem
     const isSelectedItem = ref<boolean>(false);
 
-    const previousPage = () => isSelectedItem.value = false;
+    const previousPage = () => {
+        isSelectedItem.value = false;
+        filteredDetailItem.value = [...selectedDetailItem.value]; // 恢復初始值
+        console.log('previousPage called, filteredDetailItem reset:', filteredDetailItem.value);
+    };
 
     const selectedHeaders: ReadonlyHeaders = [
         { title: '6級(科目)', key: 'Subject6' },
@@ -132,19 +150,20 @@
         { title: '備註', key: 'Remarks' },
         { title: '未稅', key: 'All' },
         { title: '已對帳', key: 'True' },
+        { title: '', key: 'actions', sortable: false },
     ];
     const selectedDetailItem = ref<MoneyRawData[]>([]);
+    const filteredDetailItem = ref<MoneyRawData[]>([]);
 
     const years = [111, 112, 113]
     const searchYear = ref<number>(113)
     //console.log('searchYear=', searchYear);
     //console.log('searchYear.value=', searchYear.value);
     const searchMoneyDb = async () => {
-
         const url = '/api/MoneyDb/ByYear';
         //const data = { params: { Year: searchYear.value } }; 
         console.log(123);
-        const data = { Year: searchYear.value, Group: group };  // 抓年度的值
+        const data = { Year: searchYear.value, Group: searchGroup };  // 抓年度的值
         loading.value = true;
         try {
 
@@ -156,8 +175,8 @@
             //}
             const response: ApiResponse<MoneyRawData[]> = await get<MoneyRawData[]>(url, data);
             if (response.StatusCode === 200) {
-                console.log(response.StatusCode);
-                console.log(response.Data);
+                //console.log(response.StatusCode);
+                //console.log(response.Data);
                 const dbData = response.Data?.map((item: MoneyRawData): MoneyItem => ({
                     Budget: item.MoneyDbModel.Budget,
                     Group: item.MoneyDbModel.Group,
@@ -173,7 +192,8 @@
                 })) ?? [];
                 items.value = dbData;
                 selectedDetailItem.value = response.Data ?? [];
-                console.log('selectedDetailItem.value', selectedDetailItem.value);
+                filteredDetailItem.value = [...selectedDetailItem.value];
+                //console.log('selectedDetailItem.value', selectedDetailItem.value);
             } else {
                 console.log(response.Data ?? response.Message)
             }
@@ -187,8 +207,8 @@
         }
     };
 
-    //// sumByCondition透過condition(篩選條件是item的Text欄位)找出那一欄位的field做總和
-    //// groupBy用於分組
+    // sumByCondition透過condition(篩選條件是item的Text欄位)找出那一欄位的field做總和
+    // groupBy用於分組
     const computedItems = computed(() => {
         const groupedItems = groupBy(items.value, ['Budget', 'Group', 'Subject6', 'Subject7', 'Subject8', 'BudgetYear', 'Final']);
         const sortedItems = Object.values(groupedItems).map(group => {
@@ -219,9 +239,12 @@
     });
 
     const computedSelectedDetailItems = computed(() => {
-        return selectedDetailItem.value
+        //console.log('computedSelectedDetailItems updated:', filteredDetailItem.value);
+        return filteredDetailItem.value
             .map(item => ({
                 ...item,
+                All: item.All?.trim(),
+                True: item.True?.trim(),
                 FormattedPurchasedate: formatDate(item.Purchasedate || ""),
                 FormattedPayDate: formatDate(item.PayDate || "")
             }))
@@ -231,7 +254,7 @@
     const handleBudgetClick = async (budget: SelectedBudgetModel) => {
         isSelectedItem.value = true;
         const data = [{ ...budget }];
-        console.log('Budget clicked:', data);
+        //console.log('Budget clicked:', data);
         selectedItem.value = data.map((v) => {
             const newData: SelectedBudgetModel = {
                 Subject6: v.Subject6,
@@ -253,8 +276,8 @@
 
         // 篩選 selectedDetailItem，選出 Budget 欄位與傳進來的 Budget 欄位值相同的資料
         const budgetValue = budget.Budget;
-        selectedDetailItem.value = selectedDetailItem.value.filter(item => item.MoneyDbModel.Budget === budgetValue && item.Status !== 'C');
-        console.log('Filtered selectedDetailItem:', selectedDetailItem.value);
+        filteredDetailItem.value = selectedDetailItem.value.filter(item => item.MoneyDbModel.Budget === budgetValue && item.Status !== 'C');
+        //console.log('Filtered selectedDetailItem:', filteredDetailItem.value);
 
         //try {
         //    const url = '/api/MoneyDb/ByBudget'
@@ -281,6 +304,57 @@
         }
     };
 
+
+    const isEditingSelectedDetailForm = ref<boolean>(false);
+    const editingItem = ref<any>(null);
+
+    const editItem = async (item: any) => {
+        isEditingSelectedDetailForm.value = true;
+        editingItem.value = { ...item };
+        //console.log('Edit item:', item);
+    };
+
+    const updateItem = async (updatedItem: any) => {
+        // 編輯項目的處理邏輯
+        const url = 'api/MoneyDb/UpdateSelectedDetail';
+        try {
+            const response: ApiResponse<any> = await put<any>(url, updatedItem);
+            console.log(response?.Data);
+            // 更新成功後的處理
+
+            isEditingSelectedDetailForm.value = false;
+            editingItem.value = null;
+        }
+        catch (error: any) {
+            console.error(error);
+        }
+    }
+
+    const cancelEdit = () => {
+        isEditingSelectedDetailForm.value = false;
+        editingItem.value = null;
+    };
+
+    const deleteItem = async (item: any) => {
+        // 刪除項目的處理邏輯
+        const isConfirmed = confirm('你確定要刪除此項目嗎？');
+        if (isConfirmed) {
+            console.log('Delete item:', item);
+            try {
+                const url = 'api/MoneyDb/SoftDelete';
+                const response: ApiResponse<any> = await put<any>(url, item);
+                if (response.StatusCode == 200) {
+                    console.log(response.Message);
+                }
+            }
+            catch (error) {
+                console.error(error);
+            }
+        } else {
+            // 如果使用者取消，則不進行任何操作
+            console.log('取消刪除');
+        }
+    };
 </script>
 
 <style scoped>

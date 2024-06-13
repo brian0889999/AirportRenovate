@@ -21,7 +21,7 @@ user_data1欄位對應:	status1:權限:A、B、C、D(可以看到的功能區分
 
 Money欄位對應: Budget:名稱, [Group]:組別(工務組...), Subject6、Subject7、Subject8:科目6、7、8級, BudgetYear:年度預算額度, year:年度
 
-Money3欄位對應: PurchaseMoney:請購金額, PayDate: 支付日期, PayMoney: 實付金額, People: 請購人, People1: 支付人, All: 未稅, True: 已對帳, year:資料的年份, year1:使用者可改的資料年份, Text: 類別, Note: 摘要, Remarks: 備註
+Money3欄位對應: PurchaseMoney:請購金額, PayDate: 支付日期, PayMoney: 實付金額, People: 請購人, People1: 支付人, All: 未稅, True: 已對帳, year:資料的年份, year1:使用者可改的資料年份, Text: 類別, Note: 摘要, Remarks: 備註, Purchasedate: 請購日期, Status:OX,C是Watson在做表join時所用到的資料
 
 GridView2
 
@@ -30,3 +30,6 @@ Money的部分,金額如果是負數,字體改紅色並括弧起來
 
  FROM [Airport_new].[dbo].[Money3]  where Group1 = '工務組' and Name = '210200工作場所電費' and year = 113
 
+
+
+軟刪除應該只要抓ID1就可以,因為ID1是指同一筆勻入勻出等等......,所以要一起軟刪除
