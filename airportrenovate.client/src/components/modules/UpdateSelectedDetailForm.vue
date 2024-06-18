@@ -18,8 +18,8 @@
                             </v-col>
                             <v-col cols="12" sm="6">
                                 <v-select v-model="editedItem.Text"
-                                          :items="categories"
                                           label="類別"
+                                          bg-color="grey-lighten-1"
                                           :rules="[rules.required]"
                                           readonly></v-select>
                             </v-col>
@@ -58,21 +58,25 @@
                                           label="支付人"
                                           :rules="[rules.required]"></v-select>
                             </v-col>
-                            <v-col cols="12">
+                            <v-col cols="12" sm="6">
                                 <v-text-field v-model="editedItem.Remarks"
                                               label="備註"></v-text-field>
                             </v-col>
                             <v-col cols="12" sm="6">
                                 <v-checkbox v-model="editedItem.All"
-                                            label="未稅"></v-checkbox>
+                                            label="未稅"
+                                            true-value="V"
+                                            false-value=""></v-checkbox>
                             </v-col>
                             <v-col cols="12" sm="6">
                                 <v-checkbox v-model="editedItem.True"
-                                            label="已對帳"></v-checkbox>
+                                            label="已對帳"
+                                            true-value="V"
+                                            false-value=""></v-checkbox>
                             </v-col>
                             <v-col cols="12">
                                 <v-select v-model="editedItem.Year1"
-                                          :items="[111, 112, 113]"
+                                          :items="year1"
                                           label="年度"
                                           :rules="[rules.required]"></v-select>
                             </v-col>
@@ -91,12 +95,12 @@
 
 <script setup lang="ts">
     import { ref, reactive, watch, type PropType, onMounted, computed } from 'vue';
-    import { type ApiResponse, get } from '@/services/api';
-    import { type UserDataModel } from '@/types/apiInterface';
+    import { type ApiResponse, get, put } from '@/services/api';
+    import { type UserDataModel, type SoftDeleteViewModel } from '@/types/apiInterface';
 
     const Users = ref<UserDataModel[]>([]);
     const userNames = ref<string[]>([]);
-
+    const year1 = ref<number[]>([111, 112, 113]);
     const fetchUsers = async () => {
         try {
             const url = 'api/Privilege';
@@ -116,14 +120,14 @@
   
     const props = defineProps({
         item: {
-            type: Object as PropType<any>,
+            type: Object as PropType<SoftDeleteViewModel>,
             required: true
         }
     });
 
     const emit = defineEmits(['update', 'cancel']);
 
-    const editedItem = ref({ ...props.item });
+    const editedItem = ref<SoftDeleteViewModel>({ ...props.item });
 
     //console.log('editedItem', editedItem);
 
@@ -131,17 +135,37 @@
         editedItem.value = { ...newItem };
     });
 
-    const formattedPurchasedate = computed({
-        get: () => editedItem.value.Purchasedate.split('T')[0],
-        set: (value: string) => editedItem.value.Purchasedate = value + "T00:00:00"
+    const formattedPurchasedate = computed<string>({
+        get: () => (editedItem.value.Purchasedate ? editedItem.value.Purchasedate.split('T')[0] : ''),
+        set: (value: string) => {
+            if (editedItem.value.Purchasedate) {
+                editedItem.value.Purchasedate = value + "T00:00:00";
+            }
+        }
     });
 
-    const formattedPayDate = computed({
-        get: () => editedItem.value.PayDate.split('T')[0],
-        set: (value: string) => editedItem.value.PayDate = value + "T00:00:00"
+    const formattedPayDate = computed<string>({
+        get: () => (editedItem.value.PayDate ? editedItem.value.PayDate.split('T')[0] : ''),
+        set: (value: string) => {
+            if (editedItem.value.PayDate) {
+                editedItem.value.PayDate = value + "T00:00:00";
+            }
+        }
     });
 
-    const submitform = () => {
+    const submitform = async () => {
+        const url = 'api/MoneyDb/UpdateSelectedDetail';
+        const data: SoftDeleteViewModel = { ...editedItem.value, Year1: editedItem.value.Year1 ? editedItem.value.Year1.toString() : "" };
+        //const data = editedItem.value;
+        try {
+            const response: ApiResponse<any> = await put<any>(url, data);
+            console.log(response?.Data || response?.Message);
+            // 更新成功後的處理
+            canceledit();
+        }
+        catch (error: any) {
+            console.error(error);
+        }
         emit('update', editedItem.value);
     };
 
@@ -166,10 +190,7 @@
     //    year: 111
     //});
 
-    const categories = ['類別1', '類別2', '類別3'];
-    const requestors = ['請購人1', '請購人2', '請購人3'];
-    const payers = ['支付人1', '支付人2', '支付人3'];
-
+ 
     const rules = {
         required: (value: any) => !!value || '此欄位必填'
     };

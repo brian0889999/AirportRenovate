@@ -55,19 +55,14 @@
         <v-data-table v-if="isSelectedItem && !isEditingSelectedDetailForm"
                       :headers="selectedDetailHeaders"
                       :items="computedSelectedDetailItems">
-            <template #item.Purchasedate="{ item }">
-                {{ item.FormattedPurchasedate }}
-            </template>
-            <template #item.PayDate="{ item }">
+            <!--<template #item.PayDate="{ item }">
                 {{ item.FormattedPayDate }}
-            </template>
+            </template>-->
             <template #item.actions="{ item }">
                 <v-btn icon size="small" class="mr-2" @click="editItem(item)">
                     <v-icon>mdi-pencil</v-icon>
                 </v-btn>
-                <v-btn icon size="small" @click="deleteItem(item)">
-                    <v-icon>mdi-delete</v-icon>
-                </v-btn>
+                <v-btn icon="mdi-delete" size="small" @click="deleteItem(item)" />
             </template>
         </v-data-table>
         <update-selected-detail-form v-if="isEditingSelectedDetailForm"
@@ -109,18 +104,6 @@
         { title: '本科目實付數(9)', key: 'SubjectActual' },
     ];
 
-
-    const items = ref<MoneyItem[]>([]);
-
-    //isSelectedItem
-    const isSelectedItem = ref<boolean>(false);
-
-    const previousPage = () => {
-        isSelectedItem.value = false;
-        filteredDetailItem.value = [...selectedDetailItem.value]; // 恢復初始值
-        console.log('previousPage called, filteredDetailItem reset:', filteredDetailItem.value);
-    };
-
     const selectedHeaders: ReadonlyHeaders = [
         { title: '6級(科目)', key: 'Subject6' },
         { title: '7級(子目)', key: 'Subject7' },
@@ -136,14 +119,13 @@
         { title: '本科目實付數(9)累計(一般)及(勻入)實付金額', key: 'SubjectActual' },
         { title: '(含勻入)可用預算餘額(10)=(1)+(2)-(3)-(4)+(6)', key: 'End' }
     ];
-    const selectedItem = ref<SelectedBudgetModel[]>([]);
 
     const selectedDetailHeaders: ReadonlyHeaders = [
-        { title: '請購日期', key: 'Purchasedate' },
+        { title: '請購日期', key: 'FormattedPurchasedate' },
         { title: '類別', key: 'Text' },
         { title: '摘要', key: 'Note' },
         { title: '請購金額', key: 'PurchaseMoney' },
-        { title: '支付日期', key: 'PayDate' },
+        { title: '支付日期', key: 'FormattedPayDate' },
         { title: '實付金額', key: 'PayMoney' },
         { title: '請購人', key: 'People' },
         { title: '支付人', key: 'People1' },
@@ -152,17 +134,32 @@
         { title: '已對帳', key: 'True' },
         { title: '', key: 'actions', sortable: false },
     ];
+    const items = ref<MoneyItem[]>([]);
+    const isSelectedItem = ref<boolean>(false);
+    const selectedItem = ref<SelectedBudgetModel[]>([]);
     const selectedDetailItem = ref<MoneyRawData[]>([]);
     const filteredDetailItem = ref<MoneyRawData[]>([]);
 
-    const years = [111, 112, 113]
-    const searchYear = ref<number>(113)
+
+    const previousPage = async () => {
+        isSelectedItem.value = false;
+        filteredDetailItem.value = [...selectedDetailItem.value]; // 恢復初始值
+        //console.log('previousPage called, filteredDetailItem reset:', filteredDetailItem.value);
+        try {
+            await searchMoneyDb(); // 重新取一次資料(不管有沒有更新或刪除)
+        }
+        catch (error) {
+            console.error(error);
+        };
+    };
+
+    const years = ref<number[]>([111, 112, 113]);
+    const searchYear = ref<number>(113);
     //console.log('searchYear=', searchYear);
     //console.log('searchYear.value=', searchYear.value);
     const searchMoneyDb = async () => {
         const url = '/api/MoneyDb/ByYear';
         //const data = { params: { Year: searchYear.value } }; 
-        console.log(123);
         const data = { Year: searchYear.value, Group: searchGroup };  // 抓年度的值
         loading.value = true;
         try {
@@ -208,8 +205,8 @@
     };
 
     // sumByCondition透過condition(篩選條件是item的Text欄位)找出那一欄位的field做總和
-    // groupBy用於分組
-    const computedItems = computed(() => {
+    // groupBy用於分組 用下面7個欄位groupBy
+    const computedItems = computed(() => {  
         const groupedItems = groupBy(items.value, ['Budget', 'Group', 'Subject6', 'Subject7', 'Subject8', 'BudgetYear', 'Final']);
         const sortedItems = Object.values(groupedItems).map(group => {
             const firstItem = group[0];
@@ -221,7 +218,6 @@
             const useBudget = (firstItem.BudgetYear || 0) - out - general + (firstItem.Final || 0);
             const end = (firstItem.BudgetYear || 0) + (firstItem.Final || 0) - general - out + inValue;
             const inBalance = inValue - inActual;
-
             return {
                 ...firstItem,
                 General: general,
@@ -254,7 +250,7 @@
     const handleBudgetClick = async (budget: SelectedBudgetModel) => {
         isSelectedItem.value = true;
         const data = [{ ...budget }];
-        //console.log('Budget clicked:', data);
+        console.log('Budget clicked:', data);
         selectedItem.value = data.map((v) => {
             const newData: SelectedBudgetModel = {
                 Subject6: v.Subject6,
@@ -316,18 +312,51 @@
 
     const updateItem = async (updatedItem: any) => {
         // 編輯項目的處理邏輯
-        const url = 'api/MoneyDb/UpdateSelectedDetail';
+        console.log('updatedItem',updatedItem);
         try {
-            const response: ApiResponse<any> = await put<any>(url, updatedItem);
-            console.log(response?.Data);
-            // 更新成功後的處理
+            await searchMoneyDb();// 重新取一次資料(不管有沒有更新或刪除)
+            //console.log('selectedItem', selectedItem.value); computedItems
+            console.log(computedItems.value);
+            selectedItem.value = computedItems.value.filter((x: any) => { //更新選擇的GroupBy的單筆資料
+                // 確保 updatedItem 和 MoneyDbModel 存在
+                if (!updatedItem || !updatedItem.MoneyDbModel) {
+                    return false;
+                }
+                // 找Subject6,7,8欄位,7,8如果沒有就不配對
+                const isSubject6Match = x.Subject6 === updatedItem.MoneyDbModel.Subject6;
+                const isSubject7Match = !updatedItem.MoneyDbModel.Subject7 || x.Subject7 === updatedItem.MoneyDbModel.Subject7;
+                const isSubject8Match = !updatedItem.MoneyDbModel.Subject8 || x.Subject8 === updatedItem.MoneyDbModel.Subject8;
 
-            isEditingSelectedDetailForm.value = false;
-            editingItem.value = null;
+                return isSubject6Match && isSubject7Match && isSubject8Match;
+            }).map((v: any) => {
+                const newData: SelectedBudgetModel = {
+                    Subject6: v.Subject6,
+                    Subject7: v.Subject7,
+                    Subject8: v.Subject8,
+                    BudgetYear: v.BudgetYear,
+                    Final: v.Final,
+                    General: v.General,
+                    Out: v.Out,
+                    UseBudget: v.UseBudget,
+                    In: v.In,
+                    InActual: v.InActual,
+                    InBalance: v.InBalance,
+                    SubjectActual: v.SubjectActual,
+                    End: v.End
+                };
+                return newData;
+            });
+            //console.log('selectedItem:', selectedItem);
+            // 篩選 selectedDetailItem，選出 Budget 欄位與傳進來的 Budget 欄位值相同的資料,修改資料後,用這筆資料Name欄位再篩選一次
+            const budgetValue = updatedItem.Name; //改用Name欄位
+            //console.log('budgetValue', budgetValue);
+            //console.log('filteredDetailItem', filteredDetailItem.value);
+            filteredDetailItem.value = selectedDetailItem.value.filter(item => item.MoneyDbModel.Budget === budgetValue && item.Status !== 'C');
+            //console.log('filteredDetailItem', filteredDetailItem.value);  //更新選到的資料底下細項
         }
-        catch (error: any) {
+        catch (error) {
             console.error(error);
-        }
+        };    
     }
 
     const cancelEdit = () => {

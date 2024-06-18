@@ -33,7 +33,12 @@ const routes: Array<RouteRecordRaw> = [
                 name: 'PrivilegeManagement',
                 component: () => import(/*webpackChunkName "PrivilegeManagement" */ '@/views/main/PrivilegeManagement.vue'),
                 meta: { title: '權限管理' },
-            },  {
+            }, {
+                path: 'DeletedRecords',
+                name: 'DeletedRecords',
+                component: () => import(/*webpackChunkName "Test2" */ '@/views/main/DeletedRecords.vue'),
+                meta: { title: '復原刪除' },
+            }, {
                 path: 'Test2',
                 name: 'Test2',
                 component: () => import(/*webpackChunkName "Test2" */ '@/views/main/Test2.vue'),

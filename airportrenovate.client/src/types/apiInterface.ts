@@ -115,3 +115,24 @@ export interface MoneyRawData {
         Year?: number;
     };
 }
+
+export interface SoftDeleteViewModel {
+    ID: number;
+    Purchasedate?: string;
+    Text?: string;
+    Note?: string;
+    PurchaseMoney?: number;
+    PayDate?: string;
+    PayMoney?: number;
+    People?: string;
+    Name?: string;
+    Remarks?: string;
+    People1?: string;
+    ID1?: number;
+    Status?: string;
+    Group1?: string;
+    Year?: number;
+    Year1?: string;
+    All?: string;
+    True?: string;
+}

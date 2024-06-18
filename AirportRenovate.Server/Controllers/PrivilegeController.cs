@@ -50,9 +50,11 @@ public class PrivilegeController : ControllerBase
         }
         else
         {
+            //var nextNo = _context.User_data1.Max(u => u.No) + 1;
             // 創建新的 LoginModelDb 物件
             var newUser = new LoginModelDb
             {
+                //No = nextNo,
                 //No = currentItem.No,
                 Name = currentItem.Name,
                 Account = currentItem.Account,

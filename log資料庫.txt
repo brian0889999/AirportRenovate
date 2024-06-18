@@ -1,0 +1,14 @@
+uSE [Airport_new]
+GO
+/****** Object:  Table [dbo].[log]    Script Date: 2024/6/12 下午 05:28:08 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[log](
+ [SQL] [varchar](max) NULL,
+ [Action] [varchar](max) NULL,
+ [Time] [datetime] NULL,
+ [Name] [varchar](max) NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO

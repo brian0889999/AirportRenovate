@@ -20,15 +20,11 @@ namespace AirportRenovate.Server.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class MoneyDbController : ControllerBase
+public class MoneyDbController(AirportBudgetDbContext context, IMapper mapper) : ControllerBase
 {
-    private readonly AirportBudgetDbContext _context;
-    private readonly IMapper _mapper;
-    public MoneyDbController(AirportBudgetDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
+    private readonly AirportBudgetDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
+
     //[HttpPost("ByYear")]
     //public async Task<IActionResult> GetData([FromBody] QueryDto queryDto) // 前端傳Year值,後端回傳符合Year值的工務組資料
     [HttpGet("ByYear")]
@@ -120,13 +116,13 @@ public class MoneyDbController : ControllerBase
                All = money3.All != null ? money3.All.Trim() : "",
                True = money3.True != null ? money3.True.Trim() : "",
            })
-   .AsEnumerable() // 轉為本地處理，避免 EF Core 的限制
-   .Select(x => {
-       x.money3.Group1 = x.Group1;
-       x.money3.Status = x.Status; // 更新 Status 欄位值
-       return x.money3;
-   })
-   .ToList();
+            .AsEnumerable() // 轉為本地處理，避免 EF Core 的限制
+            .Select(x => {
+                x.money3.Group1 = x.Group1;
+                x.money3.Status = x.Status; // 更新 Status 欄位值
+            return x.money3;
+            })
+            .ToList();
 
 
             return Ok(results);
@@ -204,8 +200,8 @@ public class MoneyDbController : ControllerBase
 
     [HttpPut("UpdateSelectedDetail")]
     public IActionResult DoUpdate([FromBody] SoftDeleteViewModel request)
-    {
-        var money3 = _context.Money3.FirstOrDefault(m => m.ID1 == request.ID1);
+    {   
+        var money3 = _context.Money3.FirstOrDefault(m => m.ID1 == request.ID1); // 這邊不能用find(ID1不是PK)
         if (money3 == null)
         {
             return NotFound("Record not found");
@@ -218,6 +214,7 @@ public class MoneyDbController : ControllerBase
         money3.People = request.People;
         money3.People1 = request.People1;
         money3.Note = request.Note;
+        money3.Remarks = request.Remarks;
         money3.All = request.All;
         money3.True = request.True;
         money3.Year1 = request.Year1;
@@ -236,6 +233,9 @@ public class MoneyDbController : ControllerBase
         {
             return NotFound("not exist");
         }
+        // 更新Status欄位
+        money3.Status = "X";
+        _context.SaveChanges();
         return Ok("ok");
     }
 

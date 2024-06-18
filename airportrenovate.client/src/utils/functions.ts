@@ -1,4 +1,4 @@
-import type {  MoneyItem,  MoneyRawData } from '@/types/apiInterface';
+import type { MoneyItem, MoneyRawData } from '@/types/apiInterface';
 import { type ApiResponse, get } from '@/services/api';
 import axios from 'axios';
 
