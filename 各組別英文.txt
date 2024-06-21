@@ -33,3 +33,7 @@ Money的部分,金額如果是負數,字體改紅色並括弧起來
 
 
 軟刪除應該只要抓ID1就可以,因為ID1是指同一筆勻入勻出等等......,所以要一起軟刪除
+
+
+insert into  [Airport_new].[dbo].[Money3]([Purchasedate],[Text],[Note],[PurchaseMoney],[Paydate],[PayMoney],[People],[People1],[Name],Remarks,ID1,status,[Group1],year,year1)
+                        VALUES(@Purchasedate, @Text, @Note, @PurchaseMoney, NULL, @PayMoney, @People,@People1, @Name,@Remarks,(select isNull(MAX(id1),0)+1 from [Airport_new].[dbo].[Money3]),'O','工務組',@year,@year1) 

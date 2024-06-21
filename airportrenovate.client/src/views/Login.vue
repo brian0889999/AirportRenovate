@@ -62,10 +62,10 @@ const loginData = ref<LoginViewModel>({
         const url = '/api/Login';
         const data = loginData.value;
         const regex: RegExp = /^(?!.*[^\x21-\x7e])(?=.*[\W])(?=.*[a-zA-Z])(?=.*\d).{8,20}$/;
-        if (!regex.test(loginData.value.Password)) {
-            alert('請輸入 8 到 20 個字符的密碼，必須包含至少一個字母、一個數字和一個特殊字符。');
-            return;
-        }
+        //if (!regex.test(loginData.value.Password)) {
+        //    alert('請輸入 8 到 20 個字符的密碼，必須包含至少一個字母、一個數字和一個特殊字符。');
+        //    return;
+        //}
     try {
         const response = await axios.post(url, data);
         /*const response: ApiResponse<any> = await post<any>(url, data);*/

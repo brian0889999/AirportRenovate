@@ -2,11 +2,15 @@
     <v-container class="no-margin" fluid>
         <v-row justify="start">
             <v-col cols="12" sm="8" md="6">
-                <v-select label="查詢年度"
-                          :items="years"
-                          v-model="searchYear"
-                          style="width: 100px;">
-                </v-select>
+                <v-row>
+                    <v-col cols="3">
+                        <v-select label="查詢年度"
+                                  :items="years"
+                                  v-model="searchYear"
+                                  style="width: 100%;">
+                        </v-select>
+                    </v-col>
+                </v-row>
                 <v-btn @click="searchDeletedRecords"
                        color="primary"
                        class="mb-2">
@@ -50,8 +54,8 @@ import type { VDataTable } from 'vuetify/components';
 type ReadonlyHeaders = VDataTable['$props']['headers'];
 import { formatDate } from '@/utils/functions';
   
-
-const years = ref<number[]>([111, 112, 113]);
+    const loading = ref(false);
+    const years = ref<number[]>([111, 112, 113]);
     const searchYear = ref<number>(113);
     const items = ref<SoftDeleteViewModel[]>([]);
     const headers: ReadonlyHeaders = [

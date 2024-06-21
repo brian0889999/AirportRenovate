@@ -5,15 +5,15 @@ namespace AirportRenovate.Server.Utilities
 {
     public class DESEncryptionUtility
     {
-        private static string key = "XXXXXXXX"; //必須8碼
-        private static string iv = "12345678"; //必須8碼
+        private readonly string key = "XXXXXXXX"; //必須8碼
+        private readonly string iv = "12345678"; //必須8碼
 
         /// <summary>
         /// DES加密
         /// </summary>
         /// <param name="original">要加密的字串</param>
         /// <returns>加密後的字串</returns>
-        public static string EncryptDES(string original)
+        public  string EncryptDES(string original)
         {
             try
             {
@@ -35,7 +35,7 @@ namespace AirportRenovate.Server.Utilities
         /// </summary>
         /// <param name="hexString">要解密的字串</param>
         /// <returns>解密後的字串</returns>
-        public static string DecryptDES(string hexString)
+        public  string DecryptDES(string hexString)
         {
             try
             {

@@ -1,5 +1,7 @@
 ﻿using AirportRenovate.Server.DTOs;
 using AirportRenovate.Server.Models;
+using AirportRenovate.Server.Utilities;
+using AirportRenovate.Server.ViewModels;
 using AutoMapper;
 
 namespace AirportRenovate.Server.Mappings
@@ -8,7 +10,7 @@ namespace AirportRenovate.Server.Mappings
     {
         public ViewModelMapping()
         {
-            CreateMap<Money3DbModel, Money3DbModelDto>();
+            CreateMap<SoftDeleteViewModel, Money3DbModel>();
         }
     }
 }

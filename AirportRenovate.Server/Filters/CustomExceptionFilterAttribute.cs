@@ -9,7 +9,7 @@ public class CustomExceptionFilterAttribute : ExceptionFilterAttribute
     public override void OnException(ExceptionContext context)
     {
         var exception = context.Exception;
-        var statusCode = 500;
+        var statusCode = 500; // 設中斷點看錯誤訊息
         var errorMessage = "發生錯誤";
 
         // 根據異常類型或其他條件自定義錯誤訊息

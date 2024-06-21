@@ -19,9 +19,10 @@
                             <v-col cols="12" sm="6">
                                 <v-select v-model="editedItem.Text"
                                           label="類別"
-                                          bg-color="grey-lighten-1"
+                                          :items="textValues"
+                                          :bg-color="textColor"
                                           :rules="[rules.required]"
-                                          readonly></v-select>
+                                          :readonly="text"></v-select>
                             </v-col>
                             <v-col cols="12">
                                 <v-text-field v-model="editedItem.Note"
@@ -86,7 +87,7 @@
                 <v-card-actions>
                     <v-spacer></v-spacer>
                     <v-btn color="blue darken-1" text @click="canceledit">取消</v-btn>
-                    <v-btn color="blue darken-1" text @click="submitform">儲存</v-btn>
+                    <v-btn color="blue darken-1" text @click="submitform">{{ saveBtn }}</v-btn>
                 </v-card-actions>
             </v-card>
         <!--</v-dialog>-->
@@ -94,11 +95,43 @@
 </template>
 
 <script setup lang="ts">
-    import { ref, reactive, watch, type PropType, onMounted, computed } from 'vue';
-    import { type ApiResponse, get, put } from '@/services/api';
+    import { defineProps, defineEmits, ref, reactive, watch, type PropType, onMounted, computed } from 'vue';
+    import { type ApiResponse, get, put, post } from '@/services/api';
     import { type UserDataModel, type SoftDeleteViewModel } from '@/types/apiInterface';
+    const props = defineProps({
+        item: {
+            type: Object as PropType<SoftDeleteViewModel>,
+            required: true
+        },
+        isEdit: {
+            type: Boolean,
+            required: true
+        },
+        searchGroup: {
+            type: String,
+            //required: true
+        }
+    });
+    //const props = defineProps<{
+    //    item: SoftDeleteViewModel;
+    //    isEdit: boolean;
+    //    searchGroup: string;
+    //}>();
+    const saveBtn = props.isEdit ? '儲存' : '新增';
+    const text = props.isEdit ? true : false;
+    const textColor = props.isEdit ? 'grey-lighten-1' : '';
+    const textValues = ref<string[]>(['一般']);
+    const emit = defineEmits(['update', 'cancel', 'create']);
 
-    const Users = ref<UserDataModel[]>([]);
+    const editedItem = ref<SoftDeleteViewModel>({ ...props.item });
+    watch(() => props.item, (newValue) => {
+        editedItem.value = { ...newValue };
+    });
+    //console.log('props.item', props.item);
+    //console.log('editedItem', editedItem.value);
+    //console.log('props.searchGroup:', props.searchGroup);
+
+    const users = ref<UserDataModel[]>([]);
     const userNames = ref<string[]>([]);
     const year1 = ref<number[]>([111, 112, 113]);
     const fetchUsers = async () => {
@@ -106,11 +139,11 @@
             const url = 'api/Privilege';
             const response: ApiResponse<UserDataModel[]> = await get<UserDataModel[]>(url);
                 if(response.StatusCode == 200) {
-                    Users.value = response.Data!;
-                    /*console.log('Users:', Users);*/
+                    users.value = response.Data!;
+                    /*console.log('users:', users);*/
                      // 提取 Name 欄位，並在最前面加入 '無' 選項
-                    userNames.value = ['無', ...Users.value.map(user => user.Name || '')];
-                    //console.log('User Names:', userNames);
+                    userNames.value = ['無', ...users.value.map(user => user.Name || '')];
+                    //console.log('userNames:', userNames);
             }
         }
         catch (error) {
@@ -118,55 +151,43 @@
         }
     };
   
-    const props = defineProps({
-        item: {
-            type: Object as PropType<SoftDeleteViewModel>,
-            required: true
-        }
-    });
+  const formattedPurchasedate = computed<string>({
+    get: () => (editedItem.value.Purchasedate ? editedItem.value.Purchasedate.split('T')[0] : ''),
+    set: (value: string) => {
+        editedItem.value.Purchasedate = value ? value + "T00:00:00" : '';
+    }
+});
 
-    const emit = defineEmits(['update', 'cancel']);
-
-    const editedItem = ref<SoftDeleteViewModel>({ ...props.item });
-
-    //console.log('editedItem', editedItem);
-
-    watch(() => props.item, (newItem) => {
-        editedItem.value = { ...newItem };
-    });
-
-    const formattedPurchasedate = computed<string>({
-        get: () => (editedItem.value.Purchasedate ? editedItem.value.Purchasedate.split('T')[0] : ''),
-        set: (value: string) => {
-            if (editedItem.value.Purchasedate) {
-                editedItem.value.Purchasedate = value + "T00:00:00";
-            }
-        }
-    });
-
-    const formattedPayDate = computed<string>({
-        get: () => (editedItem.value.PayDate ? editedItem.value.PayDate.split('T')[0] : ''),
-        set: (value: string) => {
-            if (editedItem.value.PayDate) {
-                editedItem.value.PayDate = value + "T00:00:00";
-            }
-        }
-    });
+const formattedPayDate = computed<string>({
+    get: () => (editedItem.value.PayDate ? editedItem.value.PayDate.split('T')[0] : ''),
+    set: (value: string) => {
+        editedItem.value.PayDate = value ? value + "T00:00:00" : '';
+    }
+});
 
     const submitform = async () => {
-        const url = 'api/MoneyDb/UpdateSelectedDetail';
+        // DB的Year1欄位存字串
         const data: SoftDeleteViewModel = { ...editedItem.value, Year1: editedItem.value.Year1 ? editedItem.value.Year1.toString() : "" };
-        //const data = editedItem.value;
+        const url = 'api/MoneyDb';
         try {
-            const response: ApiResponse<any> = await put<any>(url, data);
-            console.log(response?.Data || response?.Message);
-            // 更新成功後的處理
+            let response: ApiResponse<any>;
+            if (data.ID) {
+                response = await put<any>(url, data);
+                console.log(response?.Data || response?.Message);
+                // 更新成功後的處理
+                emit('update', editedItem.value);
+            } else {
+                response = await post<any>(url, data);
+                console.log(response?.Data || response?.Message);
+                //console.log('data:', data);
+                //console.log(editedItem.value);
+                emit('create', editedItem.value);
+            }
+        } catch (error: any) {
+            console.error(error);
+        } finally {
             canceledit();
         }
-        catch (error: any) {
-            console.error(error);
-        }
-        emit('update', editedItem.value);
     };
 
     const canceledit = () => {

@@ -136,3 +136,38 @@ export interface SoftDeleteViewModel {
     All?: string;
     True?: string;
 }
+
+
+export interface Detail {
+    FormattedPurchasedate: string;
+    FormattedPayDate: string;
+    ID: number;
+    Purchasedate?: string;
+    Text?: string;
+    Note?: string;
+    PurchaseMoney?: number;
+    PayDate?: string;
+    PayMoney?: number;
+    People?: string;
+    Name?: string;
+    Remarks?: string;
+    People1?: string;
+    ID1?: number;
+    Status?: string;
+    Group1?: string;
+    Year?: number;
+    Year1?: string;
+    All?: string;
+    True?: string;
+    MoneyDbModel: {
+        ID: number;
+        Budget?: string;
+        Group?: string;
+        Subject6?: string;
+        Subject7?: string;
+        Subject8?: string;
+        BudgetYear?: number;
+        Final?: string;
+        Year?: number;
+    };
+}

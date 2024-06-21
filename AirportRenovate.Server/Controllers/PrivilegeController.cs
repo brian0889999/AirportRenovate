@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using AirportRenovate.Server.Interfaces.Repositorys;
 using AirportRenovate.Server.Models;
+using AirportRenovate.Server.DTOs;
 using AirportRenovate.Server.Datas;
 using AirportRenovate.Server.Utilities;
+using AutoMapper;
 using System.Net.Sockets;
 using System.Linq.Expressions;
 
@@ -11,106 +14,107 @@ namespace AirportRenovate.Server.Controllers;
 [Route("api/[controller]")]
 public class PrivilegeController : ControllerBase
 {
-    private readonly AirportBudgetDbContext _context;
-    public PrivilegeController(AirportBudgetDbContext context)
+    private readonly IGenericRepository<Users> _users;
+    private readonly IMapper _mapper;
+    private readonly DESEncryptionUtility _dESEncryptionUtility;
+    public PrivilegeController(IGenericRepository<Users> users, IMapper mapper, DESEncryptionUtility dESEncryptionUtility)
     {
-        _context = context;
+        _users = users;
+        _mapper = mapper;
+        _dESEncryptionUtility = dESEncryptionUtility;
     }
 
-
-    [HttpGet]    
-    public ActionResult<IEnumerable<UserModelDb>> FetchUsers()
+    /// <summary>
+    /// 取得 使用者
+    /// </summary>
+    /// <returns>查詢結果</returns>
+    [HttpGet]
+    public ActionResult<IEnumerable<UserDto>> FetchUsers()
     {
-        var usersData = _context.User_data1;
-        var users = new List<UserModelDb>();
-        foreach (var userData in usersData)
+        var usersData = _users.GetAll().ToList();
+        List<UserDto> users = _mapper.Map<List<UserDto>>(usersData);
+
+        foreach (var user in users)
         {
-            var user = new UserModelDb
+            if (!string.IsNullOrEmpty(user.Password))
             {
-                No = userData.No,
-                Name = userData.Name?.Trim(),
-                Account = userData.Account?.Trim(),
-                Password = string.IsNullOrEmpty(userData?.Password) ? null : DESEncryptionUtility.DecryptDES(userData.Password.Trim()),
-                Auth = userData?.Auth?.Trim(),
-                Status1 = userData?.Status1?.Trim(),
-                Status2 = userData?.Status2?.Trim(),
-                Status3 = userData?.Status3?.Trim()
-            };
-            users.Add(user);
+                user.Password = _dESEncryptionUtility.DecryptDES(user.Password.Trim());
+            }
         }
+
         return Ok(users);
     }
 
+    /// <summary>
+    /// 新增 使用者
+    /// </summary>
+    /// <returns>新增結果</returns>
     [HttpPost]
-    public IActionResult AddUser([FromBody] UserModelDb currentItem)
+    public IActionResult AddUser([FromBody] UserDto request)
     {
-        if(currentItem == null)
+        try
         {
-            return BadRequest("沒有user資料");
-        }
-        else
-        {
-            //var nextNo = _context.User_data1.Max(u => u.No) + 1;
-            // 創建新的 LoginModelDb 物件
-            var newUser = new LoginModelDb
+            if (request == null)
             {
-                //No = nextNo,
-                //No = currentItem.No,
-                Name = currentItem.Name,
-                Account = currentItem.Account,
-                Password = string.IsNullOrEmpty(currentItem?.Password) ? null : DESEncryptionUtility.EncryptDES(currentItem.Password),
-                Email = "",
-                Auth = currentItem?.Auth,
-                Reason = "",
-                Status1 = currentItem?.Status1,
-                Status2 = "O", // 預設值
-                Memo = "",
-                Status3 = currentItem?.Status3?.Trim(),
-                Account_Open = "y", // 預設值
-                Time = new DateTime(1990, 1, 1, 0, 0, 0), // 預設值
-                Time1 = DateTime.Now, // 當下時間
-                Count = 0, // 預設值
-                Unit_No = "M" // 預設值
-            };
+                return BadRequest("沒有user資料");
+            }
+            else
+            {
+                if (!string.IsNullOrEmpty(request.Password))
+                {
+                    request.Password = _dESEncryptionUtility.EncryptDES(request.Password.Trim());
+                }
 
-            // 添加到資料庫
-            _context.User_data1.Add(newUser);
-            _context.SaveChanges();
+                Users newUser = _mapper.Map<Users>(request);
 
-            return Ok(newUser);
+                _users.Add(newUser);
+                return Ok(newUser);
+            }
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
         }
     }
 
-
+    /// <summary>
+    /// 更新 使用者
+    /// </summary>
+    /// <returns>更新結果</returns>
     [HttpPut]
 
-    public IActionResult UpdateUser([FromBody] UserModelDb currentItem)
+    public IActionResult UpdateUser([FromBody] UserDto currentItem)
     {
-        if (currentItem == null)
+        try
         {
-            return BadRequest("沒有user資料");
-        } 
-        else
-        {
-            // 根據No欄位去找資料
-            var existingUser = _context.User_data1.FirstOrDefault(user => user.No == currentItem.No);
-            if (existingUser == null)
+            if (currentItem == null)
             {
-                return NotFound("沒有找到user");
+                return BadRequest("沒有user資料");
             }
-            existingUser.Name = currentItem.Name;
-            existingUser.Account = currentItem.Account;
-            existingUser.Password = string.IsNullOrEmpty(currentItem?.Password) ? null : DESEncryptionUtility.EncryptDES(currentItem.Password);
-            existingUser.Auth = currentItem?.Auth;
-            existingUser.Status1 = currentItem?.Status1?.Trim();
-            existingUser.Status2 = currentItem?.Status2?.Trim();
-            existingUser.Status3 = currentItem?.Status3?.Trim();
-            _context.SaveChanges();
+            else
+            {
+                // 根據No欄位去找資料
+                var existingUser = _users.GetByCondition(user => user.No == currentItem.No).FirstOrDefault();
 
-            return Ok(existingUser);
+                if (existingUser == null)
+                {
+                    return NotFound("沒有找到user");
+                }
+
+                if (!string.IsNullOrEmpty(currentItem.Password))
+                {
+                    currentItem.Password = _dESEncryptionUtility.EncryptDES(currentItem.Password.Trim());
+                }
+
+                _mapper.Map(currentItem, existingUser);
+                _users.Update(existingUser);
+
+                return Ok(existingUser);
+            }
         }
-        
-
-        
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 }

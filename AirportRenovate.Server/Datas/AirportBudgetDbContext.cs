@@ -11,7 +11,7 @@ namespace AirportRenovate.Server.Datas
         public AirportBudgetDbContext(DbContextOptions<AirportBudgetDbContext> options) : base(options)
         {
         }
-        public DbSet<LoginModelDb> User_data1 {  get; set; }
+        public DbSet<Users> User_data1 {  get; set; }
         public DbSet<MoneyDbModel> Money { get; set; }
         public DbSet<Money2DbModel> Money2 { get; set; }
         public DbSet<Money3DbModel> Money3 { get; set; }
@@ -45,6 +45,13 @@ namespace AirportRenovate.Server.Datas
             //    .WithMany()
             //    .HasForeignKey(m3 => m3.Name)
             //    .HasPrincipalKey(m => m.Budget);
+        }
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseSqlServer("Money;MultipleActiveResultSets=True;");
+            }
         }
     }
 }

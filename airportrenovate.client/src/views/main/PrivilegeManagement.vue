@@ -46,14 +46,17 @@
                           :rules="[rules.required]"></v-text-field>
             <v-select v-model="currentItem.Status1"
                       :items="status1Items"
-                      label="權限"></v-select>
+                      label="權限"
+                      :rules="[rules.required]"></v-select>
             <v-select v-model="currentItem.Auth" 
                       :items="ReverseAuthMapping"  item-title="text" item-value="value"
-                      label="組室"></v-select>
+                      label="組室"
+                      :rules="[rules.required]"></v-select>
             <v-select v-model="currentItem.Status3"
                       :items="ReverseStatusMapping" item-title="text" item-value="value" 
                       label="系統"></v-select>
-            <v-text-field v-model="currentItem.Account" label="帳號"></v-text-field>
+            <v-text-field v-model="currentItem.Account" label="帳號"
+                          :rules="[rules.required]"></v-text-field>
             <v-text-field v-model="currentItem.Password" label="密碼" 
                           :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
                           :type="showPassword ? 'text' : 'password' "
@@ -189,35 +192,28 @@ import  AuthTable  from '@/components/modules/AuthTable.vue';
             const url = '/api/Privilege'
             const data: UserDataModel | null = currentItem.value;
             try {
-                //let response;
+                let response: ApiResponse<any>;
                 if (isEditMode.value) { // 如果是編輯用put,新增用post
-                    try {
-                        const response: ApiResponse<any> = await put<any>(url, data);
+                         response = await put<any>(url, data);
                         console.log(response.Data);
-                    }
-                    catch (error) {
-                        console.error(error);
-                    };
-                } else {
-                    try {
-                        const response: ApiResponse<any> = await post<any>(url, data);
-                        console.log(response.Data);                        
-                    }
-                    catch (error) {
-                        console.error(error);
-                    } 
+                }
+                else
+                {  
+                         response = await post<any>(url, data);
+                        console.log(response.Data);
                 };
                 // 這裡可以加入成功處理的邏輯
                 console.log("操作成功");
-                fetchUsers();
+                await fetchUsers();
             } catch (error) {
                 // 處理錯誤
                 console.error(error);
                 // 這裡可以加入錯誤處理的邏輯,例如提示用戶或記錄錯誤
+            } finally {
+                isEditing.value = false;
             }
         }
         /*console.log(currentItem.value);*/
-        isEditing.value = false;
     };
 
     const cancelEdit = () => {

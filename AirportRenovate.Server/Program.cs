@@ -5,6 +5,9 @@ using AirportRenovate.Server.Filters;
 using AirportRenovate.Server.Mappings;
 using System.Text.Json.Serialization;
 using AirportRenovate.Server.Utilities;
+using AirportRenovate.Server.Interfaces.Repositorys;
+using MyGisMIS.Server.Repositorys;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,8 +31,10 @@ builder.Services.AddControllers(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-//builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-builder.Services.AddAutoMapper(typeof(ViewModelMapping));
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+//builder.Services.AddAutoMapper(typeof(ViewModelMapping));
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<DESEncryptionUtility>();
 
 builder.Services.AddDbContext<AirportBudgetDbContext>(options => 
 options.UseSqlServer(builder.Configuration.GetConnectionString("Money")));

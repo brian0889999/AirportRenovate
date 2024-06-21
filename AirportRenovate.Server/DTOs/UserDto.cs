@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AirportRenovate.Server.Models
+namespace AirportRenovate.Server.DTOs
 {
-    public class UserModelDb
+    public class UserDto
     {
         [Key]
         public int No { get; set; }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using AirportRenovate.Server.Interfaces.Repositorys;
 using AirportRenovate.Server.Models;
 using AirportRenovate.Server.Datas;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,7 @@ using AutoMapper.QueryableExtensions;
 using AirportRenovate.Server.DTOs;
 using AirportRenovate.Server.ViewModels;
 using System.Text.RegularExpressions;
+using MoneyDbModel = AirportRenovate.Server.Models.MoneyDbModel;
 
 
 
@@ -20,113 +22,40 @@ namespace AirportRenovate.Server.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class MoneyDbController(AirportBudgetDbContext context, IMapper mapper) : ControllerBase
+public class MoneyDbController(IGenericRepository<Money3DbModel> money3Repository, IGenericRepository<MoneyDbModel> moneyRepository,  IMapper mapper) : ControllerBase
 {
-    private readonly AirportBudgetDbContext _context = context;
+    private readonly IGenericRepository<Money3DbModel> _money3Repository = money3Repository;
+    private readonly IGenericRepository<MoneyDbModel> _moneyRepository = moneyRepository;
     private readonly IMapper _mapper = mapper;
 
-    //[HttpPost("ByYear")]
-    //public async Task<IActionResult> GetData([FromBody] QueryDto queryDto) // 前端傳Year值,後端回傳符合Year值的工務組資料
+
+    /// <summary>
+    /// Groups的預算資料查詢
+    /// </summary>
+    /// <returns>查詢結果</returns>
     [HttpGet("ByYear")]
-    public async Task<IActionResult> GetData(int Year, string Group) // 前端傳Year值,後端回傳符合Year值的工務組資料
+    public IActionResult GetData(int Year, string Group) // 前端傳Year值,後端回傳符合Year值的工務組資料
     {
         try
         {
-            //var A = _context.Money.Include(x=>x.Money3DbModels).ToList();
-            //A[0].Money3DbModels[0];
-            //var yearParameter = Year;
-
-            //var results = await _context.Money
-            //    .Where(money => money.Group == "工務組" && money.Year == yearParameter)
-            //    .Join(_context.Money3,
-            //        money => money.Budget,
-            //        money3 => money3.Name,
-            //        (money, money3) => new { Money = money, Money3 = money3 })
-            //    .Where(joinResult => joinResult.Money3.Group1 == "工務組" &&
-            //                         (joinResult.Money3.Status == "O" || joinResult.Money3.Status == "C") &&
-            //                         joinResult.Money3.Year == yearParameter)
-            //    .GroupBy(joinResult => new { joinResult.Money.Subject6, joinResult.Money.Subject7, joinResult.Money.Subject8, joinResult.Money.BudgetYear, joinResult.Money.Final, joinResult.Money.Budget, joinResult.Money.Group, joinResult.Money3.Year })
-            //    .Select(g => new
-            //    {
-            //        g.Key.Subject6,
-            //        g.Key.Subject7,
-            //        g.Key.Subject8,
-            //        g.Key.BudgetYear,
-            //        g.Key.Final,
-            //        g.Key.Budget,
-            //        g.Key.Group,
-            //        Year = g.Key.Year,
-            //        General = g.Sum(x => x.Money3.Text == "一般" ? x.Money3.PurchaseMoney : 0),
-            //        Out = g.Sum(x => x.Money3.Text == "勻出" ? x.Money3.PurchaseMoney : 0),
-            //        UseBudget = g.Key.BudgetYear - g.Sum(x => x.Money3.Text == "勻出" ? x.Money3.PurchaseMoney : 0) - g.Sum(x => x.Money3.Text == "一般" ? x.Money3.PurchaseMoney : 0) + g.Key.Final,
-            //        In = g.Sum(x => x.Money3.Text == "勻入" ? x.Money3.PurchaseMoney : 0),
-            //        InActual = g.Sum(x => x.Money3.Text == "勻入" ? x.Money3.PayMoney : 0),
-            //        InBalance = g.Sum(x => x.Money3.Text == "勻入" ? x.Money3.PurchaseMoney : 0) - g.Sum(x => x.Money3.Text == "勻入" ? x.Money3.PayMoney : 0),
-            //        SubjectActual = g.Sum(x => x.Money3.Text == "勻入" ? x.Money3.PayMoney : 0) + g.Sum(x => x.Money3.Text == "一般" ? x.Money3.PayMoney : 0)
-            //    })
-            //    .ToListAsync();
-
-            //var results = _context.Money.ToList();
-            //foreach (var item in results)
-            //{
-            //    if (!string.IsNullOrEmpty(item.Budget))
-            //    {
-            //        var a = _context.Money3.Where(x => x.Name == item.Budget);
-            //        if (a!= null)
-            //        {
-            //            item.Money3DbModels = a.ToList();
-            //        }
-            //    }
-
-            //}
-
-
-            //var AC = A.ToList();
-            //var B = A.Include(m => m.Money3DbModels);
-            //var C = B.ToList();
-
-            var A = _context.Money3
-            .Where(money3 => money3.Group1 == Group
-            && money3.MoneyDbModel != null && money3.MoneyDbModel.Group == Group
-            && money3.Year == Year && money3.MoneyDbModel.Year == Year
-            && (money3.Status == "O" || money3.Status == "C"))
-            .Include(money3 => money3.MoneyDbModel)
-            .ToQueryString();
-
-            //var results = _context.Money3
-            //    .Where(money3 => money3.Group1 == "工務組"
-            //    && money3.MoneyDbModel != null && money3.MoneyDbModel.Group == "工務組"
-            //    && money3.Year == Year && money3.MoneyDbModel.Year == Year
-            //    && (money3.Status != null && money3.Status.Trim() == "O" || money3.Status != null && money3.Status.Trim() == "C"))
-            //    .Include(money3 => money3.MoneyDbModel)
-            //    //.ProjectTo<Money3DbModelDto>(_mapper.ConfigurationProvider)
-            //    .ToList();
-
-            var results = _context.Money3
-           .Where(money3 => money3.Group1 == Group
-               && money3.MoneyDbModel != null && money3.MoneyDbModel.Group == Group
-               && money3.Year == Year && money3.MoneyDbModel.Year == Year
-               && (money3.Status != null && (money3.Status.Trim() == "O" || money3.Status.Trim() == "C")))
-           .Include(money3 => money3.MoneyDbModel)
-           .Select(money3 => new {
-               money3,
-               money3.MoneyDbModel,
-               Group1 = money3.Group1 != null ? money3.Group1.Trim() : "",
-               Status = money3.Status != null ? money3.Status.Trim() : "",// 移除 Status 欄位的多餘空格
-               All = money3.All != null ? money3.All.Trim() : "",
-               True = money3.True != null ? money3.True.Trim() : "",
-           })
-            .AsEnumerable() // 轉為本地處理，避免 EF Core 的限制
-            .Select(x => {
-                x.money3.Group1 = x.Group1;
-                x.money3.Status = x.Status; // 更新 Status 欄位值
-            return x.money3;
-            })
-            .ToList();
-
+            var results = _money3Repository.GetByCondition(money3 => money3.Group1 == Group
+                    && money3.MoneyDbModel != null && money3.MoneyDbModel.Group == Group
+                    && money3.Year == Year && money3.MoneyDbModel.Year == Year
+                    && (money3.Status != null && (money3.Status.Trim() == "O" || money3.Status.Trim() == "C")))
+                    .Include(money3 => money3.MoneyDbModel)
+                    .AsEnumerable() // 轉為本地處理，避免 EF Core 的限制
+                    .Select(money3 =>
+                    {
+                        // 移除需要的欄位中的多餘空格
+                        money3.Group1 = money3.Group1?.Trim() ?? "";
+                        money3.Status = money3.Status?.Trim() ?? "";
+                        money3.All = money3.All?.Trim() ?? "";
+                        money3.True = money3.True?.Trim() ?? "";
+                        return money3;
+                    })
+                    .ToList();
 
             return Ok(results);
-
         }
         catch (Exception ex)
         {
@@ -134,25 +63,58 @@ public class MoneyDbController(AirportBudgetDbContext context, IMapper mapper) :
         }
     }
 
+    [HttpGet("Test")]
+    public IActionResult GetGroupData(int Year, string Group) // 前端傳Year值,後端回傳符合Year值的工務組資料
+    {
+        try
+        {
+            var results = _money3Repository.GetByCondition(money3 => money3.Group1 == Group
+                    && money3.MoneyDbModel != null && money3.MoneyDbModel.Group == Group
+                    && money3.Year == Year && money3.MoneyDbModel.Year == Year
+                    && (money3.Status != null && (money3.Status.Trim() == "O" || money3.Status.Trim() == "C")))
+                    .Include(money3 => money3.MoneyDbModel)
+                    .AsEnumerable() // 轉為本地處理，避免 EF Core 的限制
+                    .Select(money3 =>
+                    {
+                        // 移除需要的欄位中的多餘空格
+                        money3.Group1 = money3.Group1?.Trim() ?? "";
+                        money3.Status = money3.Status?.Trim() ?? "";
+                        money3.All = money3.All?.Trim() ?? "";
+                        money3.True = money3.True?.Trim() ?? "";
+                        return money3;
+                    })
+                     .GroupBy(money3 => new
+                     {
+                         money3.MoneyDbModel?.Subject6,
+                         money3.MoneyDbModel?.Subject7,
+                         money3.MoneyDbModel?.Subject8,
+                         money3.MoneyDbModel?.BudgetYear,
+                         money3.MoneyDbModel?.Final,
+                         money3.MoneyDbModel?.Budget,
+                         money3.MoneyDbModel?.Group,
+                         money3.MoneyDbModel?.Year
+                     })
+                .Select(g => new
+                {
+                    Subject6 = g.Key.Subject6,
+                    Subject7 = g.Key.Subject7,
+                    Subject8 = g.Key.Subject8,
+                    BudgetYear = g.Key.BudgetYear,
+                    Final = g.Key.Final,
+                    Budget = g.Key.Budget,
+                    Group = g.Key.Group,
+                    Year = g.Key.Year,
+                    Items = g.ToList()
+                })
+                .ToList();
 
-
-    //[HttpGet("ByBudget")]
-    //public async Task<IActionResult> GetDataByBudget(string budget)
-    //{
-    //    try
-    //    {
-    //        var results = await _context.Money
-    //            .Include(m => m.Money3DbModels)
-    //            .Where(m => m.Budget == budget && m.Group == "工務組")
-    //            .ToListAsync();
-
-    //        return Ok(results);
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        return StatusCode(500, $"Internal server error: {ex}");
-    //    }
-    //}
+            return Ok(results);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex}");
+        }
+    }
 
     //[HttpGet("ExportToExcel")]
     //public async Task<IActionResult> ExportToExcel(string budget)
@@ -198,45 +160,83 @@ public class MoneyDbController(AirportBudgetDbContext context, IMapper mapper) :
     //    }
     //}
 
-    [HttpPut("UpdateSelectedDetail")]
-    public IActionResult DoUpdate([FromBody] SoftDeleteViewModel request)
-    {   
-        var money3 = _context.Money3.FirstOrDefault(m => m.ID1 == request.ID1); // 這邊不能用find(ID1不是PK)
-        if (money3 == null)
+    [HttpPost]
+    public async Task<IActionResult> Post([FromBody] SoftDeleteViewModel request)
+    {
+        try
         {
-            return NotFound("Record not found");
+            // 取得資料庫中ID1欄位的最大值並遞增
+            int maxID1 = await _money3Repository.GetAll().MaxAsync(m => (int?)m.ID1) ?? 0;
+            request.ID1 = maxID1 + 1;
+
+            // 取得當年民國年分
+            //var currentYear = DateTime.Now.Year - 1911;
+            //request.Year = currentYear;
+            // 使用 AutoMapper 將 ViewModel 映射到 Model
+            Money3DbModel money3 = _mapper.Map<Money3DbModel>(request);
+            // 檢查 People 和 People1 欄位，若為 null 則存空值
+            money3.People = request.People == "無" ? string.Empty : request.People;
+            money3.People1 = request.People1 == "無" ? string.Empty : request.People1;
+            _money3Repository.Add(money3);
+
+            return Ok("Record added successfully");
         }
-
-        money3.Purchasedate = request.Purchasedate;
-        money3.PurchaseMoney = request.PurchaseMoney;
-        money3.PayDate = request.PayDate;
-        money3.PayMoney = request.PayMoney;
-        money3.People = request.People;
-        money3.People1 = request.People1;
-        money3.Note = request.Note;
-        money3.Remarks = request.Remarks;
-        money3.All = request.All;
-        money3.True = request.True;
-        money3.Year1 = request.Year1;
-
-        _context.SaveChanges();
-
-        return Ok("Record updated successfully");
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex}");
+        }
     }
 
-    [HttpPut("SoftDelete")]
+    /// <summary>
+    /// 更新細項
+    /// </summary>
+    /// <returns>更新結果</returns>
+    [HttpPut]
+    public IActionResult DoUpdate([FromBody] SoftDeleteViewModel request)
+    {
+        try
+        {
+            request.MoneyDbModel = null;
+            var money3 = _money3Repository.GetByCondition(m => m.ID1 == request.ID1).AsNoTracking().FirstOrDefault(); // 這邊不能用find(ID1不是PK)
+            if (money3 == null)
+            {
+                return NotFound("Record not found");
+            }
 
+            Money3DbModel money3dt = _mapper.Map<Money3DbModel>(request);
+            _money3Repository.Update(money3dt);
+
+            return Ok("Record updated successfully");
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex}");
+        }
+    }
+
+    /// <summary>
+    /// 軟刪除
+    /// </summary>
+    /// <returns>刪除結果</returns>
+    [HttpPut("SoftDelete")]
     public IActionResult DoSoftDelete([FromBody] SoftDeleteViewModel request)
     {
-        var money3 = _context.Money3.FirstOrDefault(m => m.ID1 == request.ID1);
-        if (money3 == null)
+        try
         {
-            return NotFound("not exist");
+            var money3 = _money3Repository.GetByCondition(m => m.ID1 == request.ID1).FirstOrDefault();
+            if (money3 == null)
+            {
+                return NotFound("not exist");
+            }
+            // 更新Status欄位
+            money3.Status = "X";
+            _money3Repository.Update(money3);
+            return Ok("ok");
         }
-        // 更新Status欄位
-        money3.Status = "X";
-        _context.SaveChanges();
-        return Ok("ok");
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex}");
+        }
     }
 
 
