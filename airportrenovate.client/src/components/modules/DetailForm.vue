@@ -8,7 +8,7 @@
                     <span class="headline">編輯項目</span>
                 </v-card-title>
                 <v-card-text>
-                    <v-form ref="editForm" v-model="isValid">
+                    <v-form ref="editFormRef" v-model="isValid">
                         <v-row>
                             <v-col cols="12" sm="6">
                                 <v-text-field v-model="formattedPurchasedate"
@@ -117,6 +117,7 @@
     //    isEdit: boolean;
     //    searchGroup: string;
     //}>();
+    const editFormRef = ref<HTMLFormElement | null>(null);
     const saveBtn = props.isEdit ? '儲存' : '新增';
     const text = props.isEdit ? true : false;
     const textColor = props.isEdit ? 'grey-lighten-1' : '';
@@ -166,18 +167,22 @@ const formattedPayDate = computed<string>({
 });
 
     const submitform = async () => {
+        const { valid } = await editFormRef.value?.validate();
+        if (!valid) return;
+
         // DB的Year1欄位存字串
         const data: SoftDeleteViewModel = { ...editedItem.value, Year1: editedItem.value.Year1 ? editedItem.value.Year1.toString() : "" };
-        const url = 'api/MoneyDb';
+        const url = '/api/PublicWorksGroup';
         try {
             let response: ApiResponse<any>;
-            if (data.ID) {
+            if (data.ID1) {
                 response = await put<any>(url, data);
                 console.log(response?.Data || response?.Message);
                 // 更新成功後的處理
                 emit('update', editedItem.value);
             } else {
                 response = await post<any>(url, data);
+                console.log('response.Data:', response?.Data);
                 console.log(response?.Data || response?.Message);
                 //console.log('data:', data);
                 //console.log(editedItem.value);

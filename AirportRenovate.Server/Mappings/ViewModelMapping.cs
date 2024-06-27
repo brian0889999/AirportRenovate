@@ -10,7 +10,8 @@ namespace AirportRenovate.Server.Mappings
     {
         public ViewModelMapping()
         {
-            CreateMap<SoftDeleteViewModel, Money3DbModel>();
+            CreateMap<SoftDeleteViewModel, Money3DbModel>()
+            .ForMember(dest => dest.MoneyDbModel, opt => opt.Ignore());
         }
     }
 }

@@ -29,7 +29,7 @@ export interface BudgetModel {
     subject7?: string | null;
     subject8?: string | null;
     budgetYear?: number | null;
-    final?: number | null;
+    final?: string | null;
     general?: number | null;
     out?: number | null;
     useBudget?: number | null;
@@ -46,7 +46,7 @@ export interface SelectedBudgetModel {
     Subject7?: string | null;
     Subject8?: string | null;
     BudgetYear?: number | null;
-    Final?: number | null;
+    Final?: string | null;
     General?: number | null;
     Out?: number | null;
     UseBudget?: number | null;
@@ -77,11 +77,29 @@ export interface MoneyItem {
     Subject7?: string;
     Subject8?: string;
     BudgetYear?: number;
-    Final?: number;
+    Final?: string;
     Text?: string;
     PurchaseMoney?: number;
     PayMoney?: number;
     Purchasedate?: string;
+}export interface SelectedDetail {
+    ID1?: number;
+    Budget?: string;
+    Group?: string;
+    Subject6?: string;
+    Subject7?: string;
+    Subject8?: string;
+    BudgetYear?: number;
+    Final?: string;
+    Text?: string;
+    PurchaseMoney?: number;
+    PayMoney?: number;
+    Purchasedate?: string;
+    Remarks?: string;
+    PayDate?: string;
+    All?: string;
+    True?: string;
+    Year1?: string;
 }
 
 export interface MoneyRawData {
@@ -170,4 +188,23 @@ export interface Detail {
         Final?: string;
         Year?: number;
     };
+}
+
+export interface BalanceFormViewModel {
+    Group: string,
+    Subject6: string,
+    Subject7: string,
+    Subject8: string,
+    PurchaseMoney: number,
+    PayMoney: number,
+    Group1: string,
+    Subject6_1: string,
+    Subject7_1: string,
+    Subject8_1: string,
+    People: string,
+    Year: number,
+    PurchaseDate: string,
+    Note: string,
+    People1: string,
+    Budget: string
 }

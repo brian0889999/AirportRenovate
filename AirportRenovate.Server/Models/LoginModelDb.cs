@@ -2,7 +2,7 @@
 
 namespace AirportRenovate.Server.Models
 {
-    public class Users
+    public class LoginModelDb
     {
          [Key]
         public int No { get; set; }

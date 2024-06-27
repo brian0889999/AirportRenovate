@@ -14,10 +14,10 @@ namespace AirportRenovate.Server.Controllers;
 [Route("api/[controller]")]
 public class PrivilegeController : ControllerBase
 {
-    private readonly IGenericRepository<Users> _users;
+    private readonly IGenericRepository<User> _users;
     private readonly IMapper _mapper;
     private readonly DESEncryptionUtility _dESEncryptionUtility;
-    public PrivilegeController(IGenericRepository<Users> users, IMapper mapper, DESEncryptionUtility dESEncryptionUtility)
+    public PrivilegeController(IGenericRepository<User> users, IMapper mapper, DESEncryptionUtility dESEncryptionUtility)
     {
         _users = users;
         _mapper = mapper;
@@ -65,7 +65,7 @@ public class PrivilegeController : ControllerBase
                     request.Password = _dESEncryptionUtility.EncryptDES(request.Password.Trim());
                 }
 
-                Users newUser = _mapper.Map<Users>(request);
+                User newUser = _mapper.Map<User>(request);
 
                 _users.Add(newUser);
                 return Ok(newUser);

@@ -15,6 +15,7 @@ using AirportRenovate.Server.DTOs;
 using AirportRenovate.Server.ViewModels;
 using System.Text.RegularExpressions;
 using MoneyDbModel = AirportRenovate.Server.Models.MoneyDbModel;
+using MathNet.Numerics.Statistics;
 
 
 
@@ -22,7 +23,7 @@ namespace AirportRenovate.Server.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class MoneyDbController(IGenericRepository<Money3DbModel> money3Repository, IGenericRepository<MoneyDbModel> moneyRepository,  IMapper mapper) : ControllerBase
+public class PublicWorksGroupController(IGenericRepository<Money3DbModel> money3Repository, IGenericRepository<MoneyDbModel> moneyRepository,  IMapper mapper) : ControllerBase
 {
     private readonly IGenericRepository<Money3DbModel> _money3Repository = money3Repository;
     private readonly IGenericRepository<MoneyDbModel> _moneyRepository = moneyRepository;
@@ -63,57 +64,74 @@ public class MoneyDbController(IGenericRepository<Money3DbModel> money3Repositor
         }
     }
 
-    [HttpGet("Test")]
+    [HttpGet]
     public IActionResult GetGroupData(int Year, string Group) // 前端傳Year值,後端回傳符合Year值的工務組資料
     {
         try
         {
             var results = _money3Repository.GetByCondition(money3 => money3.Group1 == Group
-          && money3.MoneyDbModel != null && money3.MoneyDbModel.Group == Group
-          && money3.Year == Year && money3.MoneyDbModel.Year == Year
-          && (money3.Status != null && (money3.Status.Trim() == "O" || money3.Status.Trim() == "C")))
-          .Include(money3 => money3.MoneyDbModel)
-          .AsEnumerable() // 轉為本地處理，避免 EF Core 的限制
-          .Select(money3 =>
-          {
-              // 移除需要的欄位中的多餘空格
-              money3.Group1 = money3.Group1?.Trim() ?? "";
-              money3.Status = money3.Status?.Trim() ?? "";
-              money3.All = money3.All?.Trim() ?? "";
-              money3.True = money3.True?.Trim() ?? "";
-              return money3;
-          })
-          .Select(money3 => new
-          {
-              money3.ID,
-              money3.Purchasedate,
-              money3.Text,
-              money3.Note,
-              money3.PurchaseMoney,
-              money3.PayDate,
-              money3.PayMoney,
-              money3.People,
-              money3.Name,
-              money3.Remarks,
-              money3.People1,
-              money3.ID1,
-              money3.Status,
-              money3.Group1,
-              money3.All,
-              money3.True,
-              money3.Year,
-              money3.Year1,
-             M1ID= money3.MoneyDbModel?.ID,
-              money3.MoneyDbModel?.Budget,
-              money3.MoneyDbModel?.Group,
-              money3.MoneyDbModel?.Subject6,
-              money3.MoneyDbModel?.Subject7,
-              money3.MoneyDbModel?.Subject8,
-              money3.MoneyDbModel?.BudgetYear,
-              money3.MoneyDbModel?.Final,
-              M1Year = money3.MoneyDbModel?.Year
-          })
-          .ToList();
+    && money3.MoneyDbModel != null && money3.MoneyDbModel.Group == Group
+    && money3.Year == Year && money3.MoneyDbModel.Year == Year
+    && (money3.Status != null && (money3.Status.Trim() == "O" || money3.Status.Trim() == "C")))
+    .Include(money3 => money3.MoneyDbModel)
+    .AsEnumerable()
+    .Select(money3 =>
+    {
+        money3.Group1 = money3.Group1?.Trim() ?? "";
+        money3.Status = money3.Status?.Trim() ?? "";
+        money3.All = money3.All?.Trim() ?? "";
+        money3.True = money3.True?.Trim() ?? "";
+        return new
+        {
+            money3.MoneyDbModel?.Subject6,
+            money3.MoneyDbModel?.Subject7,
+            money3.MoneyDbModel?.Subject8,
+            money3.MoneyDbModel?.BudgetYear,
+            money3.MoneyDbModel?.Final,
+            money3.MoneyDbModel?.Budget,
+            money3.MoneyDbModel?.Group,
+            money3.MoneyDbModel?.Year,
+            money3.Text,
+            money3.PurchaseMoney,
+            money3.PayMoney
+        };
+    })
+    .ToList();
+
+
+            return Ok(results);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex}");
+        }
+    } 
+    
+    [HttpGet("SelectedDetail")]
+    public async Task<IActionResult> GetDetailData(string Budget, int Year, string Group, string? Note = null, int? PurchaseMoney = null) // 前端傳Year值,後端回傳符合Year值的工務組資料
+    {
+        try
+        {
+            var query = _money3Repository.GetByCondition(money3 =>
+           money3.MoneyDbModel!.Budget == Budget &&
+           money3.Group1 == Group &&
+           money3.MoneyDbModel.Group == Group &&
+           money3.Year == Year &&
+           money3.MoneyDbModel.Year == Year &&
+           money3.Status == "O"
+       );
+
+            if (!string.IsNullOrEmpty(Note))
+            {
+                query = query.Where(money3 => money3.Note != null && money3.Note.Contains(Note));
+            }
+
+            if (PurchaseMoney.HasValue)
+            {
+                query = query.Where(money3 => money3.PurchaseMoney == PurchaseMoney.Value);
+            }
+
+            var results = await query.Include(money3 => money3.MoneyDbModel).ToListAsync();
 
             return Ok(results);
         }
@@ -171,7 +189,7 @@ public class MoneyDbController(IGenericRepository<Money3DbModel> money3Repositor
     public async Task<IActionResult> Post([FromBody] SoftDeleteViewModel request)
     {
         try
-        {
+        {   
             // 取得資料庫中ID1欄位的最大值並遞增
             int maxID1 = await _money3Repository.GetAll().MaxAsync(m => (int?)m.ID1) ?? 0;
             request.ID1 = maxID1 + 1;
@@ -203,16 +221,16 @@ public class MoneyDbController(IGenericRepository<Money3DbModel> money3Repositor
     {
         try
         {
-            request.MoneyDbModel = null;
+            //request.MoneyDbModel = null;
             var money3 = _money3Repository.GetByCondition(m => m.ID1 == request.ID1).AsNoTracking().FirstOrDefault(); // 這邊不能用find(ID1不是PK)
             if (money3 == null)
             {
                 return NotFound("Record not found");
             }
+            // 將 ViewModel 映射到實體模型
+            Money3DbModel updatedMoney3 = _mapper.Map<SoftDeleteViewModel, Money3DbModel>(request, money3);
 
-            Money3DbModel money3dt = _mapper.Map<Money3DbModel>(request);
-            _money3Repository.Update(money3dt);
-
+            _money3Repository.Update(updatedMoney3);
             return Ok("Record updated successfully");
         }
         catch (Exception ex)

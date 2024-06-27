@@ -13,19 +13,19 @@ namespace AirportRenovate.Server.Models
         [Key]
         public int ID { get; set; }
 
-        public string? Budget { get; set; }
+        public string? Budget { get; set; } = string.Empty;
 
-        public string? Group { get; set; }
+        public string? Group { get; set; } = string.Empty;
 
-        public string? Subject6 { get; set; }
+        public string? Subject6 { get; set; } = string.Empty;
 
-        public string? Subject7 { get; set; }
+        public string? Subject7 { get; set; } = string.Empty;
 
-        public string? Subject8 { get; set; }
+        public string? Subject8 { get; set; } = string.Empty;
 
         public int? BudgetYear { get; set; }
 
-        public string? Final { get; set; }
+        public string? Final { get; set; } = string.Empty;
 
         public int? General { get; set; }
 

@@ -4,7 +4,7 @@ using AirportRenovate.Server.Datas;
 using AirportRenovate.Server.Interfaces.Repositorys;
 using System.Linq.Expressions;
 
-namespace MyGisMIS.Server.Repositorys
+namespace AirportRenovate.Server.Repositorys
 {
     public class GenericRepository<T>(AirportBudgetDbContext context) : IGenericRepository<T> where T : class
     {

@@ -11,9 +11,9 @@ namespace AirportRenovate.Server.Controllers;
 [Route("api/[controller]")]
 public class LoginController : ControllerBase
 {
-    private readonly IGenericRepository<Users> _users;
+    private readonly IGenericRepository<User> _users;
     private readonly DESEncryptionUtility _dESEncryptionUtility;
-    public LoginController(IGenericRepository<Users> users, DESEncryptionUtility dESEncryptionUtility)
+    public LoginController(IGenericRepository<User> users, DESEncryptionUtility dESEncryptionUtility)
     {
         _users = users;
         _dESEncryptionUtility = dESEncryptionUtility;

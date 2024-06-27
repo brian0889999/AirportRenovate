@@ -4,7 +4,7 @@
             <v-row>
                 <v-col cols="3">
                     <v-text-field label="輸入摘要"
-                                  v-model="textInput"
+                                  v-model="noteInput"
                                   style="width: 100%;" />
                 </v-col>
                 <v-col cols="3">
@@ -28,13 +28,13 @@
 <script setup lang="ts">
     import { defineProps, defineEmits, ref } from 'vue';
 
-const textInput = ref('');
+    const noteInput = ref('');
     const purchaseMoneyInput = ref<number | null>(null);
     const emit = defineEmits(['search']);
 const searchByInputs = () => {
     // 查詢輸入欄位邏輯
-    //console.log('Text:', textInput.value, 'PurchaseMoney:', purchaseMoneyInput.value);
+    //console.log('Note:', noteInput.value, 'PurchaseMoney:', purchaseMoneyInput.value);
     // 可以使用 emit 傳遞輸入值到父組件
-    emit('search', { text: textInput.value, PurchaseMoney: purchaseMoneyInput.value });
+    emit('search', { Note: noteInput.value, PurchaseMoney: purchaseMoneyInput.value });
 }
 </script>

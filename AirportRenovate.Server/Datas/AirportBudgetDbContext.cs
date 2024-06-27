@@ -11,13 +11,13 @@ namespace AirportRenovate.Server.Datas
         public AirportBudgetDbContext(DbContextOptions<AirportBudgetDbContext> options) : base(options)
         {
         }
-        public DbSet<Users> User_data1 {  get; set; }
+        public DbSet<User> User_data1 {  get; set; }
         public DbSet<MoneyDbModel> Money { get; set; }
         public DbSet<Money2DbModel> Money2 { get; set; }
         public DbSet<Money3DbModel> Money3 { get; set; }
-        public DbSet<Type1DbModel> Type1 { get; set; }
-        public DbSet<Type2DbModel> Type2 { get; set; }
-        public DbSet<Type3DbModel> Type3 { get; set; }
+        public DbSet<Type1> Type1 { get; set; }
+        public DbSet<Type2> Type2 { get; set; }
+        public DbSet<Type3> Type3 { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

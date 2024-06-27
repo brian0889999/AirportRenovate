@@ -68,8 +68,8 @@ import { formatDate } from '@/utils/functions';
         { title: '請購人', key: 'People' },
         { title: '支付人', key: 'People1' },
         { title: '備註', key: 'Remarks' },
-        { title: '未稅', key: 'All' },
-        { title: '已對帳', key: 'True' },
+        { title: '預算名稱', key: 'Name' },
+        { title: '組室別', key: 'Group1' },
         { title: '', key: 'actions', sortable: false },
     ];
 const searchDeletedRecords = async () => {

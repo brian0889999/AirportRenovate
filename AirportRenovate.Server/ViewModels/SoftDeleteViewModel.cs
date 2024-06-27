@@ -34,7 +34,7 @@
         public int? Year { get; set; }
         public string? Year1 { get; set; }
         public MoneyDbModel? MoneyDbModel { get; set; }
-        public string? FormattedPurchaseDate { get; set; }
-        public string? FormattedPayDate { get; set; }
+        //public string? FormattedPurchaseDate { get; set; }
+        //public string? FormattedPayDate { get; set; }
     }
 }

@@ -18,7 +18,7 @@
                         </v-select>
                     </v-col>
                 </v-row>
-                <v-btn @click="searchMoneyDb"
+                <v-btn @click="fetchBudgetData"
                        color="primary"
                        class="mb-2">
                     查詢
@@ -28,7 +28,7 @@
         <v-data-table v-if="!isSelectedItem"
                       :headers="headers"
                       :items="computedItems"
-                      item-key="name"
+                      item-key="Budget"
                       items-per-page="12"
                       loading-text="讀取中請稍後..."
                       items-per-page-text="每頁筆數"
@@ -66,7 +66,7 @@
         </v-data-table>
         <v-data-table v-if="isSelectedItem && !showDetailForm"
                       :headers="selectedDetailHeaders"
-                      :items="computedSelectedDetailItems">
+                      :items="selectedDetailItem">
             <template #top>
                 <v-row>
                     <v-col>
@@ -100,7 +100,7 @@
     import { ref, computed } from 'vue';
     import { get, post, put, type ApiResponse } from '@/services/api';
     import type { VDataTable } from 'vuetify/components';
-    import type { BudgetModel, SelectedBudgetModel, MoneyItem, MoneyRawData, SoftDeleteViewModel, Detail } from '@/types/apiInterface';
+    import type { BudgetModel, SelectedBudgetModel, MoneyItem, MoneyRawData, SoftDeleteViewModel, Detail, SelectedDetail } from '@/types/apiInterface';
     import { formatDate, sumByCondition, groupBy } from '@/utils/functions';
     import DetailForm from '@/components/modules/DetailForm.vue';
     import SearchFields from '@/components/modules/SearchFields.vue';
@@ -159,8 +159,8 @@
     const items = ref<MoneyItem[]>([]);
     const isSelectedItem = ref<boolean>(false);
     const selectedItem = ref<SelectedBudgetModel[]>([]);
-    const selectedDetailItem = ref<MoneyRawData[]>([]);
-    const filteredDetailItem = ref<MoneyRawData[]>([]);
+    const selectedDetailItem = ref<SelectedDetail[]>([]);
+    const filteredDetailItem = ref<SelectedDetail[]>([]);
     const groups = ref<string[]>(['工務組', '業務組', '人事室', '中控室', '北竿站', '企劃組', '南竿站', '政風室', '航務組', '總務組', '企劃行政組', '營運安全組']);
     const searchGroup = ref<string>('工務組');
     const isEdit = ref(false);
@@ -169,10 +169,8 @@
 
     const previousPage = async () => {
         isSelectedItem.value = false;
-        filteredDetailItem.value = [...selectedDetailItem.value]; // 恢復初始值
-        //console.log('previousPage called, filteredDetailItem reset:', filteredDetailItem.value);
         try {
-            await searchMoneyDb(); // 重新取一次資料(不管有沒有更新或刪除)
+            await fetchBudgetData(); // 重新取一次資料(不管有沒有更新或刪除)
         }
         catch (error) {
             console.error(error);
@@ -181,35 +179,18 @@
 
     const years = ref<number[]>([111, 112, 113]);
     const searchYear = ref<number>(113);
-    //console.log('searchYear=', searchYear);
-    //console.log('searchYear.value=', searchYear.value);
-    const searchMoneyDb = async () => {
-        const url = '/api/MoneyDb/ByYear';
+
+    const fetchBudgetData = async () => {
+        const url = '/api/PublicWorksGroup';
         //const data = { params: { Year: searchYear.value } }; 
         const data = { Year: searchYear.value, Group: searchGroup.value };  // 抓年度的值
         loading.value = true;
         try {
-            const response: ApiResponse<MoneyRawData[]> = await get<MoneyRawData[]>(url, data);
+            const response: ApiResponse<MoneyItem[]> = await get<MoneyItem[]>(url, data);
             if (response.StatusCode === 200) {
+                console.log('data:', response.Data);
                 //console.log(response.StatusCode);
-                //console.log(response.Data);
-                const dbData = response.Data?.map((item: MoneyRawData): MoneyItem => ({
-                    Budget: item.MoneyDbModel.Budget,
-                    Group: item.MoneyDbModel.Group,
-                    Subject6: item.MoneyDbModel.Subject6,
-                    Subject7: item.MoneyDbModel.Subject7,
-                    Subject8: item.MoneyDbModel.Subject8,
-                    BudgetYear: item.MoneyDbModel.BudgetYear,
-                    Final: parseFloat(item.MoneyDbModel.Final ?? "") || 0,
-                    Text: item.Text,
-                    PurchaseMoney: item.PurchaseMoney,
-                    PayMoney: item.PayMoney,
-                    Purchasedate: item.Purchasedate || ""  // 確保不為 undefined
-                })) ?? [];
-                items.value = dbData;
-                selectedDetailItem.value = response.Data ?? [];
-                filteredDetailItem.value = [...selectedDetailItem.value];
-                //console.log('selectedDetailItem.value', selectedDetailItem.value);
+                items.value = response.Data ?? [];
             } else {
                 console.log(response.Data ?? response.Message)
             }
@@ -220,6 +201,36 @@
         finally {
             loading.value = false;
             console.log('end');
+        }
+    };
+
+    const fetchSelectedDetail = async (Budget: string, Group: string, Year: number, Note?: string, PurchaseMoney?: number) => {
+        const url = '/api/PublicWorksGroup/SelectedDetail';
+        const data: any = { Budget, Group, Year };
+
+        if (Note) data.Note = Note;
+        if (PurchaseMoney) data.PurchaseMoney = PurchaseMoney;
+
+        try {
+            loading.value = true;
+            const response: ApiResponse<SelectedDetail[]> = await get<SelectedDetail[]>(url, data);
+            if (response.StatusCode === 200) {
+                //filteredDetailItem.value = response.Data!;
+                selectedDetailItem.value = response.Data?.map(item => ({
+                    ...item,
+                    All: item.All?.trim(),
+                    True: item.True?.trim(),
+                    FormattedPurchasedate: formatDate(item.Purchasedate || ""),
+                    FormattedPayDate: formatDate(item.PayDate || "")
+                })).sort((a, b) => new Date(b.Purchasedate || "").getTime() - new Date(a.Purchasedate || "").getTime()) ?? [];
+                console.log('selectedDetailItem', selectedDetailItem.value);
+            } else {
+                console.error(response.Message);
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            loading.value = false;
         }
     };
 
@@ -234,9 +245,15 @@
             const inValue = sumByCondition(group, '勻入', 'PurchaseMoney');
             const inActual = sumByCondition(group, '勻入', 'PayMoney');
             const subjectActual = inActual + sumByCondition(group, '一般', 'PayMoney');
-            const useBudget = (firstItem.BudgetYear || 0) - out - general + (firstItem.Final || 0);
-            const end = (firstItem.BudgetYear || 0) + (firstItem.Final || 0) - general - out + inValue;
+
+            // 將 Final 欄位從字串轉換成數字
+            const finalValue = parseFloat(firstItem.Final ?? "") || 0;
+            const budgetYear = firstItem.BudgetYear || 0;
+
+            const useBudget = budgetYear + finalValue - out - general;
+            const end = budgetYear + finalValue - general - out + inValue;
             const inBalance = inValue - inActual;
+
             return {
                 ...firstItem,
                 General: general,
@@ -251,19 +268,6 @@
         });
         //按照日期排序
         return sortedItems.sort((a, b) => new Date(b.Purchasedate || "").getTime() - new Date(a.Purchasedate || "").getTime());
-    });
-
-    const computedSelectedDetailItems = computed(() => {
-        //console.log('computedSelectedDetailItems updated:', filteredDetailItem.value);
-        return filteredDetailItem.value
-            .map(item => ({
-                ...item,
-                All: item.All?.trim(),
-                True: item.True?.trim(),
-                FormattedPurchasedate: formatDate(item.Purchasedate || ""),
-                FormattedPayDate: formatDate(item.PayDate || "")
-            }))
-            .sort((a, b) => new Date(b.Purchasedate || "").getTime() - new Date(a.Purchasedate || "").getTime());
     });
 
     const handleBudgetClick = async (budget: SelectedBudgetModel) => {
@@ -288,11 +292,9 @@
             };
             return newData;
         });
-        // 篩選 selectedDetailItem，選出 Budget 欄位與傳進來的 Budget 欄位值相同的資料
-        
+        // 篩選 selectedDetailItem，選出 Budget 欄位與傳進來的 Budget 欄位值相同的資料   
         currentBudgetValue.value = budget.Budget; // 儲存 budgetValue
-        filteredDetailItem.value = selectedDetailItem.value.filter(item => item.MoneyDbModel.Budget === budget.Budget && item.Status !== 'C');
-        //console.log('Filtered selectedDetailItem:', filteredDetailItem.value);
+        await fetchSelectedDetail(budget.Budget!, searchGroup.value, searchYear.value);
     };
 
     const handleExcelClick = async (budget: string) => {
@@ -328,7 +330,14 @@
         // 編輯項目的處理邏輯
         console.log('updatedItem', updatedItem);
         try {
-            await requery(updatedItem); // 把資訊帶進去重查
+            //await requery(updatedItem); // 把資訊帶進去重查
+            await fetchBudgetData();
+            await fetchSelectedDetail(currentBudgetValue.value!, searchGroup.value, searchYear.value);
+            // 重新更新 selectedItem
+            const budgetItem = computedItems.value.find(budget => budget.Budget === currentBudgetValue.value);
+            if (budgetItem) {
+                await handleBudgetClick(budgetItem);
+            }
         }
         catch (error) {
             console.error(error);
@@ -360,9 +369,15 @@
         };
     };
 
-    const handleCreate = (newItem: any) => {
+    const handleCreate = async (newItem: any) => {
         // 處理新增邏輯
-        searchMoneyDb();
+        await fetchBudgetData();
+        await fetchSelectedDetail(currentBudgetValue.value!, searchGroup.value, searchYear.value);
+        // 重新更新 selectedItem
+        const budgetItem = computedItems.value.find(budget => budget.Budget === currentBudgetValue.value);
+        if (budgetItem) {
+            await handleBudgetClick(budgetItem);
+        }
         console.log('Created:', newItem);
     };
 
@@ -371,58 +386,23 @@
         editingItem.value = null;
     };
 
-    const requery = async (updatedItem: MoneyRawData) => {
-        await searchMoneyDb();// 重新取一次資料(不管有沒有更新或刪除)
-        selectedItem.value = computedItems.value.filter((x: MoneyItem) => { //更新選擇的GroupBy的單筆資料
-            // 確保 updatedItem 和 MoneyDbModel 存在
-            if (!updatedItem || !updatedItem.MoneyDbModel) {
-                return false;
-            }
-            // 找Subject6,7,8欄位,7,8如果沒有就不配對
-            const isSubject6Match = x.Subject6 === updatedItem.MoneyDbModel.Subject6;
-            const isSubject7Match = !updatedItem.MoneyDbModel.Subject7 || x.Subject7 === updatedItem.MoneyDbModel.Subject7;
-            const isSubject8Match = !updatedItem.MoneyDbModel.Subject8 || x.Subject8 === updatedItem.MoneyDbModel.Subject8;
-
-            return isSubject6Match && isSubject7Match && isSubject8Match;
-        }).map((v: any) => {
-            const newData: SelectedBudgetModel = {
-                Subject6: v.Subject6,
-                Subject7: v.Subject7,
-                Subject8: v.Subject8,
-                BudgetYear: v.BudgetYear,
-                Final: v.Final,
-                General: v.General,
-                Out: v.Out,
-                UseBudget: v.UseBudget,
-                In: v.In,
-                InActual: v.InActual,
-                InBalance: v.InBalance,
-                SubjectActual: v.SubjectActual,
-                End: v.End
-            };
-            return newData;
-        });
-        //console.log('selectedItem:', selectedItem);
-        // 篩選 selectedDetailItem，選出 Budget 欄位與傳進來的 Budget 欄位值相同的資料,修改資料後,用這筆資料Name欄位再篩選一次
-        const budgetValue = updatedItem.Name; //改用Name欄位
-        //console.log('budgetValue', budgetValue);
-        //console.log('filteredDetailItem', filteredDetailItem.value);
-        filteredDetailItem.value = selectedDetailItem.value.filter(item => item.MoneyDbModel.Budget === budgetValue && item.Status !== 'C');
-        //console.log('filteredDetailItem', filteredDetailItem.value);  //更新選到的資料底下細項
-    }
-    
-
     const deleteItem = async (item: MoneyRawData) => {
         // 刪除項目的處理邏輯
         const isConfirmed = confirm('你確定要刪除此項目嗎？');
         if (isConfirmed) {
             console.log('Delete item:', item);
             try {
-                const url = 'api/MoneyDb/SoftDelete';
+                const url = 'api/PublicWorksGroup/SoftDelete';
                 const response: ApiResponse<any> = await put<any>(url, item);
                 if (response.StatusCode == 200) {
                     console.log(response.Message);
-                    await requery(item); // 把資訊帶進去重查
+                    await fetchBudgetData();
+                    await fetchSelectedDetail(currentBudgetValue.value!, searchGroup.value, searchYear.value);
+                    // 重新更新 selectedItem
+                    const budgetItem = computedItems.value.find(budget => budget.Budget === currentBudgetValue.value);
+                    if (budgetItem) {
+                        await handleBudgetClick(budgetItem);
+                    }
                 }
             }
             catch (error) {
@@ -435,9 +415,10 @@
     };
 
 
-    const handleSearch = (payload: { text: string, PurchaseMoney: number }) => {
+    const handleSearch = async (payload: { Note: string, PurchaseMoney: number }) => {
         // 處理查詢邏輯
-        console.log('Text:', payload.text, 'Number:', payload.PurchaseMoney);
+        console.log('Note:', payload.Note, 'Number:', payload.PurchaseMoney);
+        await fetchSelectedDetail(currentBudgetValue.value!, searchGroup.value, searchYear.value, payload.Note, payload.PurchaseMoney);
     };
 </script>
 

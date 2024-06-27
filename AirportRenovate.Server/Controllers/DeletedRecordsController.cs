@@ -8,14 +8,13 @@ using NPOI.XSSF.UserModel; // NPOI 的 Excel 套件
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using AutoMapper;
 using NPOI.SS.Formula.Functions;
 using AirportRenovate.Server.Mappings;
 using AutoMapper.QueryableExtensions;
 using AirportRenovate.Server.DTOs;
 using AirportRenovate.Server.ViewModels;
 using System.Text.RegularExpressions;
-using MyGisMIS.Server.Repositorys;
+using AirportRenovate.Server.Repositorys;
 
 
 

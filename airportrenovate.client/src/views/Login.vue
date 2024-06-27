@@ -1,5 +1,5 @@
 <template>
-    <v-container fluid fill-height >
+    <!--<v-container fluid fill-height >
         <v-row  justify="center" align="center">
             <v-col>
                 <h2>登入</h2>
@@ -18,8 +18,8 @@
                 </form>
             </v-col>
         </v-row>
-    </v-container>
-    <!--<v-container fill-height fluid>
+    </v-container>-->
+    <v-container fill-height fluid>
         <v-row justify="center" align="center" style="width: 100%; height: 100vh;">
             <v-col  align="center" cols="12" sm="8" md="6">
                 <v-card max-width="500">
@@ -27,16 +27,27 @@
                         <h2>登入</h2>
                     </v-card-title>
                     <v-card-text>
-                        <v-form @submit.prevent="login" enctype="application/x-www-form-urlencoded" >
-                            <v-text-field v-model="loginData.Account" label="帳號" outlined ></v-text-field>
-                            <v-text-field v-model="loginData.Password" label="密碼" outlined type="password" ></v-text-field>
-                            <v-btn type="submit" color="primary" block>登入</v-btn>
+                        <v-form ref="loginFormRef" @submit.prevent="login" enctype="application/x-www-form-urlencoded" >
+                            <v-text-field v-model="loginData.Account" 
+                                          label="帳號" 
+                                          outlined 
+                                          :rules="[rules.required]" >
+                            </v-text-field>
+                            <v-text-field v-model="loginData.Password" 
+                                          label="密碼" 
+                                          outlined 
+                                          :type="showPassword ? 'text' : 'password' "
+                                          @click:append-inner="showPassword = !showPassword"
+                                          :rules="[rules.passwordFormat]"
+                                          :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'">
+                            </v-text-field>
+                            <v-btn type="submit" color="primary" block :loading="btnLoading">登入</v-btn>
                         </v-form>
                     </v-card-text>
                 </v-card>
             </v-col>
         </v-row>
-    </v-container>-->
+    </v-container>
 
 </template>
 
@@ -48,17 +59,27 @@ import type { LoginViewModel } from '@/types/apiInterface';
 import type { LoginUserModel } from '@/types/apiInterface';
 import { useRouter } from 'vue-router';
 import { useCookies } from 'vue3-cookies';
-    import { post, type ApiResponse } from '../services/api';
+import { post, type ApiResponse } from '../services/api';
+import { RULES } from '@/constants/constants';
 
 const router = useRouter();
 
 const { cookies } = useCookies(); // 初始化 vue3-cookies
 
+const loginFormRef = ref<HTMLFormElement | null>(null);
 const loginData = ref<LoginViewModel>({
     Account: '',
     Password: '',
 })
+const btnLoading = ref<boolean>(false);
+const showPassword = ref<boolean>(false);
+const rules = RULES;
+
     const login = async () => {
+        const { valid } = await loginFormRef.value?.validate();
+        if (!valid) return;
+        btnLoading.value = true;
+
         const url = '/api/Login';
         const data = loginData.value;
         const regex: RegExp = /^(?!.*[^\x21-\x7e])(?=.*[\W])(?=.*[a-zA-Z])(?=.*\d).{8,20}$/;
@@ -66,24 +87,26 @@ const loginData = ref<LoginViewModel>({
         //    alert('請輸入 8 到 20 個字符的密碼，必須包含至少一個字母、一個數字和一個特殊字符。');
         //    return;
         //}
-    try {
-        const response = await axios.post(url, data);
-        /*const response: ApiResponse<any> = await post<any>(url, data);*/
-        if (response) {
-            const userData: LoginUserModel = response.data;
-            for (let key in userData) {
-                if (key === 'Status1' || key === 'Status2' || key === 'Status3') {
-                    userData[key] = userData[key]?.trim(); // 清除資料多餘空格
+        try {
+            const response = await axios.post(url, data);
+            /*const response: ApiResponse<any> = await post<any>(url, data);*/
+            if (response) {
+                const userData: LoginUserModel = response.data;
+                for (let key in userData) {
+                    if (key === 'Status1' || key === 'Status2' || key === 'Status3') {
+                        userData[key] = userData[key]?.trim(); // 清除資料多餘空格
+                    }
                 }
+                setUserData(userData);
+                /*   console.log(userData ? userData : '沒有資料'); // 登入成功後的回傳資料*/
             }
-            setUserData(userData);
-         /*   console.log(userData ? userData : '沒有資料'); // 登入成功後的回傳資料*/
+            router.push('/main')
+
+        } catch (error) {
+            console.error('登入失敗:', error); // 處理登入失敗的情況
+        } finally {
+            btnLoading.value = false;
         }
-        router.push('/main')
-       
-    } catch (error) {
-        console.error('登入失敗:', error); // 處理登入失敗的情況
-    }
 }
 
     // 設定使用者資料的函數

@@ -6,8 +6,8 @@ using AirportRenovate.Server.Mappings;
 using System.Text.Json.Serialization;
 using AirportRenovate.Server.Utilities;
 using AirportRenovate.Server.Interfaces.Repositorys;
-using MyGisMIS.Server.Repositorys;
-
+using AirportRenovate.Server.Repositorys;
+using AutoMapper;
 
 var builder = WebApplication.CreateBuilder(args);
 

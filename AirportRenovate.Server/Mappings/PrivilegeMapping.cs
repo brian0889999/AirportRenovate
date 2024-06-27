@@ -10,7 +10,7 @@ namespace AirportRenovate.Server.Mappings
     {
         public PrivilegeMapping()
         {
-            CreateMap<Users, UserDto>()
+            CreateMap<User, UserDto>()
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name != null ? src.Name.Trim() : ""))
                 .ForMember(dest => dest.Account, opt => opt.MapFrom(src => src.Account != null ? src.Account.Trim() : ""))
                 //.ForMember(dest => dest.Password, opt => opt.Ignore()) // 不在這裡處理Password
@@ -19,7 +19,7 @@ namespace AirportRenovate.Server.Mappings
                 .ForMember(dest => dest.Status2, opt => opt.MapFrom(src => src.Status2 != null ? src.Status2.Trim() : ""))
                 .ForMember(dest => dest.Status3, opt => opt.MapFrom(src => src.Status3 != null ? src.Status3.Trim() : ""));
             // New mapping for AddUser and UpdateUser
-            CreateMap<UserDto, Users>()
+            CreateMap<UserDto, User>()
                 //.ForMember(dest => dest.Password, opt => opt.Ignore()) // 不在這裡處理Password
                 .ForMember(dest => dest.Status1, opt => opt.MapFrom(src => src.Status1 != null ? src.Status1.Trim() : ""))
                 //.ForMember(dest => dest.Status2, opt => opt.MapFrom(src => src.Status2 != null ? src.Status2.Trim() : ""))
