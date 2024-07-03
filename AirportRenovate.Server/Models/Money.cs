@@ -8,7 +8,7 @@ namespace AirportRenovate.Server.Models
     //{
     //    public int Year { get; set; }
     //}
-    public class MoneyDbModel
+    public class Money
     {
         [Key]
         public int ID { get; set; }
@@ -46,7 +46,7 @@ namespace AirportRenovate.Server.Models
 
         //[ForeignKey("Budget")]
         [JsonIgnore]
-        public ICollection<Money3DbModel>? Money3DbModels { get; set; }
+        public ICollection<Money3>? Money3s { get; set; }
         //public List<Money3DbModel>? Money3DbModels { get; set; }
     }
 

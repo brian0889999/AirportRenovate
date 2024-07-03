@@ -15,19 +15,21 @@ using AirportRenovate.Server.DTOs;
 using AirportRenovate.Server.ViewModels;
 using System.Text.RegularExpressions;
 using AirportRenovate.Server.Repositorys;
+using Microsoft.AspNetCore.Authorization;
 
 
 
 namespace AirportRenovate.Server.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class BalanceManagementController(IGenericRepository<Type1> Type1, IGenericRepository<Type2> Type2, IGenericRepository<Type3> Type3,IGenericRepository<Money3DbModel> money3Repository, IMapper mapper) : ControllerBase
+public class BalanceManagementController(IGenericRepository<Type1> Type1, IGenericRepository<Type2> Type2, IGenericRepository<Type3> Type3,IGenericRepository<Money3> money3Repository, IMapper mapper) : ControllerBase
 {
     private readonly IGenericRepository<Type1> _Type1 = Type1;
     private readonly IGenericRepository<Type2> _Type2 = Type2;
     private readonly IGenericRepository<Type3> _Type3 = Type3;
-    private readonly IGenericRepository<Money3DbModel> _money3Repository = money3Repository;
+    private readonly IGenericRepository<Money3> _money3Repository = money3Repository;
     private readonly IMapper _mapper = mapper;
     [HttpGet("Subjects6")]
     public async Task<IActionResult> GetTypes1(string? group)
@@ -106,28 +108,29 @@ public class BalanceManagementController(IGenericRepository<Type1> Type1, IGener
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] BalanceFormViewModel balanceForm)
     {
+        //User
         try
         {
             var results = await _money3Repository.GetByCondition(money3 => money3.Group1 == balanceForm.Group
-   && money3.MoneyDbModel != null && money3.MoneyDbModel.Group == balanceForm.Group
-   && money3.MoneyDbModel.Budget == balanceForm.Budget
-   && money3.Year == balanceForm.Year && money3.MoneyDbModel.Year == balanceForm.Year
+   && money3.Money != null && money3.Money.Group == balanceForm.Group
+   && money3.Money.Budget == balanceForm.Budget
+   && money3.Year == balanceForm.Year && money3.Money.Year == balanceForm.Year
    && (money3.Status != null && (money3.Status.Trim() == "O" || money3.Status.Trim() == "C")))
-   .Include(money3 => money3.MoneyDbModel)
+   .Include(money3 => money3.Money)
      .ToListAsync();
 
             var query = results
             .GroupBy(m3 => new {
-                Subject6 = m3.MoneyDbModel != null ? m3.MoneyDbModel.Subject6 : "",
-                Subject7 = m3.MoneyDbModel != null ? m3.MoneyDbModel.Subject7 : "",
-                Subject8 = m3.MoneyDbModel != null ? m3.MoneyDbModel.Subject8 : "",
-                BudgetYear = m3.MoneyDbModel != null ? m3.MoneyDbModel.BudgetYear : 0,
-                Final = m3.MoneyDbModel != null && decimal.TryParse(m3.MoneyDbModel.Final, out var final) ? final : 0m,
-                Budget = m3.MoneyDbModel != null ? m3.MoneyDbModel.Budget : "",
-                Group = m3.MoneyDbModel != null ? m3.MoneyDbModel.Group : "",
+                Subject6 = m3.Money != null ? m3.Money.Subject6 : "",
+                Subject7 = m3.Money != null ? m3.Money.Subject7 : "",
+                Subject8 = m3.Money != null ? m3.Money.Subject8 : "",
+                BudgetYear = m3.Money != null ? m3.Money.BudgetYear : 0,
+                Final = m3.Money != null && decimal.TryParse(m3.Money.Final, out var final) ? final : 0m,
+                Budget = m3.Money != null ? m3.Money.Budget : "",
+                Group = m3.Money != null ? m3.Money.Group : "",
                 m3.Year
             })
-            .Select(g => new BudgetDetailsDto
+            .Select(g => new BudgetDetailsViewModel
             {
                 Budget = g.Key.Budget ?? "",
                 Subject6 = g.Key.Subject6 ?? "",

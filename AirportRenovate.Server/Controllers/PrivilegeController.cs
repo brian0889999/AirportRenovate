@@ -1,15 +1,17 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using AirportRenovate.Server.Interfaces.Repositorys;
 using AirportRenovate.Server.Models;
-using AirportRenovate.Server.DTOs;
 using AirportRenovate.Server.Datas;
 using AirportRenovate.Server.Utilities;
 using AutoMapper;
 using System.Net.Sockets;
 using System.Linq.Expressions;
+using Microsoft.AspNetCore.Authorization;
+using AirportRenovate.Server.ViewModels;
 
 namespace AirportRenovate.Server.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class PrivilegeController : ControllerBase
@@ -29,10 +31,10 @@ public class PrivilegeController : ControllerBase
     /// </summary>
     /// <returns>查詢結果</returns>
     [HttpGet]
-    public ActionResult<IEnumerable<UserDto>> FetchUsers()
+    public ActionResult<IEnumerable<UserDataViewModel>> FetchUsers()
     {
         var usersData = _users.GetAll().ToList();
-        List<UserDto> users = _mapper.Map<List<UserDto>>(usersData);
+        List<UserDataViewModel> users = _mapper.Map<List<UserDataViewModel>>(usersData);
 
         foreach (var user in users)
         {
@@ -50,7 +52,7 @@ public class PrivilegeController : ControllerBase
     /// </summary>
     /// <returns>新增結果</returns>
     [HttpPost]
-    public IActionResult AddUser([FromBody] UserDto request)
+    public IActionResult AddUser([FromBody] UserDataViewModel request)
     {
         try
         {
@@ -83,7 +85,7 @@ public class PrivilegeController : ControllerBase
     /// <returns>更新結果</returns>
     [HttpPut]
 
-    public IActionResult UpdateUser([FromBody] UserDto currentItem)
+    public IActionResult UpdateUser([FromBody] UserDataViewModel currentItem)
     {
         try
         {

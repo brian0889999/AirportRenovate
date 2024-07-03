@@ -47,3 +47,11 @@ export const handleExcelClick = async (budget: string) => {
         console.error(error);
     }
 };
+
+
+// 數字格式化
+export const formatNumber = (value: number): string  => {
+    if (!value) return '0';
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+

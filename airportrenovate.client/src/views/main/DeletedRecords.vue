@@ -10,12 +10,20 @@
                                   style="width: 100%;">
                         </v-select>
                     </v-col>
+                    <v-col cols="3">
+                        <v-text-field label="輸入摘要"
+                                      v-model="noteInput"
+                                      style="width: 100%;" />
+                    </v-col>
+                    <v-col cols="3">
+                        <v-btn @click="searchDeletedRecords"
+                               color="primary"
+                               class="mt-2"
+                               size="large">
+                            查詢
+                        </v-btn>
+                    </v-col>
                 </v-row>
-                <v-btn @click="searchDeletedRecords"
-                       color="primary"
-                       class="mb-2">
-                    查詢
-                </v-btn>
             </v-col>
         </v-row>
         <v-data-table :headers="headers"
@@ -31,6 +39,12 @@
             </template>
             <template v-slot:item.PayDate="{ item }">
                 {{ formatDate(item.PayDate) }}
+            </template>
+            <template v-slot:item.PurchaseMoney="{ item }">
+                {{ formatNumber(item.PurchaseMoney) }}
+            </template>
+            <template v-slot:item.PayMoney="{ item }">
+                {{ formatNumber(item.PayMoney) }}
             </template>
             <template v-slot:item.actions="{ item }">
                <v-btn @click="restoreData(item)"
@@ -51,12 +65,13 @@ import type { SoftDeleteViewModel } from '@/types/apiInterface';
 //import { AuthMapping, ReverseAuthMapping, StatusMapping, ReverseStatusMapping } from '@/utils/mappings'; // 對應狀態碼到中文
 import { get, put, type ApiResponse } from '@/services/api';
 import type { VDataTable } from 'vuetify/components';
+import { formatDate, formatNumber } from '@/utils/functions';
 type ReadonlyHeaders = VDataTable['$props']['headers'];
-import { formatDate } from '@/utils/functions';
   
     const loading = ref(false);
     const years = ref<number[]>([111, 112, 113]);
     const searchYear = ref<number>(113);
+    const noteInput = ref<string>('');
     const items = ref<SoftDeleteViewModel[]>([]);
     const headers: ReadonlyHeaders = [
         { title: '請購日期', key: 'Purchasedate' },
@@ -73,14 +88,17 @@ import { formatDate } from '@/utils/functions';
         { title: '', key: 'actions', sortable: false },
     ];
 const searchDeletedRecords = async () => {
-    const url = 'api/DeletedRecords';
-    const data = { Year: searchYear.value };
+    const url = 'api/PublicWorksGroup/ByDeletedRecords';
+    const data: any = { Year: searchYear.value, Note: ''};
+    if(noteInput) data.Note = noteInput.value;
     try {
+        console.log(123);
+        console.log(data);
         const response: ApiResponse<SoftDeleteViewModel[]> = await get<SoftDeleteViewModel[]>(url, data);
         //console.log(response.Message);
         if (response.StatusCode == 200) {
             items.value = response?.Data ?? []; 
-            console.log(items);
+            console.log(items.value);
         }
     }
     catch (error) {
@@ -89,7 +107,7 @@ const searchDeletedRecords = async () => {
     };
     const restoreData = async (item: SoftDeleteViewModel) => {
         const isConfirmed = confirm('你確定要還原嗎？');
-        const url = 'api/DeletedRecords/ByRestoreData'
+        const url = 'api/PublicWorksGroup/ByRestoreData'
         if (isConfirmed) {
             try {
                 //console.log(item);

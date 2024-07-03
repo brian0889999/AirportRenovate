@@ -16,7 +16,8 @@
                 <v-col cols="3">
                     <v-btn @click="searchByInputs"
                            color="primary"
-                           class="mb-2">
+                           class="mt-2"
+                            size="large">
                         查詢
                     </v-btn>
                 </v-col>

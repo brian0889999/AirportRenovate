@@ -9,7 +9,7 @@
         <v-spacer />
         <v-spacer />
         <v-spacer />
-        <v-toolbar-title>經費管理/歡迎</v-toolbar-title>
+        <v-toolbar-title>經費管理/歡迎&nbsp;&nbsp;{{ user.Name }}</v-toolbar-title>
 
 
 
@@ -20,13 +20,55 @@
 </template>
 
 <script setup lang="ts">
-    import { computed, onMounted } from 'vue';
+    import { computed, onMounted, ref } from 'vue';
     import { useStore } from '@/store/index';
     import { useRouter } from 'vue-router';
+    import { get, type ApiResponse } from '@/services/api';
+    import type { UserViewModel } from '@/types/apiInterface';
     const router = useRouter();
-    const logout = () => {
+    const defaultUser: UserViewModel = {
+        No: 0,
+        Name: '',
+        Account: '',
+        Password: '',
+        Email: '',
+        Unit_No: '',
+        Auth: '',
+        Account_Open: '',
+        Reason: '',
+        Count: 0,
+        Time: new Date(),
+        Time1: new Date(),
+        Status1: '',
+        Status2: '',
+        MEMO: '',
+        Status3: '',
+};
+    const user = ref<UserViewModel>(defaultUser); 
+    onMounted(async () => {
+        await getCurrentUser();
+    });
 
+    const getCurrentUser = async () => {
+        const url = '/api/User/Current';
+        try {
+            const response: ApiResponse<UserViewModel> = await get<UserViewModel>(url);
+            if (response.StatusCode === 200) {
+                const data = response.Data;
+                user.value = data ? data : defaultUser;
+            }
+            else {
+                console.error(response.Data ?? response.Message);
+            }
+        }
+        catch (error: any) {
+            console.error(error.message);
+        }
+    };
+
+    const logout = () => {
         if (confirm("確定要登出嗎?")) {
+            localStorage.removeItem('jwtToken');
             router.push('/login');
         } else {
             return false;

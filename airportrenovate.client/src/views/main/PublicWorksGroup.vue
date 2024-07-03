@@ -17,12 +17,20 @@
                                   style="width: 100%;">
                         </v-select>
                     </v-col>
+                    <v-col cols="3">
+                        <v-btn @click="fetchBudgetData"
+                               color="primary"
+                               class="mt-2"
+                               size="large">
+                            查詢
+                        </v-btn>
+                    </v-col>
                 </v-row>
-                <v-btn @click="fetchBudgetData"
+                <!--<v-btn @click="fetchBudgetData"
                        color="primary"
                        class="mb-2">
                     查詢
-                </v-btn>
+                </v-btn>-->
             </v-col>
         </v-row>
         <v-data-table v-if="!isSelectedItem"
@@ -36,7 +44,7 @@
                       style="width: 100%;">
             <template #item.Budget="{ item }">
                 <v-btn variant="flat"
-                       class="mb-2"
+                       class="mb-2 v-btn--text"
                        @click="handleBudgetClick(item)">
                     {{ item.Budget }}
                 </v-btn>
@@ -45,6 +53,33 @@
                        color="primary">
                     EXCEL
                 </v-btn>
+            </template>
+            <template #item.BudgetYear="{ item }">
+                {{ formatNumber(item.BudgetYear) }}
+            </template>
+            <template #item.Final="{ item }">
+                {{ formatNumber(item.Final) }}
+            </template>
+            <template #item.General="{ item }">
+                {{ formatNumber(item.General) }}
+            </template>
+            <template #item.Out="{ item }">
+                {{ formatNumber(item.Out) }}
+            </template>
+            <template #item.UseBudget="{ item }">
+                {{ formatNumber(item.UseBudget) }}
+            </template>
+            <template #item.In="{ item }">
+                {{ formatNumber(item.In) }}
+            </template>
+            <template #item.InActual="{ item }">
+                {{ formatNumber(item.InActual)}}
+            </template>
+            <template #item.InBalance="{ item }">
+                {{ formatNumber(item.InBalance)}}
+            </template>
+            <template #item.SubjectActual="{ item }">
+                {{ formatNumber(item.SubjectActual)}}
             </template>
         </v-data-table>
         <!-- isSelectedItem -->
@@ -57,26 +92,61 @@
                 </v-btn>
             </v-col>
         </v-row>
-        <search-fields v-if="isSelectedItem && !showDetailForm"
-                       @search="handleSearch" />
+        
         <v-data-table v-if="isSelectedItem && !showDetailForm"
                       :headers="selectedHeaders"
                       :items="selectedItem"
                       hide-default-footer>
+            <template #item.BudgetYear="{ item }">
+                {{ formatNumber(item.BudgetYear) }}
+            </template>
+            <template #item.Final="{ item }">
+                {{ formatNumber(item.Final) }}
+            </template>
+            <template #item.General="{ item }">
+                {{ formatNumber(item.General) }}
+            </template>
+            <template #item.Out="{ item }">
+                {{ formatNumber(item.Out) }}
+            </template>
+            <template #item.UseBudget="{ item }">
+                {{ formatNumber(item.UseBudget) }}
+            </template>
+            <template #item.In="{ item }">
+                {{ formatNumber(item.In) }}
+            </template>
+            <template #item.InActual="{ item }">
+                {{ formatNumber(item.InActual)}}
+            </template>
+            <template #item.InBalance="{ item }">
+                {{ formatNumber(item.InBalance)}}
+            </template>
+            <template #item.SubjectActual="{ item }">
+                {{ formatNumber(item.SubjectActual)}}
+            </template>
+            <template #item.End="{ item }">
+                {{ formatNumber(item.End)}}
+            </template>
         </v-data-table>
         <v-data-table v-if="isSelectedItem && !showDetailForm"
                       :headers="selectedDetailHeaders"
                       :items="selectedDetailItem">
             <template #top>
-                <v-row>
+                <search-fields v-if="isSelectedItem && !showDetailForm"
+                               @search="handleSearch"
+                               class="mt-1"/>
+                <v-row no-gutters>
                     <v-col>
                         <v-btn color="primary" @click="addItem">新增</v-btn>
                     </v-col>
                 </v-row>
             </template>
-            <!--<template #item.PayDate="{ item }">
-            {{ item.FormattedPayDate }}
-        </template>-->
+            <template #item.PurchaseMoney="{ item }">
+                {{ formatNumber(item.PurchaseMoney) }}
+            </template>
+            <template #item.PayMoney="{ item }">
+                {{ formatNumber(item.PayMoney) }}
+            </template>
             <template #item.actions="{ item }">
                 <v-btn icon size="small" class="mr-2" @click="editItem(item)">
                     <v-icon>mdi-pencil</v-icon>
@@ -101,7 +171,7 @@
     import { get, post, put, type ApiResponse } from '@/services/api';
     import type { VDataTable } from 'vuetify/components';
     import type { BudgetModel, SelectedBudgetModel, MoneyItem, MoneyRawData, SoftDeleteViewModel, Detail, SelectedDetail } from '@/types/apiInterface';
-    import { formatDate, sumByCondition, groupBy } from '@/utils/functions';
+    import { formatDate, sumByCondition, groupBy, formatNumber } from '@/utils/functions';
     import DetailForm from '@/components/modules/DetailForm.vue';
     import SearchFields from '@/components/modules/SearchFields.vue';
     
@@ -160,12 +230,11 @@
     const isSelectedItem = ref<boolean>(false);
     const selectedItem = ref<SelectedBudgetModel[]>([]);
     const selectedDetailItem = ref<SelectedDetail[]>([]);
-    const filteredDetailItem = ref<SelectedDetail[]>([]);
     const groups = ref<string[]>(['工務組', '業務組', '人事室', '中控室', '北竿站', '企劃組', '南竿站', '政風室', '航務組', '總務組', '企劃行政組', '營運安全組']);
     const searchGroup = ref<string>('工務組');
     const isEdit = ref(false);
 
-    const currentBudgetValue = ref<string | undefined>(''); // 儲存 budgetValue 的變數
+    const currentBudgetValue = ref<string>(''); // 儲存 budgetValue 的變數
 
     const previousPage = async () => {
         isSelectedItem.value = false;
@@ -210,7 +279,7 @@
 
         if (Note) data.Note = Note;
         if (PurchaseMoney) data.PurchaseMoney = PurchaseMoney;
-
+        console.log(data);
         try {
             loading.value = true;
             const response: ApiResponse<SelectedDetail[]> = await get<SelectedDetail[]>(url, data);
@@ -272,7 +341,7 @@
 
     const handleBudgetClick = async (budget: SelectedBudgetModel) => {
         isSelectedItem.value = true;
-        const data = [{ ...budget }];
+        const data = [{ ...budget }]; // 將整個item複製
         //console.log('Budget clicked:', data);
         selectedItem.value = data.map((v) => {
             const newData: SelectedBudgetModel = {
@@ -293,7 +362,7 @@
             return newData;
         });
         // 篩選 selectedDetailItem，選出 Budget 欄位與傳進來的 Budget 欄位值相同的資料   
-        currentBudgetValue.value = budget.Budget; // 儲存 budgetValue
+        budget.Budget ? currentBudgetValue.value = budget.Budget  : ''; // 儲存 budgetValue
         await fetchSelectedDetail(budget.Budget!, searchGroup.value, searchYear.value);
     };
 
@@ -350,7 +419,7 @@
         editingItem.value = { // 新增功能的初始值
             ID: 0,
             Purchasedate: '',
-            Text: '',
+            Text: '一般',
             Note: '',
             PurchaseMoney: 0,
             PayDate: '',
@@ -431,4 +500,16 @@
         text-decoration: underline;
         cursor: pointer;
     }*/
+
+    .v-btn--text {
+        color: blue;
+        text-decoration: underline;
+        background-color: transparent;
+        border: none;
+        padding: 0;
+    }
+
+    .v-btn--text:hover {
+        color: darkblue;
+    }
 </style>

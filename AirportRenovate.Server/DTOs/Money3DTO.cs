@@ -2,7 +2,7 @@
 
 namespace AirportRenovate.Server.DTOs;
 
-public class Money3DbModelDto : Money3DbModel
+public class Money3DTO : Money3
 {
 
 }

@@ -56,7 +56,7 @@
 import axios from 'axios';
 import { ref } from 'vue';
 import type { LoginViewModel } from '@/types/apiInterface';
-import type { LoginUserModel } from '@/types/apiInterface';
+import type { UserViewModel } from '@/types/apiInterface';
 import { useRouter } from 'vue-router';
 import { useCookies } from 'vue3-cookies';
 import { post, type ApiResponse } from '../services/api';
@@ -88,19 +88,25 @@ const rules = RULES;
         //    return;
         //}
         try {
-            const response = await axios.post(url, data);
+            const response: ApiResponse<any> = await post<any>(url, data);
             /*const response: ApiResponse<any> = await post<any>(url, data);*/
-            if (response) {
-                const userData: LoginUserModel = response.data;
-                for (let key in userData) {
-                    if (key === 'Status1' || key === 'Status2' || key === 'Status3') {
-                        userData[key] = userData[key]?.trim(); // 清除資料多餘空格
-                    }
-                }
-                setUserData(userData);
-                /*   console.log(userData ? userData : '沒有資料'); // 登入成功後的回傳資料*/
+            //if (response) {
+            //    //const userData: UserViewModel = response.Data;
+            //    //for (let key in userData) {
+            //    //    if (key === 'Status1' || key === 'Status2' || key === 'Status3') {
+            //    //        userData[key] = userData[key]?.trim(); // 清除資料多餘空格
+            //    //    }
+            //    //}
+            //    console.log(response.Data);
+            //    //setUserData(userData);
+            //    /*   console.log(userData ? userData : '沒有資料'); // 登入成功後的回傳資料*/
+            //}
+            //router.push('/main')
+            if (response.StatusCode === 200) {
+                const jwtToken = response.Data;
+                localStorage.setItem('jwtToken', jwtToken);
+                router.push({ name: 'main' });
             }
-            router.push('/main')
 
         } catch (error) {
             console.error('登入失敗:', error); // 處理登入失敗的情況
@@ -110,7 +116,7 @@ const rules = RULES;
 }
 
     // 設定使用者資料的函數
-    const setUserData = (userData: LoginUserModel) => {
+    const setUserData = (userData: UserViewModel) => {
         // 將使用者資料存入 Cookie，設置為一天後過期
         cookies.set('userData', JSON.stringify(userData), { expires: '1d' });
     };

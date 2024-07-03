@@ -1,9 +1,9 @@
 ﻿using AirportRenovate.Server.Models;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AirportRenovate.Server.DTOs;
+namespace AirportRenovate.Server.ViewModels;
 
-public class BudgetDetailsDto
+public class BudgetDetailsViewModel
 {
     public string Budget { get; set; } = string.Empty;
     public string Subject6 { get; set; } = string.Empty;
@@ -11,7 +11,7 @@ public class BudgetDetailsDto
     public string Subject7 { get; set; } = string.Empty;
     public string Subject8 { get; set; } = string.Empty;
     public int? BudgetYear { get; set; }
-    public decimal? Final { get; set; } 
+    public decimal? Final { get; set; }
     public decimal? General { get; set; }
     public decimal? Out { get; set; }
     public decimal? UseBudget { get; set; }

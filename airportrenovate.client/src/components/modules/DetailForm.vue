@@ -39,7 +39,7 @@
                                 <v-text-field v-model="formattedPayDate"
                                               label="支付日期"
                                               type="date"
-                                              :rules="[rules.required]"></v-text-field>
+                                              ></v-text-field>
                             </v-col>
                             <v-col cols="12" sm="6">
                                 <v-text-field v-model="editedItem.PayMoney"
@@ -57,7 +57,7 @@
                                 <v-select v-model="editedItem.People1"
                                           :items="userNames"
                                           label="支付人"
-                                          :rules="[rules.required]"></v-select>
+                                          ></v-select>
                             </v-col>
                             <v-col cols="12" sm="6">
                                 <v-text-field v-model="editedItem.Remarks"
@@ -162,7 +162,7 @@
 const formattedPayDate = computed<string>({
     get: () => (editedItem.value.PayDate ? editedItem.value.PayDate.split('T')[0] : ''),
     set: (value: string) => {
-        editedItem.value.PayDate = value ? value + "T00:00:00" : '';
+        editedItem.value.PayDate = value ? value + "T00:00:00" : null;
     }
 });
 
@@ -177,13 +177,15 @@ const formattedPayDate = computed<string>({
             let response: ApiResponse<any>;
             if (data.ID1) {
                 response = await put<any>(url, data);
-                console.log(response?.Data || response?.Message);
+                //console.log(response?.Data || response?.Message);
                 // 更新成功後的處理
                 emit('update', editedItem.value);
             } else {
+                // 在這裡將Year欄位賦值為Year1的值
+                data.Year = editedItem.value.Year1 ? parseInt(editedItem.value.Year1, 10) : 0;
                 response = await post<any>(url, data);
-                console.log('response.Data:', response?.Data);
-                console.log(response?.Data || response?.Message);
+                //console.log('response.Data:', response?.Data);
+                //console.log(response?.Data || response?.Message);
                 //console.log('data:', data);
                 //console.log(editedItem.value);
                 emit('create', editedItem.value);

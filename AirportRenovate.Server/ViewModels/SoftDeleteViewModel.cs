@@ -1,15 +1,17 @@
-﻿namespace AirportRenovate.Server.ViewModels
+﻿using MyGisMIS.Server.Enums;
+
+namespace AirportRenovate.Server.ViewModels
 {
-    public class MoneyDbModel
+    public class Money
     {
         public int? ID { get; set; }
-        public string? Budget { get; set; }
-        public string? Group { get; set; }
-        public string? Subject6 { get; set; }
-        public string? Subject7 { get; set; }
-        public string? Subject8 { get; set; }
+        public string? Budget { get; set; } = string.Empty;
+        public string? Group { get; set; } = string.Empty;
+        public string? Subject6 { get; set; } = string.Empty;
+        public string? Subject7 { get; set; } = string.Empty;
+        public string? Subject8 { get; set; } = string.Empty;
         public decimal? BudgetYear { get; set; }
-        public string? Final { get; set; }
+        public string? Final { get; set; } = string.Empty;
         public int? Year { get; set; }
     }
 
@@ -17,23 +19,24 @@
     {
         public int? ID { get; set; }
         public DateTime? Purchasedate { get; set; }
-        public string? Text { get; set; }
-        public string? Note { get; set; }
+        //public FolderType? Text { get; set; }
+        public string? Text { get; set; } = string.Empty;
+        public string? Note { get; set; } = string.Empty;
         public int? PurchaseMoney { get; set; }
         public DateTime? PayDate { get; set; }
         public int? PayMoney { get; set; }
-        public string? People { get; set; }
-        public string? Name { get; set; }
-        public string? Remarks { get; set; }
-        public string? People1 { get; set; }
+        public string? People { get; set; } = string.Empty;
+        public string? Name { get; set; } = string.Empty;
+        public string? Remarks { get; set; } = string.Empty;
+        public string? People1 { get; set; } = string.Empty;
         public int ID1 { get; set; }
-        public string? Status { get; set; }
-        public string? Group1 { get; set; }
-        public string? All { get; set; }
-        public string? True { get; set; }
+        public string? Status { get; set; } = string.Empty;
+        public string? Group1 { get; set; } = string.Empty;
+        public string? All { get; set; } = string.Empty;
+        public string? True { get; set; } = string.Empty;
         public int? Year { get; set; }
-        public string? Year1 { get; set; }
-        public MoneyDbModel? MoneyDbModel { get; set; }
+        public string? Year1 { get; set; } = string.Empty;
+        public Money? Money { get; set; }
         //public string? FormattedPurchaseDate { get; set; }
         //public string? FormattedPayDate { get; set; }
     }

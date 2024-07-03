@@ -3,7 +3,7 @@ export interface LoginViewModel {
     Password:string
 }
 
-export interface LoginUserModel {
+export interface UserViewModel {
     No?: number;
     Name?: string;
     Account?: string;
@@ -140,7 +140,7 @@ export interface SoftDeleteViewModel {
     Text?: string;
     Note?: string;
     PurchaseMoney?: number;
-    PayDate?: string;
+    PayDate?: string | null;
     PayMoney?: number;
     People?: string;
     Name?: string;
