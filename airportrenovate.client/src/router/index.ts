@@ -26,7 +26,7 @@ const routes: Array<RouteRecordRaw> = [
                 path: 'PublicWorksGroup',
                 name: 'PublicWorksGroup',
                 component: () => import(/*webpackChunkName "PublicWorksGroup" */ '@/views/main/PublicWorksGroup.vue'),
-                meta: { title: '工務組' },
+                meta: { title: '組室' },
             }, 
             {
                 path: 'PrivilegeManagement',
@@ -38,17 +38,19 @@ const routes: Array<RouteRecordRaw> = [
                 name: 'DeletedRecords',
                 component: () => import(/*webpackChunkName "DeletedRecords" */ '@/views/main/DeletedRecords.vue'),
                 meta: { title: '復原刪除' },
-            }, {
-                path: 'BalanceManagement',
-                name: 'BalanceManagement',
-                component: () => import(/*webpackChunkName "FinancialBanlancing" */ '@/views/main/BalanceManagement.vue'),
-                meta: { title: '勻出入' },
-            }, {
-                path: 'Test2',
-                name: 'Test2',
-                component: () => import(/*webpackChunkName "Test2" */ '@/views/main/Test2.vue'),
-                meta: { title: 'Test2' },
             },
+            //{
+            //    path: 'BalanceManagement',
+            //    name: 'BalanceManagement',
+            //    component: () => import(/*webpackChunkName "FinancialBanlancing" */ '@/views/main/BalanceManagement.vue'),
+            //    meta: { title: '勻出入' },
+            //},
+            //{
+            //    path: 'Test2',
+            //    name: 'Test2',
+            //    component: () => import(/*webpackChunkName "Test2" */ '@/views/main/Test2.vue'),
+            //    meta: { title: 'Test2' },
+            //},
         ]
     },
    

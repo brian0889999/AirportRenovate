@@ -5,7 +5,7 @@ export interface LoginViewModel {
 
 export interface UserViewModel {
     No?: number;
-    Name?: string;
+    Name: string;
     Account?: string;
     Password?: string;
     Email?: string;
@@ -121,7 +121,7 @@ export interface MoneyRawData {
     Year1?: string;
     All?: string;
     True?: string;
-    MoneyDbModel: {
+    Money: {
         ID: number;
         Budget?: string;
         Group?: string;
@@ -153,12 +153,20 @@ export interface SoftDeleteViewModel {
     Year1?: string;
     All?: string;
     True?: string;
+    Money: {
+        ID: number;
+        Budget?: string;
+        Group?: string;
+        Subject6?: string;
+        Subject7?: string;
+        Subject8?: string;
+        BudgetYear?: number;
+        Final?: string;
+        Year?: number;
+    };
 }
 
-
-export interface Detail {
-    FormattedPurchasedate: string;
-    FormattedPayDate: string;
+export interface EditViewModel {
     ID: number;
     Purchasedate?: string;
     Text?: string;
@@ -177,7 +185,7 @@ export interface Detail {
     Year1?: string;
     All?: string;
     True?: string;
-    MoneyDbModel: {
+    Money: {
         ID: number;
         Budget?: string;
         Group?: string;
@@ -190,7 +198,45 @@ export interface Detail {
     };
 }
 
-export interface BalanceFormViewModel {
+export interface Detail {
+    FormattedPurchasedate?: string;
+    FormattedPayDate?: string;
+    ID: number;
+    Purchasedate?: string;
+    Text?: string;
+    Note?: string;
+    PurchaseMoney?: number;
+    PayDate?: string;
+    PayMoney?: number;
+    People?: string;
+    Name?: string;
+    Remarks?: string;
+    People1?: string;
+    ID1?: number;
+    Status?: string;
+    Group1?: string;
+    Year?: number;
+    Year1?: string;
+    All?: string;
+    True?: string;
+    Money: {
+        ID: number;
+        Budget?: string;
+        Group?: string;
+        Subject6?: string;
+        Subject7?: string;
+        Subject8?: string;
+        BudgetYear?: number;
+        Final?: string;
+        Year?: number;
+    };
+}
+
+export interface AllocateFormViewModel {
+    ID: number,
+    ID1: number,
+    Status: string,
+    Name: string,
     Group: string,
     Subject6: string,
     Subject7: string,
@@ -200,11 +246,36 @@ export interface BalanceFormViewModel {
     Group1: string,
     Subject6_1: string,
     Subject7_1: string,
-    Subject8_1: string,
+    Subject8_1?: string,
+    People: string,
+    Year: number,
+    Year1: string,
+    Purchasedate: string,
+    Note: string,
+    People1: string,
+    //Budget: string,
+    Remarks?: string,
+    Text: string,
+    All: string | null,
+    True: string | null,
+}
+
+export interface AllocateFormViewModelOut {
+    Group: string,
+    Subject6: string,
+    Subject7: string,
+    Subject8?: string,
+    PurchaseMoney: number,
+    PayMoney: number,
+    Group1: string,
+    Subject6_1: string,
+    Subject7_1: string,
+    Subject8_1?: string,
     People: string,
     Year: number,
     PurchaseDate: string,
     Note: string,
     People1: string,
-    Budget: string
+    Budget: string,
+    Remarks?: string,
 }

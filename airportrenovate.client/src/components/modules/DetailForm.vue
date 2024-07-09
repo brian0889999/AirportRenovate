@@ -33,7 +33,7 @@
                                 <v-text-field v-model="editedItem.PurchaseMoney"
                                               label="請購金額"
                                               type="number"
-                                              :rules="[rules.required]"></v-text-field>
+                                              :rules="[rules.required, rules.lessThanOrEqualToBudget]"></v-text-field>
                             </v-col>
                             <v-col cols="12" sm="6">
                                 <v-text-field v-model="formattedPayDate"
@@ -45,7 +45,7 @@
                                 <v-text-field v-model="editedItem.PayMoney"
                                               label="實付金額"
                                               type="number"
-                                              :rules="[rules.required]"></v-text-field>
+                                              :rules="[rules.lessThanOrEqualToPurchaseMoney]"></v-text-field>
                             </v-col>
                             <v-col cols="12" sm="6">
                                 <v-select v-model="editedItem.People"
@@ -86,8 +86,8 @@
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn color="blue darken-1" text @click="canceledit">取消</v-btn>
-                    <v-btn color="blue darken-1" text @click="submitform">{{ saveBtn }}</v-btn>
+                    <v-btn color="blue darken-1" text="true" @click="canceledit">取消</v-btn>
+                    <v-btn color="blue darken-1" text="true" @click="submitform">{{ saveBtn }}</v-btn>
                 </v-card-actions>
             </v-card>
         <!--</v-dialog>-->
@@ -97,10 +97,11 @@
 <script setup lang="ts">
     import { defineProps, defineEmits, ref, reactive, watch, type PropType, onMounted, computed } from 'vue';
     import { type ApiResponse, get, put, post } from '@/services/api';
-    import { type UserDataModel, type SoftDeleteViewModel } from '@/types/apiInterface';
+    import type { UserDataModel, SoftDeleteViewModel, MoneyRawData } from '@/types/apiInterface';
+    import { RULES } from '@/constants/constants';
     const props = defineProps({
         item: {
-            type: Object as PropType<SoftDeleteViewModel>,
+            type: Object as PropType<MoneyRawData>,
             required: true
         },
         isEdit: {
@@ -110,6 +111,9 @@
         searchGroup: {
             type: String,
             //required: true
+        },
+        limitBudget: {
+            type: Number,
         }
     });
     //const props = defineProps<{
@@ -124,7 +128,23 @@
     const textValues = ref<string[]>(['一般']);
     const emit = defineEmits(['update', 'cancel', 'create']);
 
-    const editedItem = ref<SoftDeleteViewModel>({ ...props.item });
+    const limitBudget = computed(() => props.limitBudget ?? 0);
+    const limitPurchaseMoney = computed(() => {
+        const value = editedItem.value.PurchaseMoney;
+        return typeof value === 'string' ? parseFloat(value) : value ?? 0; // 轉成數字
+    });
+    const rules = {
+        ...RULES,
+        lessThanOrEqualToBudget: (value: number) => {
+            return value <= limitBudget.value || `請購金額不能大於 ${limitBudget.value}`;
+        },
+        lessThanOrEqualToPurchaseMoney: (value: number) => {
+            return value <= limitPurchaseMoney.value || '實付金額不能大於請購金額';
+        }
+    };
+
+
+    const editedItem = ref<MoneyRawData>({ ...props.item });
     watch(() => props.item, (newValue) => {
         editedItem.value = { ...newValue };
     });
@@ -134,10 +154,10 @@
 
     const users = ref<UserDataModel[]>([]);
     const userNames = ref<string[]>([]);
-    const year1 = ref<number[]>([111, 112, 113]);
+    const year1 = ref<string[]>(['111', '112', '113']);
     const fetchUsers = async () => {
         try {
-            const url = 'api/Privilege';
+            const url = 'api/User';
             const response: ApiResponse<UserDataModel[]> = await get<UserDataModel[]>(url);
                 if(response.StatusCode == 200) {
                     users.value = response.Data!;
@@ -151,7 +171,7 @@
             console.error(error);
         }
     };
-  
+    //console.log('limitBudget', props.limitBudget);
   const formattedPurchasedate = computed<string>({
     get: () => (editedItem.value.Purchasedate ? editedItem.value.Purchasedate.split('T')[0] : ''),
     set: (value: string) => {
@@ -162,7 +182,7 @@
 const formattedPayDate = computed<string>({
     get: () => (editedItem.value.PayDate ? editedItem.value.PayDate.split('T')[0] : ''),
     set: (value: string) => {
-        editedItem.value.PayDate = value ? value + "T00:00:00" : null;
+        editedItem.value.PayDate = value ? value + "T00:00:00" : '';
     }
 });
 
@@ -171,11 +191,19 @@ const formattedPayDate = computed<string>({
         if (!valid) return;
 
         // DB的Year1欄位存字串
-        const data: SoftDeleteViewModel = { ...editedItem.value, Year1: editedItem.value.Year1 ? editedItem.value.Year1.toString() : "" };
-        const url = '/api/PublicWorksGroup';
+        const data: SoftDeleteViewModel = {
+            ...editedItem.value,
+            Year1: editedItem.value.Year1 ? editedItem.value.Year1.toString() : "",
+            PayMoney: editedItem.value.PayMoney ? Number(editedItem.value.PayMoney) : 0,
+            PurchaseMoney: editedItem.value.PurchaseMoney ? Number(editedItem.value.PurchaseMoney) : 0
+        };
+
+        const url = '/api/Money3';
         try {
+            console.log('123', data);
             let response: ApiResponse<any>;
             if (data.ID1) {
+                console.log('345', data);
                 response = await put<any>(url, data);
                 //console.log(response?.Data || response?.Message);
                 // 更新成功後的處理
@@ -183,6 +211,8 @@ const formattedPayDate = computed<string>({
             } else {
                 // 在這裡將Year欄位賦值為Year1的值
                 data.Year = editedItem.value.Year1 ? parseInt(editedItem.value.Year1, 10) : 0;
+                if (!data.PayDate) data.PayDate = null; // 如果PayDate沒有值,傳空值
+                console.log('adding data:',data);
                 response = await post<any>(url, data);
                 //console.log('response.Data:', response?.Data);
                 //console.log(response?.Data || response?.Message);
@@ -218,10 +248,6 @@ const formattedPayDate = computed<string>({
     //    year: 111
     //});
 
- 
-    const rules = {
-        required: (value: any) => !!value || '此欄位必填'
-    };
 
     //const openEditDialog = (item: any) => {
     //    Object.assign(editedItem, item);

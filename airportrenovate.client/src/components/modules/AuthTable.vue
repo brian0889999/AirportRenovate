@@ -10,12 +10,14 @@
 
 <script setup lang="ts">
     import { ref } from 'vue';
+    import type { VDataTable } from 'vuetify/components';
+    type ReadonlyHeaders = VDataTable['$props']['headers'];
 //寫死的Table
-    const headers = ref([
+    const headers: ReadonlyHeaders = [
         { title: '權限', align: 'start', sortable: false, key: '權限' },
         { title: '功能', key: '功能' },
         { title: '備註', key: '備註' },
-    ]);
+    ];
     
     const items = ref([
         { 權限: 'A', 功能: '新增、編輯、刪除、檢視、勻出入、復原刪除', 備註: '管理者' },

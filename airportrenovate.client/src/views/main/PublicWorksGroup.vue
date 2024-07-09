@@ -1,6 +1,6 @@
 <template>
     <v-container class="no-margin" fluid>
-        <v-row justify="start" v-if="!isSelectedItem">
+        <v-row justify="start" v-if="!isSelectedItem && !showAllocatePage">
             <v-col cols="12" sm="8" md="6">
                 <v-row>
                     <v-col cols="3">
@@ -26,14 +26,9 @@
                         </v-btn>
                     </v-col>
                 </v-row>
-                <!--<v-btn @click="fetchBudgetData"
-                       color="primary"
-                       class="mb-2">
-                    查詢
-                </v-btn>-->
             </v-col>
         </v-row>
-        <v-data-table v-if="!isSelectedItem"
+        <v-data-table v-if="!isSelectedItem && !showAllocatePage"
                       :headers="headers"
                       :items="computedItems"
                       item-key="Budget"
@@ -49,41 +44,63 @@
                     {{ item.Budget }}
                 </v-btn>
                 <br />
-                <v-btn @click="handleExcelClick(item.Budget)"
+                <v-btn v-if="item.Budget" @click="handleExcelClick(item.Budget)"
                        color="primary">
                     EXCEL
                 </v-btn>
             </template>
+            <template #item.action="{ item }">
+                <v-btn color="primary"
+                       @click="openAllocatePage(item)">勻出</v-btn>
+            </template>
             <template #item.BudgetYear="{ item }">
-                {{ formatNumber(item.BudgetYear) }}
+                <span :class="{'negative-number': (item.BudgetYear ?? 0) < 0}">
+                    {{ formatNumber(item.BudgetYear) }}
+                </span>
             </template>
             <template #item.Final="{ item }">
-                {{ formatNumber(item.Final) }}
+                <span :class="{'negative-number': parseFloat(item.Final ?? '0') < 0}">
+                    {{ formatNumber(item.Final) }}
+                </span>
             </template>
             <template #item.General="{ item }">
-                {{ formatNumber(item.General) }}
+                <span :class="{'negative-number': (item.General ?? 0) < 0}">
+                    {{ formatNumber(item.General) }}
+                </span>
             </template>
             <template #item.Out="{ item }">
-                {{ formatNumber(item.Out) }}
+                <span :class="{'negative-number': (item.Out ?? 0) < 0}">
+                    {{ formatNumber(item.Out) }}
+                </span>
             </template>
             <template #item.UseBudget="{ item }">
-                {{ formatNumber(item.UseBudget) }}
+                <span :class="{'negative-number': (item.UseBudget ?? 0) < 0}">
+                    {{ formatNumber(item.UseBudget) }}
+                </span>
             </template>
             <template #item.In="{ item }">
-                {{ formatNumber(item.In) }}
+                <span :class="{'negative-number': (item.In ?? 0) < 0}">
+                    {{ formatNumber(item.In) }}
+                </span>
             </template>
             <template #item.InActual="{ item }">
-                {{ formatNumber(item.InActual)}}
+                <span :class="{'negative-number': (item.InActual ?? 0) < 0}">
+                    {{ formatNumber(item.InActual)}}
+                </span>
             </template>
             <template #item.InBalance="{ item }">
-                {{ formatNumber(item.InBalance)}}
+                <span :class="{'negative-number': (item.InBalance ?? 0) < 0}">
+                    {{ formatNumber(item.InBalance)}}
+                </span>
             </template>
             <template #item.SubjectActual="{ item }">
-                {{ formatNumber(item.SubjectActual)}}
+                <span :class="{'negative-number': (item.SubjectActual ?? 0)<  0}">
+                    {{ formatNumber(item.SubjectActual)}}
+                </span>
             </template>
         </v-data-table>
         <!-- isSelectedItem -->
-        <v-row justify="start" v-if="isSelectedItem && !showDetailForm">
+        <v-row justify="start" v-if="isSelectedItem && !showDetailForm && !showAllocatePage">
             <v-col cols="12" sm="8" md="6">
                 <v-btn @click="previousPage"
                        color="primary"
@@ -93,48 +110,68 @@
             </v-col>
         </v-row>
         
-        <v-data-table v-if="isSelectedItem && !showDetailForm"
+        <v-data-table v-if="isSelectedItem && !showDetailForm && !showAllocatePage"
                       :headers="selectedHeaders"
                       :items="selectedItem"
                       hide-default-footer>
             <template #item.BudgetYear="{ item }">
-                {{ formatNumber(item.BudgetYear) }}
+                <span :class="{'negative-number': (item.BudgetYear ?? 0) < 0}">
+                    {{ formatNumber(item.BudgetYear) }}
+                </span>
             </template>
             <template #item.Final="{ item }">
-                {{ formatNumber(item.Final) }}
+                <span :class="{'negative-number': parseFloat(item.Final ?? '0') < 0}">
+                    {{ formatNumber(item.Final) }}
+                </span>
             </template>
             <template #item.General="{ item }">
-                {{ formatNumber(item.General) }}
+                <span :class="{'negative-number': (item.General ?? 0) < 0}">
+                    {{ formatNumber(item.General) }}
+                </span>
             </template>
             <template #item.Out="{ item }">
-                {{ formatNumber(item.Out) }}
+                <span :class="{'negative-number': (item.Out ?? 0) < 0}">
+                    {{ formatNumber(item.Out) }}
+                </span>
             </template>
             <template #item.UseBudget="{ item }">
-                {{ formatNumber(item.UseBudget) }}
+                <span :class="{'negative-number': (item.UseBudget ?? 0) < 0}">
+                    {{ formatNumber(item.UseBudget) }}
+                </span>
             </template>
             <template #item.In="{ item }">
-                {{ formatNumber(item.In) }}
+                <span :class="{'negative-number': (item.In ?? 0)< 0}">
+                    {{ formatNumber(item.In) }}
+                </span>
             </template>
             <template #item.InActual="{ item }">
-                {{ formatNumber(item.InActual)}}
+                <span :class="{'negative-number': (item.InActual ?? 0) < 0}">
+                    {{ formatNumber(item.InActual)}}
+                </span>
             </template>
             <template #item.InBalance="{ item }">
-                {{ formatNumber(item.InBalance)}}
+                <span :class="{'negative-number': (item.InBalance ?? 0) < 0}">
+                    {{ formatNumber(item.InBalance)}}
+                </span>
             </template>
             <template #item.SubjectActual="{ item }">
-                {{ formatNumber(item.SubjectActual)}}
-            </template>
+                <span :class="{'negative-number': (item.SubjectActual ?? 0)<  0}">
+                    {{ formatNumber(item.SubjectActual)}}
+                </span>
+            </template> 
             <template #item.End="{ item }">
-                {{ formatNumber(item.End)}}
+                <span :class="{'negative-number': (item.End ?? 0) < 0}">
+                    {{ formatNumber(item.End)}}
+                </span>
             </template>
         </v-data-table>
-        <v-data-table v-if="isSelectedItem && !showDetailForm"
+        <v-data-table v-if="isSelectedItem && !showDetailForm && !showAllocatePage"
                       :headers="selectedDetailHeaders"
                       :items="selectedDetailItem">
             <template #top>
-                <search-fields v-if="isSelectedItem && !showDetailForm"
+                <search-fields v-if="isSelectedItem && !showDetailForm && !showAllocatePage"
                                @search="handleSearch"
-                               class="mt-1"/>
+                               class="mt-1" />
                 <v-row no-gutters>
                     <v-col>
                         <v-btn color="primary" @click="addItem">新增</v-btn>
@@ -142,10 +179,14 @@
                 </v-row>
             </template>
             <template #item.PurchaseMoney="{ item }">
-                {{ formatNumber(item.PurchaseMoney) }}
+                <span :class="{'negative-number': (item.PurchaseMoney ?? 0) < 0}">
+                    {{ formatNumber(item.PurchaseMoney)}}
+                </span>
             </template>
             <template #item.PayMoney="{ item }">
-                {{ formatNumber(item.PayMoney) }}
+                <span :class="{'negative-number': (item.PayMoney ?? 0) < 0}">
+                    {{ formatNumber(item.PayMoney)}}
+                </span>
             </template>
             <template #item.actions="{ item }">
                 <v-btn icon size="small" class="mr-2" @click="editItem(item)">
@@ -157,23 +198,29 @@
         <detail-form v-if="showDetailForm"
                      :isEdit="isEdit"
                      :item="editingItem"
+                     :limitBudget="limitBudget"
                      :searchGroup="searchGroup"
                      @update="handleUpdate"
                      @create="handleCreate"
                      @cancel="cancelEdit" />
+        <AllocatePage v-if="showAllocatePage"
+                      :data="allocateForm.data"
+                      @cancel="cancelAllocatePage"/>
     </v-container>
 </template>
 
 
 <script setup lang="ts">
     import axios from 'axios';
-    import { ref, computed } from 'vue';
+    import { ref, computed, onMounted } from 'vue';
     import { get, post, put, type ApiResponse } from '@/services/api';
     import type { VDataTable } from 'vuetify/components';
-    import type { BudgetModel, SelectedBudgetModel, MoneyItem, MoneyRawData, SoftDeleteViewModel, Detail, SelectedDetail } from '@/types/apiInterface';
+    import type { EditViewModel, SelectedBudgetModel, MoneyItem, MoneyRawData, SoftDeleteViewModel, Detail, SelectedDetail, UserViewModel } from '@/types/apiInterface';
     import { formatDate, sumByCondition, groupBy, formatNumber } from '@/utils/functions';
+    import { AuthMapping } from '@/utils/mappings';
     import DetailForm from '@/components/modules/DetailForm.vue';
     import SearchFields from '@/components/modules/SearchFields.vue';
+    import AllocatePage from '@/components/modules/AllocatePage.vue';
     
     const loading = ref<boolean>(false);
     type ReadonlyHeaders = VDataTable['$props']['headers'];
@@ -181,6 +228,7 @@
     const headers: ReadonlyHeaders = [
         /*{ title: '預算名稱', key: '', value: 'budget' },*/
         { title: '預算名稱', key: 'Budget' },
+        { title: '', key: 'action'},
         { title: '組室別', key: 'Group' },
         { title: '科目(6級)', key: 'Subject6' },
         { title: '科目(7級)', key: 'Subject7' },
@@ -226,15 +274,67 @@
         { title: '已對帳', key: 'True' },
         { title: '', key: 'actions', sortable: false },
     ];
+
+    // 取得當年度的民國年
+    const currentYear: number = new Date().getFullYear() - 1911;
+    // 生成從111到當年度的年份陣列
+    const years = ref<number[]>(Array.from({ length: currentYear - 111 + 1 }, (_, i) => 111 + i));
+    const searchYear = ref<number>(currentYear);
+
     const items = ref<MoneyItem[]>([]);
     const isSelectedItem = ref<boolean>(false);
     const selectedItem = ref<SelectedBudgetModel[]>([]);
-    const selectedDetailItem = ref<SelectedDetail[]>([]);
+    const selectedDetailItem = ref<Detail[]>([]);
     const groups = ref<string[]>(['工務組', '業務組', '人事室', '中控室', '北竿站', '企劃組', '南竿站', '政風室', '航務組', '總務組', '企劃行政組', '營運安全組']);
-    const searchGroup = ref<string>('工務組');
+    const searchGroup = ref<string>('');
     const isEdit = ref(false);
 
     const currentBudgetValue = ref<string>(''); // 儲存 budgetValue 的變數
+    const limitBudget = ref<number>(0); // 新增修改資料時的限制金額
+    const showAllocatePage = ref<boolean>(false);
+
+    const allocateForm = ref({
+        visible: false,
+        data: {},
+    })
+
+        const defaultUser: UserViewModel = {
+        No: 0,
+        Name: '',
+        Account: '',
+        Password: '',
+        Email: '',
+        Unit_No: '',
+        Auth: '',
+        Account_Open: '',
+        Reason: '',
+        Count: 0,
+        Time: new Date(),
+        Time1: new Date(),
+        Status1: '',
+        Status2: '',
+        MEMO: '',
+        Status3: '',
+};
+    const user = ref<UserViewModel>(defaultUser); 
+
+    const getCurrentUser = async () => {
+    const url = '/api/User/Current';
+    try {
+        const response: ApiResponse<UserViewModel> = await get<UserViewModel>(url);
+        if (response.StatusCode === 200) {
+            const data = response.Data;
+            user.value = data ? data : defaultUser;
+            searchGroup.value = AuthMapping[user.value.Auth!];
+        }
+        else {
+            console.error(response.Data ?? response.Message);
+        }
+    }
+    catch (error: any) {
+        console.error(error.message);
+    }
+};
 
     const previousPage = async () => {
         isSelectedItem.value = false;
@@ -245,21 +345,33 @@
             console.error(error);
         };
     };
-
-    const years = ref<number[]>([111, 112, 113]);
-    const searchYear = ref<number>(113);
-
+  
     const fetchBudgetData = async () => {
-        const url = '/api/PublicWorksGroup';
+        const url = '/api/Money3';
         //const data = { params: { Year: searchYear.value } }; 
         const data = { Year: searchYear.value, Group: searchGroup.value };  // 抓年度的值
         loading.value = true;
         try {
-            const response: ApiResponse<MoneyItem[]> = await get<MoneyItem[]>(url, data);
+            const response: ApiResponse<MoneyRawData[]> = await get<MoneyRawData[]>(url, data);
             if (response.StatusCode === 200) {
-                console.log('data:', response.Data);
+                //console.log('data:', response.Data);
                 //console.log(response.StatusCode);
-                items.value = response.Data ?? [];
+                const dbData = response.Data?.map((item: MoneyRawData): MoneyItem => ({
+                    Budget: item.Money.Budget,
+                    Group: item.Money.Group,
+                    Subject6: item.Money.Subject6,
+                    Subject7: item.Money.Subject7,
+                    Subject8: item.Money.Subject8,
+                    BudgetYear: item.Money.BudgetYear,
+                    Final: item.Money.Final,
+                    Text: item.Text,
+                    PurchaseMoney: item.PurchaseMoney,
+                    PayMoney: item.PayMoney,
+                    Purchasedate: item.Purchasedate || ""  // 確保不為 undefined
+                })) ?? [];
+                items.value = dbData;
+                //items.value = response.Data ?? [];
+                //console.log('items', items.value);
             } else {
                 console.log(response.Data ?? response.Message)
             }
@@ -269,20 +381,20 @@
         }
         finally {
             loading.value = false;
-            console.log('end');
+            //console.log('end');
         }
     };
 
     const fetchSelectedDetail = async (Budget: string, Group: string, Year: number, Note?: string, PurchaseMoney?: number) => {
-        const url = '/api/PublicWorksGroup/SelectedDetail';
+        const url = '/api/Money3/SelectedDetail';
         const data: any = { Budget, Group, Year };
 
         if (Note) data.Note = Note;
         if (PurchaseMoney) data.PurchaseMoney = PurchaseMoney;
-        console.log(data);
+        //console.log(data);
         try {
             loading.value = true;
-            const response: ApiResponse<SelectedDetail[]> = await get<SelectedDetail[]>(url, data);
+            const response: ApiResponse<MoneyRawData[]> = await get<MoneyRawData[]>(url, data);
             if (response.StatusCode === 200) {
                 //filteredDetailItem.value = response.Data!;
                 selectedDetailItem.value = response.Data?.map(item => ({
@@ -292,7 +404,7 @@
                     FormattedPurchasedate: formatDate(item.Purchasedate || ""),
                     FormattedPayDate: formatDate(item.PayDate || "")
                 })).sort((a, b) => new Date(b.Purchasedate || "").getTime() - new Date(a.Purchasedate || "").getTime()) ?? [];
-                console.log('selectedDetailItem', selectedDetailItem.value);
+                //console.log('selectedDetailItem', selectedDetailItem.value);
             } else {
                 console.error(response.Message);
             }
@@ -336,7 +448,8 @@
             };
         });
         //按照日期排序
-        return sortedItems.sort((a, b) => new Date(b.Purchasedate || "").getTime() - new Date(a.Purchasedate || "").getTime());
+        //return sortedItems.sort((a, b) => new Date(b.Purchasedate || "").getTime() - new Date(a.Purchasedate || "").getTime());
+        return sortedItems;
     });
 
     const handleBudgetClick = async (budget: SelectedBudgetModel) => {
@@ -348,8 +461,8 @@
                 Subject6: v.Subject6,
                 Subject7: v.Subject7,
                 Subject8: v.Subject8,
-                BudgetYear: v.BudgetYear,
-                Final: v.Final,
+                BudgetYear: v.BudgetYear || 0,
+                Final: v.Final || "0",
                 General: v.General,
                 Out: v.Out,
                 UseBudget: v.UseBudget,
@@ -368,7 +481,7 @@
 
     const handleExcelClick = async (budget: string) => {
         try {
-            const response = await axios.get(`/api/MoneyDb/ExportToExcel?budget=${budget}`, {
+            const response = await axios.get(`/api/Money3/ExportToExcel?budget=${budget}`, {
                 responseType: 'blob'
             });
             const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -384,20 +497,52 @@
 
 
     const showDetailForm = ref<boolean>(false);
-    const editingItem = ref<SoftDeleteViewModel | null>(null);
+    const editingItem = ref<MoneyRawData>({ // 新增功能的初始值
+            ID: 0,
+            Purchasedate: '',
+            Text: '一般',
+            Note: '',
+            PurchaseMoney: 0,
+            PayDate: '',
+            PayMoney: 0,
+            People: '',
+            Name: currentBudgetValue.value,
+            Remarks: '',
+            People1: '',
+            ID1: 0,
+            Status: 'O',
+            Group1: searchGroup.value,
+            Year: searchYear.value,
+            Year1: '',
+            All: '',
+            True: '',
+             Money: {
+                 ID: 0,
+                 Budget: '',
+                 Group: '',
+                 Subject6: '',
+                 Subject7: '',
+                 Subject8: '',
+                 BudgetYear: 0,
+                 Final: '',
+                 Year: 0,
+             },
+        });
 
     const editItem = async (item: Detail) => {
         showDetailForm.value = true;
         isEdit.value = true;
         // 解構賦值，排除 FormattedPurchasedate 和 FormattedPayDate 欄位
+        //console.log('console.log(item);', item);
         const { FormattedPurchasedate, FormattedPayDate, ...filteredItem } = item;
         editingItem.value = { ...filteredItem };
-        console.log('Edit item:', editingItem.value);
+        //console.log(item);
+        //console.log('Edit item:', editingItem.value);
     };
 
     const handleUpdate = async (updatedItem: MoneyRawData) => {
         // 編輯項目的處理邏輯
-        console.log('updatedItem', updatedItem);
+        //console.log('updatedItem', updatedItem);
         try {
             //await requery(updatedItem); // 把資訊帶進去重查
             await fetchBudgetData();
@@ -412,10 +557,11 @@
             console.error(error);
         };
     };
-    
+  
     const addItem = () => {
         showDetailForm.value = true;
         isEdit.value = false;
+        limitBudget.value = selectedItem.value[0].UseBudget ?? 0;
         editingItem.value = { // 新增功能的初始值
             ID: 0,
             Purchasedate: '',
@@ -435,6 +581,17 @@
             Year1: '',
             All: '',
             True: '',
+             Money: {
+                 ID: 0,
+                 Budget: '',
+                 Group: '',
+                 Subject6: '',
+                 Subject7: '',
+                 Subject8: '',
+                 BudgetYear: 0,
+                 Final: '',
+                 Year: 0,
+             },
         };
     };
 
@@ -452,19 +609,49 @@
 
     const cancelEdit = () => {
         showDetailForm.value = false;
-        editingItem.value = null;
+        editingItem.value = { // 初始值
+            ID: 0,
+            Purchasedate: '',
+            Text: '一般',
+            Note: '',
+            PurchaseMoney: 0,
+            PayDate: '',
+            PayMoney: 0,
+            People: '',
+            Name: currentBudgetValue.value,
+            Remarks: '',
+            People1: '',
+            ID1: 0,
+            Status: 'O',
+            Group1: searchGroup.value,
+            Year: searchYear.value,
+            Year1: '',
+            All: '',
+            True: '',
+             Money: {
+                 ID: 0,
+                 Budget: '',
+                 Group: '',
+                 Subject6: '',
+                 Subject7: '',
+                 Subject8: '',
+                 BudgetYear: 0,
+                 Final: '',
+                 Year: 0,
+             },
+        };
     };
 
     const deleteItem = async (item: MoneyRawData) => {
         // 刪除項目的處理邏輯
         const isConfirmed = confirm('你確定要刪除此項目嗎？');
         if (isConfirmed) {
-            console.log('Delete item:', item);
+            /*console.log('Delete item:', item);*/
             try {
-                const url = 'api/PublicWorksGroup/SoftDelete';
+                const url = '/api/Money3/SoftDelete';
                 const response: ApiResponse<any> = await put<any>(url, item);
                 if (response.StatusCode == 200) {
-                    console.log(response.Message);
+                    //console.log(response.Message);
                     await fetchBudgetData();
                     await fetchSelectedDetail(currentBudgetValue.value!, searchGroup.value, searchYear.value);
                     // 重新更新 selectedItem
@@ -486,9 +673,22 @@
 
     const handleSearch = async (payload: { Note: string, PurchaseMoney: number }) => {
         // 處理查詢邏輯
-        console.log('Note:', payload.Note, 'Number:', payload.PurchaseMoney);
+        //console.log('Note:', payload.Note, 'Number:', payload.PurchaseMoney);
         await fetchSelectedDetail(currentBudgetValue.value!, searchGroup.value, searchYear.value, payload.Note, payload.PurchaseMoney);
     };
+
+    const openAllocatePage = (item: SelectedBudgetModel) => {
+        allocateForm.value.data = item;
+        showAllocatePage.value = true;
+    }
+
+    const cancelAllocatePage = () => {
+        showAllocatePage.value = false;
+    }
+
+     onMounted(async () => {
+     await getCurrentUser();
+ });
 </script>
 
 <style scoped>
@@ -511,5 +711,8 @@
 
     .v-btn--text:hover {
         color: darkblue;
+    }
+    .negative-number {
+        color: red;
     }
 </style>

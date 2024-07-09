@@ -1,24 +1,4 @@
 <template>
-    <!--<v-container fluid fill-height >
-        <v-row  justify="center" align="center">
-            <v-col>
-                <h2>登入</h2>
-                <form @submit.prevent="login" enctype="application/x-www-form-urlencoded">
-                    <div>
-                        <label for="account">帳號：</label>
-                        <input type="text" name="Account" id="account" v-model="loginData.Account" placeholder="請輸入帳號" />
-                    </div>
-                    <div>
-                        <label for="password">密碼：</label>
-                        <input type="password" name="Password" id="password" v-model="loginData.Password" placeholder="請輸入密碼" />
-                    </div>
-                    <div>
-                        <button type="submit">登入</button>
-                    </div>
-                </form>
-            </v-col>
-        </v-row>
-    </v-container>-->
     <v-container fill-height fluid>
         <v-row justify="center" align="center" style="width: 100%; height: 100vh;">
             <v-col  align="center" cols="12" sm="8" md="6">
@@ -31,7 +11,8 @@
                             <v-text-field v-model="loginData.Account" 
                                           label="帳號" 
                                           outlined 
-                                          :rules="[rules.required]" >
+                                          :rules="[rules.required]" 
+                                          clearable>
                             </v-text-field>
                             <v-text-field v-model="loginData.Password" 
                                           label="密碼" 
@@ -39,7 +20,8 @@
                                           :type="showPassword ? 'text' : 'password' "
                                           @click:append-inner="showPassword = !showPassword"
                                           :rules="[rules.passwordFormat]"
-                                          :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'">
+                                          :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+                                          clearable>
                             </v-text-field>
                             <v-btn type="submit" color="primary" block :loading="btnLoading">登入</v-btn>
                         </v-form>
@@ -58,13 +40,10 @@ import { ref } from 'vue';
 import type { LoginViewModel } from '@/types/apiInterface';
 import type { UserViewModel } from '@/types/apiInterface';
 import { useRouter } from 'vue-router';
-import { useCookies } from 'vue3-cookies';
 import { post, type ApiResponse } from '../services/api';
 import { RULES } from '@/constants/constants';
 
 const router = useRouter();
-
-const { cookies } = useCookies(); // 初始化 vue3-cookies
 
 const loginFormRef = ref<HTMLFormElement | null>(null);
 const loginData = ref<LoginViewModel>({
@@ -79,29 +58,10 @@ const rules = RULES;
         const { valid } = await loginFormRef.value?.validate();
         if (!valid) return;
         btnLoading.value = true;
-
         const url = '/api/Login';
         const data = loginData.value;
-        const regex: RegExp = /^(?!.*[^\x21-\x7e])(?=.*[\W])(?=.*[a-zA-Z])(?=.*\d).{8,20}$/;
-        //if (!regex.test(loginData.value.Password)) {
-        //    alert('請輸入 8 到 20 個字符的密碼，必須包含至少一個字母、一個數字和一個特殊字符。');
-        //    return;
-        //}
         try {
             const response: ApiResponse<any> = await post<any>(url, data);
-            /*const response: ApiResponse<any> = await post<any>(url, data);*/
-            //if (response) {
-            //    //const userData: UserViewModel = response.Data;
-            //    //for (let key in userData) {
-            //    //    if (key === 'Status1' || key === 'Status2' || key === 'Status3') {
-            //    //        userData[key] = userData[key]?.trim(); // 清除資料多餘空格
-            //    //    }
-            //    //}
-            //    console.log(response.Data);
-            //    //setUserData(userData);
-            //    /*   console.log(userData ? userData : '沒有資料'); // 登入成功後的回傳資料*/
-            //}
-            //router.push('/main')
             if (response.StatusCode === 200) {
                 const jwtToken = response.Data;
                 localStorage.setItem('jwtToken', jwtToken);
@@ -114,22 +74,6 @@ const rules = RULES;
             btnLoading.value = false;
         }
 }
-
-    // 設定使用者資料的函數
-    const setUserData = (userData: UserViewModel) => {
-        // 將使用者資料存入 Cookie，設置為一天後過期
-        cookies.set('userData', JSON.stringify(userData), { expires: '1d' });
-    };
-
-    // 獲取使用者資料的函數
-    const getUserData = () => {
-        const userData = cookies.get('userData');
-        if (userData) {
-            console.log(JSON.parse(userData)); // 輸出從 Cookie 中讀取的使用者資料
-        } else {
-            console.log('No user data found');
-        }
-    };
 </script>
 
 <style scoped>

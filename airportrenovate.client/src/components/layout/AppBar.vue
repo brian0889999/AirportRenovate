@@ -10,10 +10,7 @@
         <v-spacer />
         <v-spacer />
         <v-toolbar-title>經費管理/歡迎&nbsp;&nbsp;{{ user.Name }}</v-toolbar-title>
-
-
-
-        <v-btn>首頁</v-btn>
+        <v-btn @click="mainRoute">首頁</v-btn>
         <v-btn @click="logout">登出</v-btn>
 
     </v-app-bar>
@@ -90,6 +87,10 @@
 
     const toggleRail = (value?: boolean) => {
         store.setRail(value != undefined ? value : !store.rail);
+    }
+
+    const mainRoute = () => {
+        router.push('/main/PublicWorksGroup');
     }
 </script>
 

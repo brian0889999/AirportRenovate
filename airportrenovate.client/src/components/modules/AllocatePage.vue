@@ -1,6 +1,6 @@
-<!--<template>
+<template>
     <v-container>
-        <v-form ref="balanceFormRef" @submit.prevent="handleSubmit">
+        <v-form ref="AllocateFormRef" @submit.prevent="handleSubmit">
             <v-row>
                 <v-col cols="12">
                     <v-card outlined>
@@ -9,43 +9,71 @@
                         <v-card-text>
                             <v-row>
                                 <v-col cols="12" md="3">
-                                    <v-select v-model="balanceForm.Group"
+                                    <v-select v-model="AllocateForm.Group"
                                               :items="groups"
                                               label="組室別"
+                                              :readonly="true"
                                               @update:modelValue="fetchSubjects6"
-                                              required></v-select>
+                                              :rules="[rules.required]"></v-select>
                                 </v-col>
                                 <v-col cols="12" md="3">
-                                    <v-select v-model="balanceForm.Subject6"
+                                    <v-select v-model="AllocateForm.Subject6"
                                               :items="subjects6"
                                               item-title="text"
                                               item-value="value"
                                               label="六級(科目)"
+                                              :readonly="true"
                                               @update:modelValue="fetchSubjects7"
-                                              required></v-select>
+                                              :rules="[rules.required]"></v-select>
                                 </v-col>
                                 <v-col cols="12" md="3">
-                                    <v-select v-model="balanceForm.Subject7"
+                                    <v-select v-model="AllocateForm.Subject7"
                                               :items="subjects7"
                                               item-title="text"
                                               item-value="value"
                                               label="七級(子目)"
-                                              @update:modelValue="fetchSubjects8"
-                                              required></v-select>
+                                              :readonly="true"
+                                              @update:modelValue="fetchSubjects8"></v-select>
                                 </v-col>
                                 <v-col cols="12" md="3">
-                                    <v-select v-model="balanceForm.Subject8"
+                                    <v-select v-model="AllocateForm.Subject8"
                                               :items="subjects8"
                                               item-title="text"
                                               item-value="value"
                                               label="八級(細目)"
-                                              required></v-select>
+                                              :readonly="true"></v-select>
                                 </v-col>
                                 <v-col cols="12" md="3">
-                                    <v-text-field v-model="balanceForm.PurchaseMoney"
+                                    <v-select v-model="AllocateForm.People"
+                                              :items="people"
+                                              label="請購人"
+                                              :rules="[rules.required]"></v-select>
+                                </v-col>
+                                <v-col cols="12" md="3">
+                                    <v-select v-model="AllocateForm.Year"
+                                              :items="years"
+                                              label="年度"
+                                              :rules="[rules.required]"></v-select>
+                                </v-col>
+                                <v-col cols="12" md="3">
+                                    <v-text-field v-model="AllocateForm.Purchasedate"
+                                                  label="請購日期"
+                                                  type="date"
+                                                  :rules="[rules.required]"></v-text-field>
+                                </v-col>
+                                <v-col cols="12" md="3">
+                                    <v-text-field v-model="AllocateForm.PurchaseMoney"
                                                   label="金額"
                                                   type="number"
-                                                  required></v-text-field>
+                                                  :rules="[rules.required, rules.lessThanOrEqualToBudget]"></v-text-field>
+                                </v-col>
+                            </v-row>
+                            <v-row>
+                                <v-col cols="12" md="3">
+                                    <v-select v-model="AllocateForm.People1"
+                                              :items="people"
+                                              label="支付人"
+                                              :rules="[rules.required]"></v-select>
                                 </v-col>
                             </v-row>
                         </v-card-text>
@@ -58,76 +86,52 @@
                         <v-card-text>
                             <v-row>
                                 <v-col cols="12" md="3">
-                                    <v-select v-model="balanceForm.Group1"
+                                    <v-select v-model="AllocateForm.Group1"
                                               :items="groups"
                                               label="組室別"
                                               @update:modelValue="fetchSubjects6_1"
-                                              required></v-select>
+                                              :rules="[rules.required]"></v-select>
                                 </v-col>
                                 <v-col cols="12" md="3">
-                                    <v-select v-model="balanceForm.Subject6_1"
+                                    <v-select v-model="AllocateForm.Subject6_1"
                                               :items="subjects6_1"
                                               item-title="text"
                                               item-value="value"
                                               label="六級(科目)"
                                               @update:modelValue="fetchSubjects7_1"
-                                              required></v-select>
+                                              :rules="[rules.required]"></v-select>
                                 </v-col>
                                 <v-col cols="12" md="3">
-                                    <v-select v-model="balanceForm.Subject7_1"
+                                    <v-select v-model="AllocateForm.Subject7_1"
                                               :items="subjects7_1"
                                                item-title="text"
                                                item-value="value"
                                               label="七級(子目)"
                                               @update:modelValue="fetchSubjects8_1"
-                                              required></v-select>
+                                              :rules="[rules.required]"></v-select>
                                 </v-col>
                                 <v-col cols="12" md="3">
-                                    <v-select v-model="balanceForm.Subject8_1"
+                                    <v-select v-model="AllocateForm.Subject8_1"
                                               :items="subjects8_1"
                                                item-title="text"
                                                item-value="value"
-                                              label="八級(細目)"
-                                              required></v-select>
+                                              label="八級(細目)"></v-select>
                                 </v-col>
                             </v-row>
                             <v-row>
+                               
                                 <v-col cols="12" md="3">
-                                    <v-select v-model="balanceForm.People"
-                                              :items="people"
-                                              label="請購人"
-                                              required></v-select>
-                                </v-col>
-                                <v-col cols="12" md="3">
-                                    <v-select v-model="balanceForm.Year"
-                                              :items="years"
-                                              label="年度"
-                                              required></v-select>
-                                </v-col>
-                                <v-col cols="12" md="3">
-                                    <v-text-field v-model="balanceForm.PurchaseDate"
-                                                  label="請購日期"
-                                                  type="date"
-                                                  required></v-text-field>
-                                </v-col>
-                                <v-col cols="12" md="3">
-                                    <v-text-field v-model="balanceForm.Note"
+                                    <v-text-field v-model="AllocateForm.Note"
                                                   label="摘要"
-                                                  required></v-text-field>
+                                                  :rules="[rules.required]"></v-text-field>
                                 </v-col>
                             </v-row>
-                            <v-row>
-                                <v-col cols="12" md="3">
-                                    <v-select v-model="balanceForm.People1"
-                                              :items="people"
-                                              label="支付人"
-                                              required></v-select>
-                                </v-col>
-                            </v-row>
+                           
                         </v-card-text>
                         <v-card-actions>
                             <v-btn type="submit" color="primary">確認</v-btn>
-                            <v-btn color="secondary">取消</v-btn>
+                            <v-btn color="secondary"
+                                   @click="cancelData">取消</v-btn>
                         </v-card-actions>
                     </v-card>
                 </v-col>
@@ -140,13 +144,22 @@
 <script setup lang="ts">
 import axios from 'axios';
 import { ref, computed, onMounted, reactive, watch } from 'vue';
-import type { UserDataModel, AllocateFormViewModel } from '@/types/apiInterface';
+import type { UserDataModel, AllocateFormViewModel, SelectedBudgetModel, UserViewModel } from '@/types/apiInterface';
 import { get, put, post, type ApiResponse } from '@/services/api';
 import type { VDataTable } from 'vuetify/components';
+import { RULES } from '@/constants/constants';
 type ReadonlyHeaders = VDataTable['$props']['headers'];
 
-
-const balanceFormRef = ref<HTMLFormElement | null>(null);
+    const props = defineProps({
+        data: {
+            type: Object as () => SelectedBudgetModel,
+            require: true
+        },
+    });
+    console.log('props.data:', props.data);
+    const sourceData: SelectedBudgetModel = props.data!;
+const emit = defineEmits(['cancel']);
+const AllocateFormRef = ref<HTMLFormElement | null>(null);
 const loading = ref(false);
 const groups = ref([
     "無",
@@ -174,7 +187,31 @@ const subjects8_1 = ref([{ text: '無', value: "0" }]);
     const currentYear: number = new Date().getFullYear() - 1911;
     // 生成從111到當年度的年份陣列
     const years = ref<number[]>(Array.from({ length: currentYear - 111 + 1 }, (_, i) => 111 + i)); 
-    const defaultBalanceForm: AllocateFormViewModel = {
+   
+    const defaultUser: UserViewModel = {
+        No: 0,
+        Name: '',
+        Account: '',
+        Password: '',
+        Email: '',
+        Unit_No: '',
+        Auth: '',
+        Account_Open: '',
+        Reason: '',
+        Count: 0,
+        Time: new Date(),
+        Time1: new Date(),
+        Status1: '',
+        Status2: '',
+        MEMO: '',
+        Status3: '',
+    };
+
+    const defaultAllocateForm: AllocateFormViewModel = {
+        ID: 0,
+        ID1: 0,
+        Status: "O",
+        Name: '',
         Group: '',
         Subject6: '',
         Subject7: '',
@@ -187,20 +224,59 @@ const subjects8_1 = ref([{ text: '無', value: "0" }]);
         Subject8_1: '',
         People: '',
         Year: currentYear, // 抓當年度
-        PurchaseDate: '',
+        Year1: currentYear.toString(),
+        Purchasedate: '',
         Note: '',
         People1: '',
-        Budget: ''
+        Text: '',
+        All: null,
+        True: null,
     };
-    const balanceForm = ref<AllocateFormViewModel>({ ...defaultBalanceForm });
 
-    onMounted(async () => {
-        await fetchPeople();
+    const user = ref<UserViewModel>(defaultUser); 
+
+    const AllocateForm = ref<AllocateFormViewModel>({
+        ...defaultAllocateForm,
+        Group: sourceData.Group!,
+        Name: sourceData.Budget!,
+        Subject6: sourceData.Subject6 ?? '',
+        Subject7: sourceData.Subject7 ?? '',
+        Subject8: sourceData.Subject8 ?? '',
+        People: user.value.Name,
+        People1: user.value.Name,
+        Remarks: '',
+        Text: "",
     });
 
-    //watch(() => balanceForm.value.group, async () => {
+    const rules = {
+        ...RULES,
+        lessThanOrEqualToBudget: (value: number) => {
+            return value <= sourceData.UseBudget! || `請購金額不能大於 ${sourceData.UseBudget}`;
+        },
+        //lessThanOrEqualToPurchaseMoney: (value: number) => {
+        //    return value <= limitPurchaseMoney.value || '實付金額不能大於請購金額';
+        //}
+    };
+    
+    //watch(() => AllocateForm.value.group, async () => {
     //    await fetchSubjects6();
     //});
+    const getCurrentUser = async () => {
+        const url = '/api/User/Current';
+        try {
+            const response: ApiResponse<UserViewModel> = await get<UserViewModel>(url);
+            if (response.StatusCode === 200) {
+                const data = response.Data!;
+                user.value = data ? data : defaultUser;
+            }
+            else {
+                console.error(response.Data ?? response.Message);
+            }
+        }
+        catch (error: any) {
+            console.error(error.message);
+        }
+    };
 
     const fetchPeople = async () => {
         const url = '/api/User';
@@ -217,9 +293,9 @@ const subjects8_1 = ref([{ text: '無', value: "0" }]);
 
     const fetchSubjects6 = async () => {
         //console.log('fetchSubjects6 called');
-        if (!balanceForm.value.Group) return;
+        if (!AllocateForm.value.Group) return;
         const url = '/api/Type1/Subjects6';
-        const data = { group: balanceForm.value.Group };
+        const data = { group: AllocateForm.value.Group };
         try {
             const response: ApiResponse<any> = await get<any>(url, data);
             if (response.StatusCode == 200) {
@@ -239,11 +315,11 @@ const subjects8_1 = ref([{ text: '無', value: "0" }]);
     };
 
     const fetchSubjects7 = async () => {
-        if (!balanceForm.value.Subject6) return;
+        if (!AllocateForm.value.Subject6) return;
         const url = '/api/Type2/Subjects7';
         const data = {
-            group: balanceForm.value.Group,
-            id: balanceForm.value.Subject6
+            group: AllocateForm.value.Group,
+            id: AllocateForm.value.Subject6
         };
         try {
             const response: ApiResponse<any> = await get<any>(url, data);
@@ -261,11 +337,11 @@ const subjects8_1 = ref([{ text: '無', value: "0" }]);
     };
 
     const fetchSubjects8 = async () => {
-        if (!balanceForm.value.Subject7) return;
+        if (!AllocateForm.value.Subject7) return;
         const url = '/api/Type3/Subjects8';
         const data = {
-            group: balanceForm.value.Group,
-            id: balanceForm.value.Subject7
+            group: AllocateForm.value.Group,
+            id: AllocateForm.value.Subject7
         };
         try {
             const response: ApiResponse<any> = await get<any>(url, data);
@@ -282,17 +358,17 @@ const subjects8_1 = ref([{ text: '無', value: "0" }]);
     };
 
     const fetchSubjects6_1 = async () => {
-        if (!balanceForm.value.Group1) return;
+        if (!AllocateForm.value.Group1) return;
         const url = '/api/Type1/Subjects6_1';
         const data = {
-            group: balanceForm.value.Group1,
-            id: balanceForm.value.Subject6
+            group: AllocateForm.value.Group1,
+            id: AllocateForm.value.Subject6.substring(0, 2) // 提取前兩個字元
         };
         try {
             const response: ApiResponse<any> = await get<any>(url, data);
             if (response.Data == '這個組室沒有指定科目!') {
                 alert(response.Data);
-                //balanceForm.value = {...defaultBalanceForm };
+                //AllocateForm.value = {...defaultAllocateForm };
                 return;
             }
             if (response.StatusCode == 200) {
@@ -309,11 +385,11 @@ const subjects8_1 = ref([{ text: '無', value: "0" }]);
     };
 
     const fetchSubjects7_1 = async () => {
-        if (!balanceForm.value.Subject6_1) return;
+        if (!AllocateForm.value.Subject6_1) return;
         const url = '/api/Type2/Subjects7';
         const data = {
-            group: balanceForm.value.Group1,
-            id: balanceForm.value.Subject6_1
+            group: AllocateForm.value.Group1,
+            id: AllocateForm.value.Subject6_1
         };
         try {
             const response: ApiResponse<any> = await get<any>(url, data);
@@ -331,11 +407,11 @@ const subjects8_1 = ref([{ text: '無', value: "0" }]);
     };
 
     const fetchSubjects8_1 = async () => {
-        if (!balanceForm.value.Subject7_1) return;
+        if (!AllocateForm.value.Subject7_1) return;
         const url = '/api/Type3/Subjects8';
         const data = {
-            group: balanceForm.value.Group1,
-            id: balanceForm.value.Subject7_1
+            group: AllocateForm.value.Group1,
+            id: AllocateForm.value.Subject7_1
         };
         try {
             const response: ApiResponse<any> = await get<any>(url, data);
@@ -351,15 +427,69 @@ const subjects8_1 = ref([{ text: '無', value: "0" }]);
         }
     };
 
+    //const handleSubmit = async () => {
+    //  /*  const url = '/api/BalanceManagement';*/
+    //    const subject8Value = AllocateForm.value.Subject8;
+    //    const subject8Text = subjects8.value.find(item => item.value === subject8Value)?.text;
+    //    const subject7Text = subjects7.value.find(item => item.value === AllocateForm.value.Subject7)?.text;
+    //    const data = {
+    //        ...AllocateForm.value,
+    //        //Budget: subject8Value === "" ? `${subject7Text?.slice(0, 4)}00${subject7Text?.slice(4)}` : subject8Text
+    //    };
+    //    try {
+    //        console.log(data);
+    //        //const response: ApiResponse<any> = await post<any>(url, data);
+    //        //console.log(response.Data);
+    //        //alert('Data submitted successfully');
+    //    } catch (error) {
+    //        console.error('Failed to submit data:', error);
+    //        //alert('Failed to submit data');
+    //    }
+    //};
+
+
+
     const handleSubmit = async () => {
-        const url = '/api/BalanceManagement';
-        const subject8Value = balanceForm.value.Subject8;
-        const subject8Text = subjects8.value.find(item => item.value === subject8Value)?.text;
-        const subject7Text = subjects7.value.find(item => item.value === balanceForm.value.Subject7)?.text;
-        const data = {
-            ...balanceForm.value,
-            Budget: subject8Value === "" ? `${subject7Text?.slice(0, 4)}00${subject7Text?.slice(4)}` : subject8Text
+
+        const { valid } = await AllocateFormRef.value?.validate();
+        if (!valid) return;
+
+        const url = '/api/Money3/ID1';
+        let ID1: number = 0;
+        try {
+            const response: ApiResponse<any> = await get<any>(url);
+            if (response.StatusCode == 200) {
+                ID1 = response.Data;
+            }
+        } catch (error) {
+            console.error(error);
+        }
+
+        if (ID1 <= 0) {
+            console.error('Invalid ID1:', ID1);
+            return;
+        }
+
+        const dataOut = {
+            ...AllocateForm.value,
+            ID1: ID1, // 更新ID1屬性
+            Text: "勻出", // 改成帶參數進去
+            Remarks: AllocateForm.value.Group1 + `${AllocateForm.value.Subject7_1 + '00'}`,
+            Group1: AllocateForm.value.Group,
+            Year1: AllocateForm.value.Year.toString()
         };
+        const dataIn = {
+            ...dataOut,
+            Text: "勻入",
+            Group1: AllocateForm.value.Group1
+        }
+        saveMoney3(dataOut);
+        saveMoney3(dataIn);
+    };
+
+    const saveMoney3 = async (AllocateFormVal: AllocateFormViewModel) => {
+        const url = '/api/Money3';
+        const data = AllocateFormVal;
         try {
             console.log(data);
             const response: ApiResponse<any> = await post<any>(url, data);
@@ -367,11 +497,54 @@ const subjects8_1 = ref([{ text: '無', value: "0" }]);
             //alert('Data submitted successfully');
         } catch (error) {
             console.error('Failed to submit data:', error);
-            //alert('Failed to submit data');
+
         }
     };
+
+
+    //const handleSubmit = async () => {
+    //    const data = {
+    //        ...AllocateForm.value,
+    //        Text: "勻出",
+    //    };
+    //    data.PurchaseMoney = -data.PurchaseMoney;
+
+    //    saveMoney3(data);
+    //};
+
+    //const saveMoney3 = async (data) => {
+    //    const url = '/api/Money3';
+    //    const data = data;
+    //    try {
+    //        console.log(data);
+    //        //const response: ApiResponse<any> = await post<any>(url, data);
+    //        //console.log(response.Data);
+    //        //alert('Data submitted successfully');e
+    //    } catch (error) {
+    //        console.error('Failed to submit data:', error);
+    //        //alert('Failed to submit data');
+    //    }
+    //};
+
+    const cancelData = () => {
+        emit('cancel');
+    }
+
+    // 監聽 user.value 的變化並更新 AllocateForm.People
+    watch(user, (newValue) => {
+        if (newValue.Name) {
+            AllocateForm.value.People = newValue.Name;
+            AllocateForm.value.People1 = newValue.Name;
+        }
+    });
+
+    onMounted(async () => {
+        await getCurrentUser();
+        await fetchPeople();
+    });
+
 </script>
 
 <style scoped>
  
-</style>-->
+</style>

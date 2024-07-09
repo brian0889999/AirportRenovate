@@ -35,16 +35,16 @@
                       :loading="loading"
                       style="width: 100%;">
             <template v-slot:item.Purchasedate="{ item }">
-                {{ formatDate(item.Purchasedate) }}
+                {{ item.Purchasedate ? formatDate(item.Purchasedate) : '' }}
             </template>
             <template v-slot:item.PayDate="{ item }">
-                {{ formatDate(item.PayDate) }}
+                {{ item.PayDate ? formatDate(item.PayDate) : '' }}
             </template>
             <template v-slot:item.PurchaseMoney="{ item }">
-                {{ formatNumber(item.PurchaseMoney) }}
+                {{ formatNumber(item.PurchaseMoney || 0) }}
             </template>
             <template v-slot:item.PayMoney="{ item }">
-                {{ formatNumber(item.PayMoney) }}
+                {{ formatNumber(item.PayMoney || 0) }}
             </template>
             <template v-slot:item.actions="{ item }">
                <v-btn @click="restoreData(item)"
@@ -69,7 +69,10 @@ import { formatDate, formatNumber } from '@/utils/functions';
 type ReadonlyHeaders = VDataTable['$props']['headers'];
   
     const loading = ref(false);
-    const years = ref<number[]>([111, 112, 113]);
+    // 取得當年度的民國年
+    const currentYear: number = new Date().getFullYear() - 1911;
+    // 生成從111到當年度的年份陣列
+    const years = ref<number[]>(Array.from({ length: currentYear - 111 + 1 }, (_, i) => 111 + i)); 
     const searchYear = ref<number>(113);
     const noteInput = ref<string>('');
     const items = ref<SoftDeleteViewModel[]>([]);
@@ -88,7 +91,7 @@ type ReadonlyHeaders = VDataTable['$props']['headers'];
         { title: '', key: 'actions', sortable: false },
     ];
 const searchDeletedRecords = async () => {
-    const url = 'api/PublicWorksGroup/ByDeletedRecords';
+    const url = 'api/Money3/ByDeletedRecords';
     const data: any = { Year: searchYear.value, Note: ''};
     if(noteInput) data.Note = noteInput.value;
     try {
@@ -107,7 +110,7 @@ const searchDeletedRecords = async () => {
     };
     const restoreData = async (item: SoftDeleteViewModel) => {
         const isConfirmed = confirm('你確定要還原嗎？');
-        const url = 'api/PublicWorksGroup/ByRestoreData'
+        const url = 'api/Money3/ByRestoreData'
         if (isConfirmed) {
             try {
                 //console.log(item);

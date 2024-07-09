@@ -1,15 +1,14 @@
-import type { MoneyItem, MoneyRawData } from '@/types/apiInterface';
-import { type ApiResponse, get } from '@/services/api';
+import type { MoneyItem } from '@/types/apiInterface';
 import axios from 'axios';
 
-// ³z¹Lcondition(¿z¿ï±ø¥ó¬OitemªºTextÄæ¦ì)§ä¥X¨º¤@Äæ¦ìªºfield°µÁ`©M
+// é€éŽcondition(ç¯©é¸æ¢ä»¶æ˜¯itemçš„Textæ¬„ä½)æ‰¾å‡ºé‚£ä¸€æ¬„ä½çš„fieldåšç¸½å’Œ
 export const sumByCondition = (items: MoneyItem[], condition: string, field: keyof MoneyItem) => {
     return items
         .filter(item => item.Text === condition)
         .reduce((sum, item) => sum + (item[field] as number || 0), 0);
 };
 
-// ¥Î©ó¤À²Õ
+// ç”¨æ–¼åˆ†çµ„
 export const groupBy = (array: MoneyItem[], keys: (keyof MoneyItem)[]) => {
     return array.reduce((result, currentValue) => {
         const key = keys.map(k => currentValue[k]).join('-');
@@ -21,11 +20,11 @@ export const groupBy = (array: MoneyItem[], keys: (keyof MoneyItem)[]) => {
     }, {} as Record<string, MoneyItem[]>);
 };
 
-// ¥Á°ê¦~Âà´«¤u¨ã¨ç¼Æ
+// æ°‘åœ‹å¹´è½‰æ›å·¥å…·å‡½æ•¸
 export const formatDate = (dateString: string): string => {
-    if (!dateString) return "";  // ³B²zªÅ­È
+    if (!dateString) return "";  // è™•ç†ç©ºå€¼
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) return "";  // ³B²zµL®Ä¤é´Á
+    if (isNaN(date.getTime())) return "";  // è™•ç†ç„¡æ•ˆæ—¥æœŸ
     const year = date.getFullYear() - 1911;
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const day = date.getDate().toString().padStart(2, '0');
@@ -49,9 +48,30 @@ export const handleExcelClick = async (budget: string) => {
 };
 
 
-// ¼Æ¦r®æ¦¡¤Æ
-export const formatNumber = (value: number): string  => {
-    if (!value) return '0';
-    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
+// æ•¸å­—æ ¼å¼åŒ–
+//export const formatNumber = (value: number): string  => {
+//    if (!value) return '0';
+//    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+//}
+//if (typeof String) {
 
+//}
+export const formatNumber = (number: any) => {
+
+    if (number === undefined || number === null || isNaN(number)) {
+        return '0';
+    }
+
+    if (number < 0) {
+        return `(${Math.abs(number).toLocaleString()})`;
+    }
+    return number.toLocaleString();
+};
+
+
+//export const formatNumberWithColor = (number: number): string => {
+//    if (number < 0) {
+//        return `(<span style="color: red;">${Math.abs(number).toLocaleString()}</span>)`;
+//    }
+//    return number.toLocaleString();
+//};

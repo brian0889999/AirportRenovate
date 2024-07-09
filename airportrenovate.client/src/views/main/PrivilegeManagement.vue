@@ -74,37 +74,25 @@
 import axios from 'axios';
 import { ref, computed, onMounted } from 'vue';
 import type { UserDataModel } from '@/types/apiInterface';
+import type { VDataTable } from 'vuetify/components';
 import { AuthMapping, ReverseAuthMapping, Status3Mapping, ReverseStatusMapping } from '@/utils/mappings'; // 對應狀態碼到中文
 import { get, put, post, type ApiResponse } from '@/services/api';
 import { RULES } from '@/constants/constants';
 import  AuthTable  from '@/components/modules/AuthTable.vue';
+type ReadonlyHeaders = VDataTable['$props']['headers'];
 
- //寫死的Table
-    //const headers = ref([
-    //    { title: '權限', align: 'start', sortable: false, key: '權限' },
-    //    { title: '功能', key: '功能' },
-    //    { title: '備註', key: '備註' },
-    //]);
-    
-    //const items = ref([
-    //    { 權限: 'A', 功能: '新增、編輯、刪除、檢視、勻出入、復原刪除', 備註: '管理者' },
-    //    { 權限: 'B', 功能: '檢視', 備註: '各單位窗口' },
-    //    { 權限: 'C', 功能: '新增、編輯、刪除、檢視、勻出入', 備註: '工務組承辦' },
-    //    { 權限: 'D', 功能: '', 備註: '帳號不開放' },
-    //]);
-
-    const authheaders = ref([
+    const authheaders: ReadonlyHeaders = [
         { title: '姓名', align: 'start', sortable: false, key: 'Name', value: 'Name' },
         { title: '權限', key: 'Status1', value: 'Status1' },
         { title: '系統', key: 'Status3', value: 'Status3' },
         { title: '編輯', key: 'Edit', value: 'Edit', sortable: false },
-    ]);
+    ];
 
     const lists = ref<UserDataModel[]>([]);
     const isEditing = ref<boolean>(false);
     const isEditMode = ref<boolean>(true); // 用來區分新增或編輯資料
     //const currentItem = ref<UserDataModel | null>(null); // 表單的欄位資料
-    const currentItem = ref<UserDataModel | null>({
+    const defaultCurrent: UserDataModel = {
         Name: '',
         Account: '',
         Password: '',
@@ -112,7 +100,8 @@ import  AuthTable  from '@/components/modules/AuthTable.vue';
         Status1: '',
         Status2: '',
         Status3: ''
-    }); // 表單的欄位資料
+    };
+    const currentItem = ref<UserDataModel>(defaultCurrent); // 表單的欄位資料
     const status1Items = ref<Array<string>>(['A', 'B', 'C', 'D'])
     const showPassword = ref<boolean>(false);
     const managementFormRef = ref<HTMLFormElement | null>(null);
@@ -139,7 +128,7 @@ import  AuthTable  from '@/components/modules/AuthTable.vue';
     //取得其他使用者
     const fetchUsers = async () => {
         try {
-            const url = '/api/Privilege'
+            const url = '/api/User'
             const response: ApiResponse<UserDataModel[]> = await get<UserDataModel[]>(url);
             /*console.log(response.Data);*/
        if (response && response.Data && response.Data) {
@@ -165,7 +154,7 @@ import  AuthTable  from '@/components/modules/AuthTable.vue';
     const addItem = () => {
         isEditMode.value = false;
         isEditing.value = true;
-        currentItem.value = { Name: '', Account: '', Password: '', Auth: '', Status1: '', Status3: '' };
+        currentItem.value = defaultCurrent;
     }
 
     const rules = RULES;
@@ -173,24 +162,13 @@ import  AuthTable  from '@/components/modules/AuthTable.vue';
         console.log(currentItem.value);
         const { valid } = await managementFormRef.value?.validate();
         if (!valid) return;
-
-        const regex: RegExp = /^(?!.*[^\x21-\x7e])(?=.*[\W])(?=.*[a-zA-Z])(?=.*\d).{8,20}$/;
-        
         // 保存邏輯
         if (currentItem.value) {
-            //if (!regex.test(currentItem.value.Password ?? '')) {
-            //    alert('請輸入 8 到 20 個字符的密碼，必須包含至少一個字母、一個數字和一個特殊字符。');
-            //    return;
-            //}
-            //currentItem.value.Auth = ReverseAuthMapping[currentItem.value.Auth || ''] || currentItem.value.Auth;
-            //currentItem.value.Status3 = ReverseStatusMapping[currentItem.value.Status3 || ''] || currentItem.value.Status3;
-           
             //if (currentItem.value.Status3 === "無") {
             //    currentItem.value.Status3 = "";  // 將"無"轉換為空字串
             //};
-
-            const url = '/api/Privilege'
-            const data: UserDataModel | null = currentItem.value;
+            const url = '/api/User'
+            const data: UserDataModel = currentItem.value;
             try {
                 let response: ApiResponse<any>;
                 if (isEditMode.value) { // 如果是編輯用put,新增用post
@@ -198,7 +176,8 @@ import  AuthTable  from '@/components/modules/AuthTable.vue';
                         console.log(response.Data);
                 }
                 else
-                {  
+                {
+                    console.log(data);
                          response = await post<any>(url, data);
                         console.log(response.Data);
                 };
@@ -218,7 +197,7 @@ import  AuthTable  from '@/components/modules/AuthTable.vue';
 
     const cancelEdit = () => {
         isEditing.value = false;
-        currentItem.value = null;
+        currentItem.value = defaultCurrent;
     };
     onMounted(fetchUsers);
 </script>

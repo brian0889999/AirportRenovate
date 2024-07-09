@@ -92,32 +92,4 @@ public class LoginController : ControllerBase
             return Unauthorized("登入失敗"); // 回傳登入失敗
         }
     }
-
-
-
-
-    //[HttpPost]
-
-    //public IActionResult Login([FromBody] LoginViewModel loginData)
-    //{
-    //    if (!string.IsNullOrEmpty(loginData.Account) && !string.IsNullOrEmpty(loginData.Password))
-    //    {
-    //        var password = _dESEncryptionUtility.EncryptDES(loginData.Password);
-    //        var user = _users.GetByCondition(x => x.Account == loginData.Account).FirstOrDefault();
-    //        if (user != null && user.Password == password)
-    //        {
-    //            return Ok(user);
-    //        }
-    //        else
-    //        {
-
-    //            return BadRequest();
-    //        }
-
-    //    }
-    //    else
-    //    {
-    //        return Unauthorized("登入失敗"); // 回傳登入失敗
-    //    }
-    //}
 }

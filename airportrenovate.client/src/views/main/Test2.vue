@@ -1,4 +1,4 @@
-<template>
+<!--<template>
     <v-container>
         <v-row>
             <v-col cols="12" sm="6" md="3">
@@ -98,11 +98,11 @@
                 </v-window>
             </v-card-text>
         </v-card>
-    </v-container>
+    </v-container>-->
     <!--<DetailsDialog v-model="detailsDialog.visible" :title="detailsDialog.title" :desserts="detailsDialog.desserts" />
     <MessageDialog v-model="messageDialog.visible" :title="messageDialog.title" :message="messageDialog.message" :iconConfig="messageDialog.iconConfig" />
     <UpdateDialog v-model="updateDialog.visible" :datas="updateDialog.datas" />-->
-</template>
+<!--</template>
 
 <script setup lang="ts">
     import { ref, onMounted, watch, nextTick } from 'vue';
@@ -446,4 +446,4 @@
     .v-data-table__tr:hover {
         background-color: #232F34;
     }
-</style>
+</style>-->

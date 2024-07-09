@@ -7,7 +7,6 @@ import router from './router';
 import axios from 'axios';
 import vuetify from './plugins/vuetify';
 import '@mdi/font/css/materialdesignicons.css'; // 引入 字體圖標
-/*import VueCookies from 'vue3-cookies';*/
 
 // 請求攔截器
 axios.interceptors.request.use(config => {
@@ -38,6 +37,5 @@ const pinia = createPinia();
 app.use(pinia)
     .use(router)
     .use(vuetify)
-/*    .use(VueCookies)*/
     .mount('#app');
 /*createApp(App).mount('#app')*/

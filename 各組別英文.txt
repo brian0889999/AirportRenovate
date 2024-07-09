@@ -17,7 +17,7 @@
 
 
 
-user_data1欄位對應:	status1:權限:A、B、C、D(可以看到的功能區分), status2:能不能登入, status3:系統:土木、水電、建築、綜合、機械,time1:儲存上次更改密碼的時間
+user_data1欄位對應: Auth:組室 status1:權限:A、B、C、D(可以看到的功能區分), status2:能不能登入, status3:系統:土木、水電、建築、綜合、機械,time1:儲存上次更改密碼的時間
 
 Money欄位對應: Budget:名稱, [Group]:組別(工務組...), Subject6、Subject7、Subject8:科目6、7、8級, BudgetYear:年度預算額度, year:年度
 

@@ -19,6 +19,7 @@ using MathNet.Numerics.Statistics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using System.Linq.Expressions;
+using LinqKit;
 
 
 
@@ -27,7 +28,7 @@ namespace AirportRenovate.Server.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class PublicWorksGroupController(IGenericRepository<Money3> money3Repository, IGenericRepository<Money> moneyRepository,  IMapper mapper) : ControllerBase
+public class Money3Controller(IGenericRepository<Money3> money3Repository, IGenericRepository<Money> moneyRepository,  IMapper mapper) : ControllerBase
 {
     private readonly IGenericRepository<Money3> _money3Repository = money3Repository;
     private readonly IGenericRepository<Money> _moneyRepository = moneyRepository;
@@ -77,36 +78,38 @@ public class PublicWorksGroupController(IGenericRepository<Money3> money3Reposit
     {
         Expression<Func<Money3, bool>> condition = item => true;
         condition = money3 => money3.Group1 == Group;
+        condition = condition.And(money3 => money3.Money != null && money3.Money.Group == Group);
+        condition = condition.And(money3 => money3.Year == Year && money3.Money != null && money3.Money.Year == Year);
+        condition = condition.And(money3 => money3.Status != null && (money3.Status.Trim() == "O" || money3.Status.Trim() == "C"));
         try
         {
-            var results = _money3Repository.GetByCondition(money3 => money3.Group1 == Group
-    && money3.Money != null && money3.Money.Group == Group
-    && money3.Year == Year && money3.Money.Year == Year
-    && (money3.Status != null && (money3.Status.Trim() == "O" || money3.Status.Trim() == "C")))
-    .Include(money3 => money3.Money)
-    .AsEnumerable()
-    .Select(money3 =>
-    {
-        money3.Group1 = money3.Group1?.Trim() ?? "";
-        money3.Status = money3.Status?.Trim() ?? "";
-        money3.All = money3.All?.Trim() ?? "";
-        money3.True = money3.True?.Trim() ?? "";
-        return new
-        {
-            money3.Money?.Subject6,
-            money3.Money?.Subject7,
-            money3.Money?.Subject8,
-            money3.Money?.BudgetYear,
-            money3.Money?.Final,
-            money3.Money?.Budget,
-            money3.Money?.Group,
-            money3.Money?.Year,
-            money3.Text,
-            money3.PurchaseMoney,
-            money3.PayMoney
-        };
-    })
-    .ToList();
+            var results = _money3Repository.GetByCondition(condition)
+            .Include(money3 => money3.Money)
+            .AsEnumerable() // 轉為本地處理，避免 EF Core 的限制
+            .Select(money3 =>
+            {
+                // 移除需要的欄位中的多餘空格
+                money3.Group1 = money3.Group1?.Trim() ?? "";
+                money3.Status = money3.Status?.Trim() ?? "";
+                money3.All = money3.All?.Trim() ?? "";
+                money3.True = money3.True?.Trim() ?? "";
+                //return new
+                //{
+                //    money3.Money?.Subject6,
+                //    money3.Money?.Subject7,
+                //    money3.Money?.Subject8,
+                //    money3.Money?.BudgetYear,
+                //    money3.Money?.Final,
+                //    money3.Money?.Budget,
+                //    money3.Money?.Group,
+                //    money3.Money?.Year,
+                //    money3.Text,
+                //    money3.PurchaseMoney,
+                //    money3.PayMoney
+                //};
+                return money3;
+            })
+            .ToList();
 
 
             return Ok(results);
@@ -123,31 +126,48 @@ public class PublicWorksGroupController(IGenericRepository<Money3> money3Reposit
     /// </summary>
     /// <returns>查詢結果</returns>
     [HttpGet("SelectedDetail")]
-    public async Task<IActionResult> GetDetailData(string Budget, int Year, string Group, string? Note = null, int? PurchaseMoney = null) // 前端傳Year值,後端回傳符合Year值的工務組資料
+    public IActionResult GetDetailData(string Budget, int Year, string Group, string? Note = null, int? PurchaseMoney = null) // 前端傳Year值,後端回傳符合Year值的工務組資料
     {
         try
         {
-            var query = _money3Repository.GetByCondition(money3 =>
-           money3.Money!.Budget == Budget &&
-           money3.Group1 == Group &&
-           money3.Money.Group == Group &&
-           money3.Year == Year &&
-           money3.Money.Year == Year &&
-           money3.Status == "O"
-       );
+            Expression<Func<Money3, bool>> condition = item => true;
+            condition = condition.And(money3 =>money3.Money!.Budget == Budget);
+            condition = condition.And(money3 => money3.Group1 == Group && money3.Money != null && money3.Money.Group == Group);
+            condition = condition.And(money3 => money3.Year == Year && money3.Money != null && money3.Money.Year == Year && money3.Status == "O");
+            
 
             if (!string.IsNullOrEmpty(Note))
             {
-                query = query.Where(money3 => money3.Note != null && money3.Note.Contains(Note));
+                condition = condition.And(money3 => money3.Note != null && money3.Note.Contains(Note));
             }
 
             if (PurchaseMoney.HasValue)
             {
-                query = query.Where(money3 => money3.PurchaseMoney == PurchaseMoney.Value);
+                condition = condition.And(money3 => money3.PurchaseMoney == PurchaseMoney.Value);
             }
 
-            var results = await query.Include(money3 => money3.Money).ToListAsync();
+            //var query = _money3Repository.GetByCondition(condition);
+            //var results = await query.Include(money3 => money3.Money)
+            //    .ToListAsync();
 
+            //// 去除 Status 和 Group1 欄位的多餘空格
+            //results.ForEach(r =>
+            //{
+            //    r.Status = r.Status?.Trim();
+            //    r.Group1 = r.Group1?.Trim();
+            //});
+
+            var results = _money3Repository.GetByCondition(condition)
+           .Include(money3 => money3.Money)
+           .AsEnumerable() // 轉為本地處理，避免 EF Core 的限制
+           .Select(money3 =>
+           {
+               // 移除需要的欄位中的多餘空格
+               money3.Group1 = money3.Group1?.Trim() ?? "";
+               money3.Status = money3.Status?.Trim() ?? "";
+               return money3;
+           })
+           .ToList();
             return Ok(results);
         }
         catch (Exception ex)
@@ -208,10 +228,15 @@ public class PublicWorksGroupController(IGenericRepository<Money3> money3Reposit
     public async Task<IActionResult> Post([FromBody] SoftDeleteViewModel request)
     {
         try
-        {   
-            // 取得資料庫中ID1欄位的最大值並遞增
-            int maxID1 = await _money3Repository.GetAll().MaxAsync(m => (int?)m.ID1) ?? 0;
-            request.ID1 = maxID1 + 1;
+        {
+            //request.Money = null;
+            // 檢查 request 的 ID1 是否為 0 且 Text 是否為 "一般"
+            if (request.ID1 == 0 && request.Text == "一般")
+            {
+                // 取得資料庫中 ID1 欄位的最大值並遞增
+                int maxID1 = await _money3Repository.GetAll().MaxAsync(m => (int?)m.ID1) ?? 0;
+                request.ID1 = maxID1 + 1;
+            }
 
             // 取得當年民國年分
             //var currentYear = DateTime.Now.Year - 1911;
@@ -365,6 +390,93 @@ public class PublicWorksGroupController(IGenericRepository<Money3> money3Reposit
             return BadRequest(ex.Message);
         }
     }
+
+
+
+    /// <summary>
+    /// 查詢ID1最大值
+    /// </summary>
+    /// <returns>查詢結果</returns>
+    [HttpGet("ID1")]
+    public async Task<IActionResult> GetID1() 
+    {
+        try
+        {
+            Expression<Func<Money3, bool>> condition = item => true;
+            //condition = condition.And(money3 => money3.Money!.Budget == Budget);
+            // 取得資料庫中ID1欄位的最大值並遞增
+            int maxID1 = await _money3Repository.GetAll().MaxAsync(m => (int?)m.ID1) ?? 0;
+            if(maxID1 <= 0)
+            {
+                return NotFound("No records found with valid ID1");
+            }
+            int ID1 = maxID1 + 1;
+            return Ok(ID1);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex}");
+        }
+    }
+
+    // [HttpPost]
+    // public async Task<IActionResult> Create([FromBody] BalanceFormViewModel balanceForm)
+    // {
+    //     //User
+    //     try
+    //     {
+    //         var results = await _money3Repository.GetByCondition(money3 => money3.Group1 == balanceForm.Group
+    //&& money3.Money != null && money3.Money.Group == balanceForm.Group
+    //&& money3.Money.Budget == balanceForm.Budget
+    //&& money3.Year == balanceForm.Year && money3.Money.Year == balanceForm.Year
+    //&& (money3.Status != null && (money3.Status.Trim() == "O" || money3.Status.Trim() == "C")))
+    //.Include(money3 => money3.Money)
+    //  .ToListAsync();
+
+    //         var query = results
+    //         .GroupBy(m3 => new {
+    //             Subject6 = m3.Money != null ? m3.Money.Subject6 : "",
+    //             Subject7 = m3.Money != null ? m3.Money.Subject7 : "",
+    //             Subject8 = m3.Money != null ? m3.Money.Subject8 : "",
+    //             BudgetYear = m3.Money != null ? m3.Money.BudgetYear : 0,
+    //             Final = m3.Money != null && decimal.TryParse(m3.Money.Final, out var final) ? final : 0m,
+    //             Budget = m3.Money != null ? m3.Money.Budget : "",
+    //             Group = m3.Money != null ? m3.Money.Group : "",
+    //             m3.Year
+    //         })
+    //         .Select(g => new BudgetDetailsViewModel
+    //         {
+    //             Budget = g.Key.Budget ?? "",
+    //             Subject6 = g.Key.Subject6 ?? "",
+    //             Group = g.Key.Group ?? "",
+    //             Subject7 = g.Key.Subject7 ?? "",
+    //             Subject8 = g.Key.Subject8 ?? "",
+    //             BudgetYear = g.Key.BudgetYear,
+    //             Final = g.Key.Final,
+    //             General = g.Sum(x => x.Text == "一般" ? x.PurchaseMoney : 0),
+    //             Out = g.Sum(x => x.Text == "勻出" ? x.PurchaseMoney : 0),
+    //             UseBudget = g.Key.BudgetYear - g.Sum(x => x.Text == "勻出" ? x.PurchaseMoney : 0) - g.Sum(x => x.Text == "一般" ? x.PurchaseMoney : 0) + g.Key.Final,
+    //             In = g.Sum(x => x.Text == "勻入" ? x.PurchaseMoney : 0),
+    //             InActual = g.Sum(x => x.Text == "勻入" ? x.PayMoney : 0),
+    //             InBalance = g.Sum(x => x.Text == "勻入" ? x.PurchaseMoney : 0) - g.Sum(x => x.Text == "勻入" ? x.PayMoney : 0),
+    //             SubjectActual = g.Sum(x => x.Text == "勻入" ? x.PayMoney : 0) + g.Sum(x => x.Text == "一般" ? x.PayMoney : 0)
+    //         }).ToList();
+
+    //         if (!query.Any())
+    //         {
+    //             return Ok("沒有找到符合條件的資料!");
+    //         }
+
+    //         return Ok(query);
+
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred: {ex.Message}");
+    //     }
+    // }
+
+
 }
    
 

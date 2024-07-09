@@ -36,17 +36,17 @@ namespace AirportRenovate.Server.Models
 
         //[Column("[All]")]
         [Column("All")]
-        public string? All { get; set; } = string.Empty;
+        public string? All { get; set; } 
 
-        public string? True { get; set; } = string.Empty;
+        public string? True { get; set; }
 
         public DateTime? Summonsdate { get; set; }
 
-        public string? Summonsnumber { get; set; } = string.Empty;
+        public string? Summonsnumber { get; set; } 
 
         public int? Summonsmoney { get; set; }
 
-        public string? Summonsnote { get; set; } = string.Empty;
+        public string? Summonsnote { get; set; } 
 
         public DateTime? Accountdate { get; set; }
 
