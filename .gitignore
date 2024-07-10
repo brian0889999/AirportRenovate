@@ -9,7 +9,7 @@
 *.user
 *.userosscache
 *.sln.docstates
-
+/資料庫表格.xlsx
 /dlist
 
 # User-specific files (MonoDevelop/Xamarin Studio)

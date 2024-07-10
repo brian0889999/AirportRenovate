@@ -51,6 +51,8 @@
                                 <v-select v-model="editedItem.People"
                                           :items="userNames"
                                           label="請購人"
+                                          :readonly="isStatusC"
+                                          :bg-color="getTextColor(isStatusC)"
                                           :rules="[rules.required]"></v-select>
                             </v-col>
                             <v-col cols="12" sm="6">
@@ -66,12 +68,16 @@
                             <v-col cols="12" sm="6">
                                 <v-checkbox v-model="editedItem.All"
                                             label="未稅"
+                                            :disabled="isStatusC"
+                                            :class="getColourDisabled(isStatusC)"
                                             true-value="V"
                                             false-value=""></v-checkbox>
                             </v-col>
                             <v-col cols="12" sm="6">
                                 <v-checkbox v-model="editedItem.True"
                                             label="已對帳"
+                                            :disabled="isStatusC"
+                                            :class="getColourDisabled(isStatusC)"
                                             true-value="V"
                                             false-value=""></v-checkbox>
                             </v-col>
@@ -97,7 +103,7 @@
 <script setup lang="ts">
     import { defineProps, defineEmits, ref, reactive, watch, type PropType, onMounted, computed } from 'vue';
     import { type ApiResponse, get, put, post } from '@/services/api';
-    import type { UserDataModel, SoftDeleteViewModel, MoneyRawData } from '@/types/apiInterface';
+    import type { UserDataModel, SoftDeleteViewModel, MoneyRawData, UserViewModel } from '@/types/apiInterface';
     import { RULES } from '@/constants/constants';
     const props = defineProps({
         item: {
@@ -114,7 +120,11 @@
         },
         limitBudget: {
             type: Number,
-        }
+        },
+        user: {
+            type: Object as PropType<UserViewModel>,
+            required: true
+        },
     });
     //const props = defineProps<{
     //    item: SoftDeleteViewModel;
@@ -128,11 +138,24 @@
     const textValues = ref<string[]>(['一般']);
     const emit = defineEmits(['update', 'cancel', 'create']);
 
+    const isStatusC = computed(() => props.user.Status1 === 'C');
     const limitBudget = computed(() => props.limitBudget ?? 0);
     const limitPurchaseMoney = computed(() => {
         const value = editedItem.value.PurchaseMoney;
         return typeof value === 'string' ? parseFloat(value) : value ?? 0; // 轉成數字
     });
+
+    // 定義函數
+    const getTextColor = (boolean: boolean): string => {
+        return boolean ? 'grey-lighten-1' : '';
+    };
+    const getColourDisabled = (disabledValue: boolean) => {
+        if (disabledValue) {
+            return "myColorClass1"
+        } else {
+            return "myColorClass2"
+        }
+    };
     const rules = {
         ...RULES,
         lessThanOrEqualToBudget: (value: number) => {
@@ -269,4 +292,10 @@ const formattedPayDate = computed<string>({
 
 <style scoped>
     /* 其他樣式 */
+    .myColorClass1 {
+        background-color: #BDBDBD !important;
+    }
+    .myColorClass2 {
+        /*background-color: #dedede !important;*/
+    }
 </style>

@@ -50,7 +50,8 @@
                 </v-btn>
             </template>
             <template #item.action="{ item }">
-                <v-btn color="primary"
+                <v-btn v-if="canAdd"
+                       color="primary"
                        @click="openAllocatePage(item)">勻出</v-btn>
             </template>
             <template #item.BudgetYear="{ item }">
@@ -173,8 +174,8 @@
                                @search="handleSearch"
                                class="mt-1" />
                 <v-row no-gutters>
-                    <v-col>
-                        <v-btn color="primary" @click="addItem">新增</v-btn>
+                    <v-col v-if="canAdd">
+                        <v-btn color="primary" @click="addItem" v-if="canAdd">新增</v-btn>
                     </v-col>
                 </v-row>
             </template>
@@ -200,6 +201,7 @@
                      :item="editingItem"
                      :limitBudget="limitBudget"
                      :searchGroup="searchGroup"
+                     :user="user"
                      @update="handleUpdate"
                      @create="handleCreate"
                      @cancel="cancelEdit" />
@@ -359,6 +361,7 @@
             user.value = data ? data : defaultUser;
             console.log('user', user.value);
             searchGroup.value = AuthMapping[user.value.Auth!];
+            defaultMoneyRawData.People = user.value.Name;
         }
         else {
             console.error(response.Data ?? response.Message);
@@ -375,25 +378,25 @@
         return groups.value;
     });
 
-    //const canEdit = computed(() => {
-    //    if (user.value.Status1 === 'A') {
-    //        return true;
-    //    }
-    //    else if (user.value.Status1 === 'B') {
-    //        return false;
-    //    }
-    //});
+    const canAdd = computed(() => {
+        if (user.value.Status1 === 'B') {
+            return false;
+        }
+        else {
+            return true;
+        }
+    });
 
     const canEdit = (item: Detail) => {
-        console.log('item: ',item);
+        //console.log('item: ',item);
         if (user.value.Status1 === 'A') {
             return true;
         }
         else if (user.value.Status1 === 'B') {
             return false;
         }
-        else if (user.value.Status1 === 'C') {
-            return item.People === user.value.Name;
+        else if (user.value.Status1 === 'C' && item.True != "V") {
+            return item.People === user.value.Name;  // 權限是C時資料的請購人與使用者相同時才能編輯資料,已對帳的只有A權限可以編輯
         }
         return false;
     };
