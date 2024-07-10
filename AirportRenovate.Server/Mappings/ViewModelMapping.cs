@@ -59,6 +59,11 @@ namespace AirportRenovate.Server.Mappings
             .ForMember(dest => dest.All, opt => opt.MapFrom(src => src.All != null ? src.All.Trim() : ""))
             .ForMember(dest => dest.True, opt => opt.MapFrom(src => src.True != null ? src.True.Trim() : ""))
             .ForMember(dest => dest.Year1, opt => opt.MapFrom(src => src.Year1 != null ? src.Year1.Trim() : ""));
+
+            CreateMap<User, User>()
+                .ForMember(dest => dest.Status1, opt => opt.MapFrom(src => src.Status1 != null ? src.Status1.Trim() : ""))
+                .ForMember(dest => dest.Status2, opt => opt.MapFrom(src => src.Status2 != null ? src.Status2.Trim() : ""))
+                .ForMember(dest => dest.Status3, opt => opt.MapFrom(src => src.Status3 != null ? src.Status3.Trim() : ""));
         }
     }
 }

@@ -21,7 +21,7 @@ export const groupBy = (array: MoneyItem[], keys: (keyof MoneyItem)[]) => {
 };
 
 // 民國年轉換工具函數
-export const formatDate = (dateString: string): string => {
+export const formatDate = (dateString: any): string => {
     if (!dateString) return "";  // 處理空值
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return "";  // 處理無效日期

@@ -12,7 +12,7 @@
                     </v-col>
                     <v-col cols="3">
                         <v-select label="查詢組別"
-                                  :items="groups"
+                                  :items="filteredGroups"
                                   v-model="searchGroup"
                                   style="width: 100%;">
                         </v-select>
@@ -189,10 +189,10 @@
                 </span>
             </template>
             <template #item.actions="{ item }">
-                <v-btn icon size="small" class="mr-2" @click="editItem(item)">
+                <v-btn icon size="small" class="mr-2" @click="editItem(item)" v-if="canEdit(item)">
                     <v-icon>mdi-pencil</v-icon>
                 </v-btn>
-                <v-btn icon="mdi-delete" size="small" @click="deleteItem(item)" />
+                <v-btn icon="mdi-delete" size="small" @click="deleteItem(item)" v-if="canEdit(item)" />
             </template>
         </v-data-table>
         <detail-form v-if="showDetailForm"
@@ -212,7 +212,7 @@
 
 <script setup lang="ts">
     import axios from 'axios';
-    import { ref, computed, onMounted } from 'vue';
+    import { ref, computed, onMounted, watch } from 'vue';
     import { get, post, put, type ApiResponse } from '@/services/api';
     import type { VDataTable } from 'vuetify/components';
     import type { EditViewModel, SelectedBudgetModel, MoneyItem, MoneyRawData, SoftDeleteViewModel, Detail, SelectedDetail, UserViewModel } from '@/types/apiInterface';
@@ -298,7 +298,7 @@
         data: {},
     })
 
-        const defaultUser: UserViewModel = {
+    const defaultUser: UserViewModel = {
         No: 0,
         Name: '',
         Account: '',
@@ -315,7 +315,39 @@
         Status2: '',
         MEMO: '',
         Status3: '',
-};
+    };
+
+    const defaultMoneyRawData: MoneyRawData = { // 新增功能的初始值
+        ID: 0,
+        Purchasedate: '',
+        Text: '一般',
+        Note: '',
+        PurchaseMoney: 0,
+        PayDate: '',
+        PayMoney: 0,
+        People: '',
+        Name: currentBudgetValue.value,
+        Remarks: '',
+        People1: '',
+        ID1: 0,
+        Status: 'O',
+        Group1: searchGroup.value,
+        Year: searchYear.value,
+        Year1: '',
+        All: '',
+        True: '',
+        Money: {
+            ID: 0,
+            Budget: '',
+            Group: '',
+            Subject6: '',
+            Subject7: '',
+            Subject8: '',
+            BudgetYear: 0,
+            Final: '',
+            Year: 0,
+        },
+    };
     const user = ref<UserViewModel>(defaultUser); 
 
     const getCurrentUser = async () => {
@@ -325,6 +357,7 @@
         if (response.StatusCode === 200) {
             const data = response.Data;
             user.value = data ? data : defaultUser;
+            console.log('user', user.value);
             searchGroup.value = AuthMapping[user.value.Auth!];
         }
         else {
@@ -335,6 +368,35 @@
         console.error(error.message);
     }
 };
+    const filteredGroups = computed(() => {
+        if (user.value.Status1 === 'B') {
+            return [searchGroup.value];
+        }
+        return groups.value;
+    });
+
+    //const canEdit = computed(() => {
+    //    if (user.value.Status1 === 'A') {
+    //        return true;
+    //    }
+    //    else if (user.value.Status1 === 'B') {
+    //        return false;
+    //    }
+    //});
+
+    const canEdit = (item: Detail) => {
+        console.log('item: ',item);
+        if (user.value.Status1 === 'A') {
+            return true;
+        }
+        else if (user.value.Status1 === 'B') {
+            return false;
+        }
+        else if (user.value.Status1 === 'C') {
+            return item.People === user.value.Name;
+        }
+        return false;
+    };
 
     const previousPage = async () => {
         isSelectedItem.value = false;
@@ -497,37 +559,7 @@
 
 
     const showDetailForm = ref<boolean>(false);
-    const editingItem = ref<MoneyRawData>({ // 新增功能的初始值
-            ID: 0,
-            Purchasedate: '',
-            Text: '一般',
-            Note: '',
-            PurchaseMoney: 0,
-            PayDate: '',
-            PayMoney: 0,
-            People: '',
-            Name: currentBudgetValue.value,
-            Remarks: '',
-            People1: '',
-            ID1: 0,
-            Status: 'O',
-            Group1: searchGroup.value,
-            Year: searchYear.value,
-            Year1: '',
-            All: '',
-            True: '',
-             Money: {
-                 ID: 0,
-                 Budget: '',
-                 Group: '',
-                 Subject6: '',
-                 Subject7: '',
-                 Subject8: '',
-                 BudgetYear: 0,
-                 Final: '',
-                 Year: 0,
-             },
-        });
+    const editingItem = ref<MoneyRawData>(defaultMoneyRawData);
 
     const editItem = async (item: Detail) => {
         showDetailForm.value = true;
@@ -562,37 +594,7 @@
         showDetailForm.value = true;
         isEdit.value = false;
         limitBudget.value = selectedItem.value[0].UseBudget ?? 0;
-        editingItem.value = { // 新增功能的初始值
-            ID: 0,
-            Purchasedate: '',
-            Text: '一般',
-            Note: '',
-            PurchaseMoney: 0,
-            PayDate: '',
-            PayMoney: 0,
-            People: '',
-            Name: currentBudgetValue.value,
-            Remarks: '',
-            People1: '',
-            ID1: 0,
-            Status: 'O',
-            Group1: searchGroup.value,
-            Year: searchYear.value,
-            Year1: '',
-            All: '',
-            True: '',
-             Money: {
-                 ID: 0,
-                 Budget: '',
-                 Group: '',
-                 Subject6: '',
-                 Subject7: '',
-                 Subject8: '',
-                 BudgetYear: 0,
-                 Final: '',
-                 Year: 0,
-             },
-        };
+        editingItem.value = defaultMoneyRawData;
     };
 
     const handleCreate = async (newItem: any) => {
@@ -609,37 +611,7 @@
 
     const cancelEdit = () => {
         showDetailForm.value = false;
-        editingItem.value = { // 初始值
-            ID: 0,
-            Purchasedate: '',
-            Text: '一般',
-            Note: '',
-            PurchaseMoney: 0,
-            PayDate: '',
-            PayMoney: 0,
-            People: '',
-            Name: currentBudgetValue.value,
-            Remarks: '',
-            People1: '',
-            ID1: 0,
-            Status: 'O',
-            Group1: searchGroup.value,
-            Year: searchYear.value,
-            Year1: '',
-            All: '',
-            True: '',
-             Money: {
-                 ID: 0,
-                 Budget: '',
-                 Group: '',
-                 Subject6: '',
-                 Subject7: '',
-                 Subject8: '',
-                 BudgetYear: 0,
-                 Final: '',
-                 Year: 0,
-             },
-        };
+        editingItem.value = defaultMoneyRawData;
     };
 
     const deleteItem = async (item: MoneyRawData) => {
@@ -687,8 +659,13 @@
     }
 
      onMounted(async () => {
-     await getCurrentUser();
- });
+         await getCurrentUser();
+        /* console.log('Mounted user status:', user.value.Status1); // 增加 log*/
+     });
+
+    watch(() => user.value, (newStatus) => {
+        console.log('Status changed:', newStatus);
+    });
 </script>
 
 <style scoped>

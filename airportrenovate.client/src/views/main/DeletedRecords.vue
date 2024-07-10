@@ -35,16 +35,16 @@
                       :loading="loading"
                       style="width: 100%;">
             <template v-slot:item.Purchasedate="{ item }">
-                {{ item.Purchasedate ? formatDate(item.Purchasedate) : '' }}
+                {{ formatDate(item.Purchasedate) }}
             </template>
             <template v-slot:item.PayDate="{ item }">
-                {{ item.PayDate ? formatDate(item.PayDate) : '' }}
+                {{ formatDate(item.PayDate) }}
             </template>
             <template v-slot:item.PurchaseMoney="{ item }">
-                {{ formatNumber(item.PurchaseMoney || 0) }}
+                {{ formatNumber(item.PurchaseMoney) }}
             </template>
             <template v-slot:item.PayMoney="{ item }">
-                {{ formatNumber(item.PayMoney || 0) }}
+                {{ formatNumber(item.PayMoney) }}
             </template>
             <template v-slot:item.actions="{ item }">
                <v-btn @click="restoreData(item)"

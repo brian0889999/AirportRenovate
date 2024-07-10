@@ -157,8 +157,9 @@ public class UserController : ControllerBase
                 //{
                 //    user.Password = _dESEncryptionUtility.DecryptDES(user.Password);
                 //}
+               User formatUserInfo = _mapper.Map<User>(userInfo);
 
-            return Ok(userInfo);
+            return Ok(formatUserInfo);
         }
         catch (Exception ex)
         {
