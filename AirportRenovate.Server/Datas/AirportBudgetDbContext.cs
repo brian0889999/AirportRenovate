@@ -46,12 +46,12 @@ namespace AirportRenovate.Server.Datas
             //    .HasForeignKey(m3 => m3.Name)
             //    .HasPrincipalKey(m => m.Budget);
         }
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder.UseSqlServer("Money;MultipleActiveResultSets=True;");
-            }
-        }
+        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        //{
+        //    if (!optionsBuilder.IsConfigured)
+        //    {
+        //        optionsBuilder.UseSqlServer("Money;MultipleActiveResultSets=True;");
+        //    }
+        //}
     }
 }

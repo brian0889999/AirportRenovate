@@ -1,0 +1,36 @@
+INSERT INTO [AirportBudget].[dbo].[User] (Name, Account, Password, ErrDate, ErrCount, LastPasswordChangeDate, RolePermissionId, System, Status, GroupId)
+SELECT 
+    name AS Name,
+    account AS Account,
+    password AS Password,
+    time AS ErrDate,
+    0 AS ErrCount,  -- 預設值為 0
+    time1 AS LastPasswordChangeDate,
+    CASE 
+        WHEN status1 = 'A' THEN 1
+        WHEN status1 = 'C' THEN 2
+        WHEN status1 = 'B' THEN 3
+        WHEN status1 = 'D' THEN 4
+        ELSE NULL  -- 若無對應則為 NULL
+    END AS RolePermissionId,
+    status3 AS System,
+    CASE 
+        WHEN status2 = 'O' THEN 1  -- true 對應為 1
+        WHEN status2 = 'X' THEN 0  -- false 對應為 0
+        ELSE 1  -- 若無對應則為 1
+    END AS Status,
+    g.GroupId
+FROM Airport_new.dbo.user_data1 u
+JOIN (VALUES
+    ('A', '工務組'),
+    ('B', '業務組'),
+    ('C', '人事室'),
+    ('D', '中控室'),
+    ('E', '北竿站'),
+    ('F', '企劃組'),
+    ('G', '南竿站'),
+    ('H', '政風室'),
+    ('I', '航務組'),
+    ('J', '總務組')
+) AS AuthGroup(Auth, GroupName) ON u.Auth = AuthGroup.Auth
+JOIN AirportBudget.dbo.[Group] g ON AuthGroup.GroupName = g.GroupName;

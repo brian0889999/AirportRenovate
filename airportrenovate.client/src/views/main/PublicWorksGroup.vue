@@ -571,6 +571,7 @@
         //console.log('console.log(item);', item);
         const { FormattedPurchasedate, FormattedPayDate, ...filteredItem } = item;
         editingItem.value = { ...filteredItem };
+        limitBudget.value = selectedItem.value[0].UseBudget ?? 0;
         //console.log(item);
         //console.log('Edit item:', editingItem.value);
     };
@@ -667,7 +668,7 @@
      });
 
     watch(() => user.value, (newStatus) => {
-        console.log('Status changed:', newStatus);
+        //console.log('Status changed:', newStatus);
     });
 </script>
 

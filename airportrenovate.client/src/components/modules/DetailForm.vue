@@ -138,7 +138,7 @@
     const textValues = ref<string[]>(['一般']);
     const emit = defineEmits(['update', 'cancel', 'create']);
 
-    const isStatusC = computed(() => props.user.Status1 === 'C');
+    const isStatusC = computed(() => props.user.Status1 === 'C'); // 使用者權限是C,return true
     const limitBudget = computed(() => props.limitBudget ?? 0);
     const limitPurchaseMoney = computed(() => {
         const value = editedItem.value.PurchaseMoney;
@@ -223,10 +223,10 @@ const formattedPayDate = computed<string>({
 
         const url = '/api/Money3';
         try {
-            console.log('123', data);
+            //console.log('123', data);
             let response: ApiResponse<any>;
             if (data.ID1) {
-                console.log('345', data);
+                //console.log('345', data);
                 response = await put<any>(url, data);
                 //console.log(response?.Data || response?.Message);
                 // 更新成功後的處理
