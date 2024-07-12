@@ -33,7 +33,7 @@
                                 <v-text-field v-model="editedItem.PurchaseMoney"
                                               label="請購金額"
                                               type="number"
-                                              :rules="[rules.required, rules.lessThanOrEqualToBudget]"></v-text-field>
+                                              :rules="[rules.lessThanOrEqualToBudget]"></v-text-field>
                             </v-col>
                             <v-col cols="12" sm="6">
                                 <v-text-field v-model="formattedPayDate"

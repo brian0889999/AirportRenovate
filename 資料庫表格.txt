@@ -1,3 +1,6 @@
+
+User表:
+
 INSERT INTO [AirportBudget].[dbo].[User] (Name, Account, Password, ErrDate, ErrCount, LastPasswordChangeDate, RolePermissionId, System, Status, GroupId)
 SELECT 
     name AS Name,
@@ -34,3 +37,30 @@ JOIN (VALUES
     ('J', '總務組')
 ) AS AuthGroup(Auth, GroupName) ON u.Auth = AuthGroup.Auth
 JOIN AirportBudget.dbo.[Group] g ON AuthGroup.GroupName = g.GroupName;
+
+
+Subject6表:
+
+INSERT INTO [AirportBudget].[dbo].[Subject6] (Subject6Name, Subject6SerialNumber, GroupId)
+SELECT 
+    t.Name AS Subject6Name,
+    CAST(t.ID AS INT) AS Subject6SerialNumber,
+    CASE t.[Group]
+        WHEN '工務組' THEN 1
+        WHEN '業務組' THEN 2
+        WHEN '人事室' THEN 3
+        WHEN '中控室' THEN 4
+        WHEN '北竿站' THEN 5
+        WHEN '企劃組' THEN 6
+        WHEN '南竿站' THEN 7
+        WHEN '政風室' THEN 8
+        WHEN '航務組' THEN 9
+        WHEN '總務組' THEN 10
+        WHEN '企劃行政組' THEN 11
+        WHEN '營運安全組' THEN 12
+        ELSE NULL
+    END AS GroupId
+FROM Airport_new.dbo.Type1 t
+WHERE t.[Group] IS NOT NULL
+AND ISNUMERIC(t.ID) = 1; -- 確保 ID 欄位可以轉換為數字
+
